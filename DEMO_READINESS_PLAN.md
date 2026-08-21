@@ -41,7 +41,24 @@
 > training set.** Now working on: user-requested visual redesign (see new section below),
 > in parallel with the fetch/train work above.
 >
-> **Next:** 0.3 rehearse runbook (after redesign settles) → 2.2 backend polish if time allows.
+> **2026-08-21, continued — design locked, full narrative walkthrough**
+>
+> User: keep the current design, focus on making the actual demo narrative work end to
+> end: catalogs → merge/inconsistency → feature extraction → prediction.
+>
+> Walked that exact path live with a real candidate (TOI-101.01, full real catalog
+> coverage) and found + fixed 3 real bugs directly on it:
+> - Evidence Card showed a nonsensical "±5715.2 K" Gaia uncertainty (root cause: Gaia
+>   FLAME publishes absolute bounds, not a delta; frontend treated all catalogs the
+>   same way). Now shows the correct "±70.0 K".
+> - A label-wrapping bug made "(Uncertainty unavailable)" read as garbled text.
+> - **Evidence Card and the /about page both still hardcoded "trained on synthetic
+>   data only"** — stale from before the real retrain, directly contradicting the DL
+>   Model page. Fixed to state the real, current, honest status everywhere.
+>
+> 102/102 tests passing, both fixes verified live. Committed (`35f0d74`).
+>
+> **Next:** 0.3 rehearse runbook → 2.2 backend polish if time allows.
 
 **Created**: 2026-08-21
 **Purpose**: Get EEFN into a state that can be demonstrated to a project guide with confidence.
