@@ -122,7 +122,7 @@ export default function FusionDashboard() {
     <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-5">
         <div>
-          <h2 className="text-3xl font-extrabold text-ink tracking-tight font-sans">
+          <h2 className="text-3xl font-display font-medium text-ink tracking-tight">
             Catalog Metric Fusion Workspace
           </h2>
           <p className="text-sm text-muted mt-1">

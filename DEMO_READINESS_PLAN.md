@@ -27,12 +27,21 @@
 >       "Settings" entry that was a mislabelled duplicate of Pipeline Admin
 > - [x] 3.3 Gallery duplication collapsed to one honest "Project Overview" entry
 >
-> **In flight:**
-> - [ ] 1.2 Real Kepler fetch running (45/class = 135 stars, ~2h wall-clock, unattended).
->       Checkpoints per class, so it can be stopped at any point and still yield a
->       usable dataset.
+> - [x] 1.2 Real Kepler fetch completed — 116 usable real stars (32 Planet Transit /
+>       45 Eclipsing Binary / 39 Not Transit-Like)
+> - [x] 1.3 Trained and verified — `model_status="trained"`, `degraded=False`, live-checked
+> - [x] 1.4 Sanity-checked and recorded honestly in `LIMITATIONS.md` #7: **60.9% held-out
+>       accuracy** (92 real samples, 23 stars never trained on) vs 100% training accuracy —
+>       real overfitting on a small sample, reported as-is, not dressed up. Per-class:
+>       Not Transit-Like 100%, Planet Transit 50%, Eclipsing Binary 33% (chance level).
+> - [x] Additionally: `/predictions/dl_training` endpoint + `/ai-analysis` page now render
+>       this real report live instead of the old hardcoded numbers (see 3.2, already done)
 >
-> **Next:** 1.3 train → 1.4 sanity-check → 0.3 rehearse runbook.
+> **DL model is no longer degraded. No synthetic light curve remains anywhere in this
+> training set.** Now working on: user-requested visual redesign (see new section below),
+> in parallel with the fetch/train work above.
+>
+> **Next:** 0.3 rehearse runbook (after redesign settles) → 2.2 backend polish if time allows.
 
 **Created**: 2026-08-21
 **Purpose**: Get EEFN into a state that can be demonstrated to a project guide with confidence.

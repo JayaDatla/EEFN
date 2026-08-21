@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap');
 @import './design-tokens.css';
 
 @tailwind base;
@@ -244,10 +244,19 @@ body {
 }
 
 .section-heading h1 {
-  font: 600 clamp(var(--text-xl), 3vw, var(--text-2xl))/1.12 Inter;
-  letter-spacing: -0.02em;
+  /* Design pass (2026-08-21, explicit user request): a real display face for every
+     page headline instead of routing everything through the same mono/uppercase
+     "instrument panel" voice. Newsreader is an optical-size serif -- built to read
+     as considered and editorial at large display sizes without tipping into the
+     cream+serif "AI-generated" cliche (no cream background, no terracotta accent;
+     this pairs with the existing indigo accent and dark/light/red-night themes
+     unchanged). Weight drops from 600 to 500 because serif display faces read as
+     heavier than a grotesk at the same weight. */
+  font: 500 clamp(var(--text-xl), 3vw, var(--text-2xl))/1.15 var(--font-display);
+  letter-spacing: -0.01em;
   margin: 0;
   color: var(--color-text);
+  text-wrap: balance;
 }
 
 .section-description {

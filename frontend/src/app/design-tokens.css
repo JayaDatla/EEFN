@@ -18,6 +18,11 @@
 */
 
 :root {
+  /* ---- Typefaces: display (page headlines) / body (Inter, unchanged) / mono
+     (genuine data values and codes only -- see globals.css .section-heading h1 for
+     the reasoning). Design pass 2026-08-21. ---- */
+  --font-display: 'Newsreader', Georgia, 'Iowan Old Style', serif;
+
   /* ---- Neutral ramp (10 steps, light-mode values) ---- */
   --gray-50:  #f8fafc;
   --gray-100: #eef2f7;

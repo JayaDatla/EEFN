@@ -78,6 +78,10 @@ module.exports = {
         mono: ["IBM Plex Mono", "Courier New", "monospace"],
         heading: ["Inter", "sans-serif"],
         sans: ["Inter", "sans-serif"],
+        // Design pass 2026-08-21: a real display face for page headlines, available
+        // as a utility class for the hand-rolled headings that don't go through the
+        // shared SectionHeading component (see globals.css .section-heading h1).
+        display: ["Newsreader", "Georgia", "serif"],
       },
     },
   },

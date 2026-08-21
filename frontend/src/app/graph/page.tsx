@@ -286,7 +286,7 @@ export default function IdentityResolutionCenter() {
       {/* Title */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-5">
         <div>
-          <h2 className="text-3xl font-extrabold text-ink tracking-tight font-sans">
+          <h2 className="text-3xl font-display font-medium text-ink tracking-tight">
             Identity Resolution Center
           </h2>
           <p className="text-sm text-muted mt-1">

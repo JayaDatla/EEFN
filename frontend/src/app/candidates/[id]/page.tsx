@@ -915,7 +915,7 @@ export default function CandidateDetailPage() {
           </button>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-2xl font-extrabold text-ink tracking-tight font-sans">
+              <h2 className="text-2xl font-display font-medium text-ink tracking-tight">
                 {planet.pl_name} Curation Audit File
               </h2>
               
@@ -1017,7 +1017,7 @@ export default function CandidateDetailPage() {
               <span className={`font-mono text-[10px] font-bold uppercase tracking-wider ${isUnphysical ? 'text-severity-critical' : 'text-status-pass'}`}>
                 {isUnphysical ? 'CRITICAL RADIAL AUDIT ALERT: UNPHYSICAL PLANET SIZE' : 'RADIAL AUDIT PASSED: PHYSICAL PLANET SIZE'}
               </span>
-              <h4 className="text-lg font-extrabold text-ink tracking-tight font-sans uppercase">Derived Planet Radius Audit</h4>
+              <h4 className="text-lg font-display font-medium text-ink tracking-tight uppercase">Derived Planet Radius Audit</h4>
               <p className="text-xs text-muted max-w-3xl leading-normal font-sans">
                 {isUnphysical 
                   ? "Recalculation of the planetary radius using Gaia DR3 host star specifications reveals that the transiting body is physically too large to be an exoplanet. This points to a secondary stellar companion (e.g. eclipsing binary star blend)." 
