@@ -727,7 +727,29 @@ export default function CandidateDetailPage() {
   const getUncertaintyStr = (param: string, catalog: string) => {
     const unc = measurement_history?.uncertainties?.[param]?.[catalog];
     if (unc && unc.upper !== null && unc.lower !== null) {
-      const val = Math.abs(unc.upper);
+      let val: number;
+      if (catalog === "Gaia DR3") {
+        // Gaia FLAME-style catalogs publish asymmetric absolute bounds (b_X, B_X)
+        // around the value, not a +/- delta -- ingest.py stores them as-is
+        // (app/pipeline/ingest.py, "Gaia FLAME b_*/B_* are asymmetric absolute
+        // bounds ... not deltas"). Treating unc.upper directly as a delta (the old
+        // behavior) rendered a real candidate's Gaia Teff as "5600.0 +/- 5715.2 K"
+        // -- the raw upper BOUND misread as an error bar 5715K wide. Half-width
+        // from the actual value, mirroring app/science/density.py's
+        // half_width_from_asymmetric_bounds so the UI and the backend's own
+        // density-discrepancy calculation agree on what "the uncertainty" means.
+        const centralVal = measurement_history?.[param]?.[catalog];
+        if (centralVal != null) {
+          const v = Number(centralVal);
+          val = (Math.abs(v - unc.lower) + Math.abs(unc.upper - v)) / 2;
+        } else {
+          val = Math.abs(unc.upper - unc.lower) / 2;
+        }
+      } else {
+        // TOI Catalog (and any future symmetric-delta source): error_upper/lower
+        // are already +/- deltas around the value, stored as-is.
+        val = Math.abs(unc.upper);
+      }
       if (param === "stellar_radius") {
         return ` ± ${val.toFixed(3)}`;
       } else if (param === "stellar_teff" || param === "distance") {
@@ -735,7 +757,7 @@ export default function CandidateDetailPage() {
       }
       return ` ± ${val}`;
     }
-    return " (Uncertainty unavailable)";
+    return " (uncertainty unavailable)";
   };
 
   // Consistent delta calculations (B1)
@@ -1217,11 +1239,11 @@ export default function CandidateDetailPage() {
                 <div className="bg-surface-2/60 border border-border p-4 rounded-xl flex flex-col gap-2">
                   <span className="text-muted text-[10px] font-mono uppercase font-bold tracking-wider">Host Star Radius</span>
                   <div className="flex justify-between items-baseline mt-1 border-b border-border pb-2">
-                    <span className="text-xs text-muted font-sans">Gaia DR3:</span>
+                    <span className="text-xs text-muted font-sans whitespace-nowrap shrink-0">Gaia DR3:</span>
                     <span className="text-xs font-bold text-ink font-mono">{measurement_history.stellar_radius["Gaia DR3"] ? `${Number(measurement_history.stellar_radius["Gaia DR3"]).toFixed(3)}${getUncertaintyStr("stellar_radius", "Gaia DR3")} R_☉` : "N/A"}</span>
                   </div>
                   <div className="flex justify-between items-baseline mt-1">
-                    <span className="text-xs text-muted font-sans">TOI Catalog:</span>
+                    <span className="text-xs text-muted font-sans whitespace-nowrap shrink-0">TOI Catalog:</span>
                     <span className="text-xs font-semibold text-muted text-muted font-mono">{measurement_history.stellar_radius["TOI Catalog"] ? `${Number(measurement_history.stellar_radius["TOI Catalog"]).toFixed(3)}${getUncertaintyStr("stellar_radius", "TOI Catalog")} R_☉` : "N/A"}</span>
                   </div>
                   <div className="mt-2 text-[10px] font-mono text-muted border-t border-border pt-1.5 flex justify-between">
@@ -1234,11 +1256,11 @@ export default function CandidateDetailPage() {
                 <div className="bg-surface-2/60 border border-border p-4 rounded-xl flex flex-col gap-2">
                   <span className="text-muted text-[10px] font-mono uppercase font-bold tracking-wider">Effective Temp</span>
                   <div className="flex justify-between items-baseline mt-1 border-b border-border pb-2">
-                    <span className="text-xs text-muted font-sans">Gaia DR3:</span>
+                    <span className="text-xs text-muted font-sans whitespace-nowrap shrink-0">Gaia DR3:</span>
                     <span className="text-xs font-bold text-ink font-mono">{measurement_history.stellar_teff["Gaia DR3"] ? `${Number(measurement_history.stellar_teff["Gaia DR3"]).toFixed(1)}${getUncertaintyStr("stellar_teff", "Gaia DR3")} K` : "N/A"}</span>
                   </div>
                   <div className="flex justify-between items-baseline mt-1">
-                    <span className="text-xs text-muted font-sans">TOI Catalog:</span>
+                    <span className="text-xs text-muted font-sans whitespace-nowrap shrink-0">TOI Catalog:</span>
                     <span className="text-xs font-semibold text-muted font-mono">{measurement_history.stellar_teff["TOI Catalog"] ? `${Number(measurement_history.stellar_teff["TOI Catalog"]).toFixed(1)}${getUncertaintyStr("stellar_teff", "TOI Catalog")} K` : "N/A"}</span>
                   </div>
                   <div className="mt-2 text-[10px] font-mono text-muted border-t border-border pt-1.5 flex justify-between">
@@ -1251,11 +1273,11 @@ export default function CandidateDetailPage() {
                 <div className="bg-surface-2/60 border border-border p-4 rounded-xl flex flex-col gap-2">
                   <span className="text-muted text-[10px] font-mono uppercase font-bold tracking-wider">Stellar Distance</span>
                   <div className="flex justify-between items-baseline mt-1 border-b border-border pb-2">
-                    <span className="text-xs text-muted font-sans">Gaia DR3:</span>
+                    <span className="text-xs text-muted font-sans whitespace-nowrap shrink-0">Gaia DR3:</span>
                     <span className="text-xs font-bold text-ink font-mono">{measurement_history.distance["Gaia DR3"] ? `${Number(measurement_history.distance["Gaia DR3"]).toFixed(1)}${getUncertaintyStr("distance", "Gaia DR3")} pc` : "N/A"}</span>
                   </div>
                   <div className="flex justify-between items-baseline mt-1">
-                    <span className="text-xs text-muted font-sans">TOI Catalog:</span>
+                    <span className="text-xs text-muted font-sans whitespace-nowrap shrink-0">TOI Catalog:</span>
                     <span className="text-xs font-semibold text-muted font-mono">{measurement_history.distance["TOI Catalog"] ? `${Number(measurement_history.distance["TOI Catalog"]).toFixed(1)}${getUncertaintyStr("distance", "TOI Catalog")} pc` : "N/A"}</span>
                   </div>
                   <div className="mt-2 text-[10px] font-mono text-muted border-t border-border pt-1.5 flex justify-between">
@@ -2560,7 +2582,14 @@ export default function CandidateDetailPage() {
                         </div>
                       ) : pipelineData.dl_classification ? (
                         <div className="text-muted text-[10px] font-sans leading-normal">
-                          Synthetic-trained checkpoint (never seen a real TESS light curve) — read this as a demonstration of the architecture, not a validated classifier.
+                          {/* Was hardcoded "Synthetic-trained checkpoint... not a validated
+                              classifier" -- went stale the moment the model was retrained on
+                              real Kepler light curves (2026-08-21) and would have directly
+                              contradicted the /ai-analysis page, which correctly says
+                              "Trained on real light curves." Real training data, modest
+                              real accuracy (see DL Model page for the actual held-out
+                              number) -- neither overclaimed nor understated here. */}
+                          Trained on real Kepler light curves + real disposition labels (no synthetic light curve in this training set) — see the DL Model page for held-out accuracy before treating this as more than a modest first result.
                           {pipelineData.dl_centroid_available === false && " Centroid branch has no real measurement for this candidate."}
                         </div>
                       ) : null}

@@ -52,11 +52,15 @@ export default function AboutPage() {
               overconfident in the 0.2-0.4 predicted-probability range -- treat scores in that band as a modest
               overestimate.
             </Callout>
-            <Callout tone="critical" title="The deep-learning model is trained on synthetic data only">
-              Every DL training sample comes from a synthetic light-curve generator, not a real TESS
-              observation. Read its output (<code>dl_classification</code>) as a demonstration of the
-              architecture, not a validated classifier, until real MAST light curves and centroid data are
-              used for training.
+            <Callout tone="warning" title="The deep-learning model is real-trained, on a small sample">
+              Retrained 2026-08-21 on 116 real Kepler stars (real light curves, real disposition + real
+              false-positive-reason labels from the NASA Exoplanet Archive) -- no synthetic light curve
+              remains in this training set. Held-out accuracy is <strong>60.9%</strong> on 92 real samples
+              never trained on, against 100% training accuracy: a real, expected overfitting gap on a
+              sample this small. It reliably separates a non-detection from a real signal (100% held-out on
+              "Not Transit-Like") but cannot yet reliably tell a real planet transit from a real eclipsing
+              binary (33-50% held-out on those two). Centroid data still has no real measurement for these
+              Kepler stars. See <code>LIMITATIONS.md</code> §1.7 and the DL Model page for the full report.
             </Callout>
             <Callout tone="info" title="Only 5 of 7 planned catalogs are live">
               NASA/TOI, Gaia DR3 (source + astroparams), 2MASS, and Pan-STARRS are live with real provenance.
