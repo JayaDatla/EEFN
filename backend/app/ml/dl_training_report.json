@@ -1,0 +1,37 @@
+{
+  "trained_at": "2026-08-21T09:33:00.791490+00:00",
+  "architecture_version": "exofusion-net-v2.4branch.28feat.3ch-centroid.3class-real.1",
+  "class_names": [
+    "Planet Transit",
+    "Eclipsing Binary",
+    "Not Transit-Like"
+  ],
+  "num_real_stars": 116,
+  "real_star_class_distribution": {
+    "Planet Transit": 32,
+    "Eclipsing Binary": 45,
+    "Not Transit-Like": 39
+  },
+  "num_epochs": 35,
+  "train_samples": 372,
+  "held_out_test_samples": 92,
+  "held_out_test_stars": 23,
+  "final_train_accuracy": 1.0,
+  "final_train_loss": 0.0008643852863531631,
+  "held_out_test_metrics": {
+    "accuracy": 0.6086956521739131,
+    "n": 92,
+    "per_class_accuracy": {
+      "Planet Transit": 0.5,
+      "Eclipsing Binary": 0.3333333333333333,
+      "Not Transit-Like": 1.0
+    },
+    "per_class_n": {
+      "Planet Transit": 24,
+      "Eclipsing Binary": 36,
+      "Not Transit-Like": 32
+    }
+  },
+  "data_source": "NASA Exoplanet Archive cumulative KOI table (real disposition + real false-positive-reason flags) + real Kepler long-cadence light curves via lightkurve/MAST. No synthetic light curves in this training set.",
+  "known_gaps": "Centroid branch honestly zeroed/absent for every sample (no real Kepler TPF centroid ingestion in this pass). Metadata vector uses only real koi_steff/koi_srad/koi_depth; no 2MASS/Pan-STARRS/RUWE cross-match attempted for these Kepler stars, so those fields are honestly absent (presence=0), not fabricated."
+}

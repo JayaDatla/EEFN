@@ -1,4 +1,4 @@
-11:01:30: Starting worker for 1 functions: run_pipeline_task
-2026-08-21T11:01:30+0530 INFO     arq.worker: Starting worker for 1 functions: run_pipeline_task
-11:01:30: redis_version=7.4.10 mem_usage=1.56M clients_connected=2 db_keys=1
-2026-08-21T11:01:30+0530 INFO     arq.worker: redis_version=7.4.10 mem_usage=1.56M clients_connected=2 db_keys=1
+15:03:30: Starting worker for 1 functions: run_pipeline_task
+2026-08-21T15:03:30+0530 INFO     arq.worker: Starting worker for 1 functions: run_pipeline_task
+15:03:30: redis_version=7.4.10 mem_usage=1.56M clients_connected=3 db_keys=0
+2026-08-21T15:03:30+0530 INFO     arq.worker: redis_version=7.4.10 mem_usage=1.56M clients_connected=3 db_keys=0

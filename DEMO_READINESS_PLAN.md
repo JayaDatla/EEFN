@@ -1,5 +1,39 @@
 # EEFN Demo Readiness Plan
 
+> ## Progress log
+>
+> **2026-08-21 — decisions made and work completed**
+>
+> **Decision (0.1): Path A, no rollback.** Synthetic data is explicitly rejected —
+> the point of the project is real multi-catalog fusion. Path B (revert to the
+> 4-class synthetic checkpoint) is **off the table**.
+>
+> **Important reframing that came out of this:** the catalog-fusion story — the actual
+> thesis of the project — was *never* synthetic. 5 live catalogs, 546 real
+> cross-matched candidates, real disagreement features, and a Random Forest trained on
+> 2,667 real candidates with real held-out metrics are all genuine and demo-ready today.
+> The synthetic-data problem is confined to the DeepExoFusionNet light-curve CNN, one
+> secondary component. "No synthetic data in the demo" is therefore achievable.
+>
+> **Done:**
+> - [x] 5.1 `git init` + two commits (`fb433e9` baseline, `684637c` demo work) — the
+>       first version-control safety net this project has ever had
+> - [x] 0.2 All four services restored and verified (backend, frontend, Redis, Arq worker)
+> - [x] 1.1 Fetch hardened: retry-with-backoff + per-class checkpointing, verified working
+> - [x] 3.2 **Stale hardcoded model stats eliminated** — new `/predictions/dl_training`
+>       endpoint (503, never a fallback); page now shows real values or an explicit
+>       unavailable state; provenance banner driven by the artifact, not a literal
+> - [x] 3.1 Nav decluttered: 12 flat items → 4 labelled groups + Reference; removed a
+>       "Settings" entry that was a mislabelled duplicate of Pipeline Admin
+> - [x] 3.3 Gallery duplication collapsed to one honest "Project Overview" entry
+>
+> **In flight:**
+> - [ ] 1.2 Real Kepler fetch running (45/class = 135 stars, ~2h wall-clock, unattended).
+>       Checkpoints per class, so it can be stopped at any point and still yield a
+>       usable dataset.
+>
+> **Next:** 1.3 train → 1.4 sanity-check → 0.3 rehearse runbook.
+
 **Created**: 2026-08-21
 **Purpose**: Get EEFN into a state that can be demonstrated to a project guide with confidence.
 **Scope**: This is a *stabilisation* plan, not a feature plan. It supersedes nothing in

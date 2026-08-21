@@ -91,7 +91,7 @@ def test_vet_candidate():
     
     # Assert probability properties
     probs = result["classification"]
-    assert len(probs) == 4
+    assert len(probs) == 3
     for k, v in probs.items():
         assert 0.0 <= v <= 1.0
         

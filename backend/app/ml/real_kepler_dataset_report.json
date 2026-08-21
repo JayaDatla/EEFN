@@ -1,18 +1,18 @@
 {
-  "generated_at_unix": 1787289346.7825274,
-  "elapsed_seconds": 413.3,
-  "per_class_requested": 2,
+  "generated_at_unix": 1787297052.524257,
+  "elapsed_seconds": 7420.6,
+  "per_class_requested": 45,
   "per_class_attempted": {
-    "0": 2,
-    "1": 2,
-    "2": 2
+    "0": 45,
+    "1": 45,
+    "2": 45
   },
   "per_class_usable": {
-    "0": 2,
-    "1": 2,
-    "2": 2
+    "0": 32,
+    "1": 45,
+    "2": 39
   },
-  "total_usable_samples": 6,
+  "total_usable_samples": 116,
   "label_names": {
     "0": "Planet Transit",
     "1": "Eclipsing Binary",
