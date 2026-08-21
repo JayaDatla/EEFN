@@ -601,6 +601,7 @@ async def cancel_pipeline_run(run_id: str, db: Session = Depends(get_db)):
 
 _MODEL_METRICS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ml", "model_metrics.json")
 _CALIBRATION_REPORT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ml", "calibration_report.json")
+_DL_TRAINING_REPORT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ml", "dl_training_report.json")
 
 @router.get("/predictions/metrics")
 def get_model_metrics():
@@ -619,6 +620,34 @@ def get_model_metrics():
                    "this endpoint never fabricates evaluation metrics.",
         )
     with open(metrics_path, "r") as f:
+        return json.load(f)
+
+
+@router.get("/predictions/dl_training")
+def get_dl_training_report():
+    """
+    Serves the deep-learning training report written by app/ml/train_deep_learning.py.
+
+    Exists because the /ai-analysis page previously HARDCODED its training statistics
+    (1,182 samples / 99.58% accuracy / 0.0114 loss / a 4-class sample distribution).
+    Those numbers came from an old synthetic-data training run and silently went stale
+    -- they survived a model retrain, a metadata-vector expansion (16 -> 28 dims), and
+    a class-count change, all while still being displayed as current fact. That is the
+    exact A.8/A.14 failure this project exists to eliminate, sitting on the page most
+    likely to be shown to a reviewer.
+
+    Same honesty contract as /predictions/metrics: 503 with an explicit message if no
+    artifact exists, never a fabricated or fallback number.
+    """
+    report_path = os.path.normpath(_DL_TRAINING_REPORT_PATH)
+    if not os.path.exists(report_path):
+        raise HTTPException(
+            status_code=503,
+            detail="No dl_training_report.json artifact found. Run "
+                   "`python -m app.ml.train_deep_learning` to generate one; "
+                   "this endpoint never fabricates training statistics.",
+        )
+    with open(report_path, "r") as f:
         return json.load(f)
 
 

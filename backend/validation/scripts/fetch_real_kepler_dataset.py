@@ -68,10 +68,35 @@ LABEL_QUERIES = [
 LABEL_NAMES = {0: "Planet Transit", 1: "Eclipsing Binary", 2: "Not Transit-Like"}
 
 
+def _get_with_retry(url: str, params: dict, attempts: int = 5, timeout: float = 30.0):
+    """
+    Retry with exponential backoff on transient network failures. A single
+    unretried DNS blip ('Failed to resolve exoplanetarchive.ipac.caltech.edu')
+    killed a ~40-minute unattended run of this script and discarded all of its
+    processed work -- this is a long, network-bound job and must survive one bad
+    lookup. Mirrors the retry posture ingest.py already uses for its own
+    NASA TAP / CDS X-Match calls.
+    """
+    last_exc = None
+    for attempt in range(attempts):
+        try:
+            r = requests.get(url, params=params, timeout=timeout)
+            r.raise_for_status()
+            return r
+        except Exception as e:  # network, DNS, HTTP 5xx
+            last_exc = e
+            if attempt == attempts - 1:
+                break
+            backoff = 2.0 ** attempt
+            print(f"    request failed ({e.__class__.__name__}), retrying in {backoff:.0f}s "
+                  f"[{attempt + 1}/{attempts}]")
+            time.sleep(backoff)
+    raise last_exc
+
+
 def fetch_koi_rows(label: int, where: str, limit: int) -> list:
     query = f"SELECT TOP {limit} {FIELDS} FROM cumulative WHERE {where} AND koi_period IS NOT NULL AND koi_duration IS NOT NULL AND koi_time0bk IS NOT NULL"
-    r = requests.get(NASA_TAP_URL, params={"query": query, "format": "json"}, timeout=30.0)
-    r.raise_for_status()
+    r = _get_with_retry(NASA_TAP_URL, {"query": query, "format": "json"})
     return r.json()
 
 
@@ -118,6 +143,22 @@ def build_metadata(row: dict) -> dict:
         "st_rad": row.get("koi_srad"),
         "trandep": row.get("koi_depth"),
     }
+
+
+def save_dataset(data_list: list) -> None:
+    """Writes the processed, model-ready dataset. Called both at each per-class
+    checkpoint and at the end, so the two can never write different formats."""
+    np.savez(
+        DATASET_PATH,
+        global_views=np.stack([d[0] for d in data_list]),
+        local_views=np.stack([d[1] for d in data_list]),
+        centroids=np.stack([d[2] for d in data_list]),
+        labels=np.array([d[4] for d in data_list], dtype=np.int64),
+    )
+    # Raw metadata dicts (may contain None) can't go in an npz array -- saved
+    # alongside as JSON, same row order as the arrays above.
+    with open(DATASET_PATH.replace(".npz", "_metadata.json"), "w") as f:
+        json.dump([d[3] for d in data_list], f)
 
 
 def run(per_class: int, sleep_between: float = 0.5):
@@ -173,22 +214,16 @@ def run(per_class: int, sleep_between: float = 0.5):
 
         per_label_counts[label] = n_ok
         print(f"  -> {n_ok}/{len(rows)} real light curves usable for label {label}.")
+        # Checkpoint after every class: a crash in a later class must not discard
+        # the (network-expensive) work already done for earlier ones.
+        if data_list:
+            save_dataset(data_list)
+            print(f"  [checkpoint] {len(data_list)} samples saved so far.")
 
     if not data_list:
         raise RuntimeError("No real light curves were fetched -- nothing to save.")
 
-    np.savez(
-        DATASET_PATH,
-        global_views=np.stack([d[0] for d in data_list]),
-        local_views=np.stack([d[1] for d in data_list]),
-        centroids=np.stack([d[2] for d in data_list]),
-        labels=np.array([d[4] for d in data_list], dtype=np.int64),
-    )
-    # Raw metadata dicts (may contain None) can't go in an npz array -- saved
-    # alongside as JSON, same row order as the arrays above.
-    metadata_path = DATASET_PATH.replace(".npz", "_metadata.json")
-    with open(metadata_path, "w") as f:
-        json.dump([d[3] for d in data_list], f)
+    save_dataset(data_list)
     elapsed = time.time() - started
 
     report = {

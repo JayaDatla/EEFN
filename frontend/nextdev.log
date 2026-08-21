@@ -71,3 +71,53 @@ npm warn Unknown user config "msvs_version". This will stop working in the next 
  ✓ Compiled in 3s (664 modules)
  ○ Compiling /candidates/[id] ...
  ✓ Compiled /candidates/[id] in 1561ms (334 modules)
+ ✓ Compiled in 638ms (679 modules)
+ ✓ Compiled in 390ms (679 modules)
+ ✓ Compiled in 4.2s (679 modules)
+ ✓ Compiled in 2.1s (679 modules)
+ ✓ Compiled in 1460ms (679 modules)
+ ✓ Compiled in 1807ms (679 modules)
+ ✓ Compiled in 1734ms (679 modules)
+ ✓ Compiled in 3.8s (677 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ src\app\components\AppSidebar.tsx (117:9) @ navigation
+ ⨯ ReferenceError: navigation is not defined
+    at AppSidebar (./src/app/components/AppSidebar.tsx:216:21)
+[0m [90m 115 |[39m       [33m<[39m[33mnav[39m aria[33m-[39mlabel[33m=[39m[32m"Primary navigation"[39m className[33m=[39m[32m"sidebar-nav"[39m[33m>[39m[0m
+[0m [90m 116 |[39m         [33m<[39m[33mp[39m[33m>[39m[33mOBSERVATORY[39m[33m<[39m[33m/[39m[33mp[39m[33m>[39m[0m
+[0m[31m[1m>[22m[39m[90m 117 |[39m         {navigation[33m.[39mmap(({ href[33m,[39m label[33m,[39m icon[33m:[39m [33mIcon[39m }) [33m=>[39m {[0m
+[0m [90m     |[39m         [31m[1m^[22m[39m[0m
+[0m [90m 118 |[39m           [36mconst[39m active [33m=[39m href [33m===[39m [32m"/"[39m [33m?[39m pathname [33m===[39m [32m"/"[39m [33m:[39m pathname[33m.[39mstartsWith(href)[33m;[39m[0m
+[0m [90m 119 |[39m           [36mreturn[39m ([0m
+[0m [90m 120 |[39m             [33m<[39m[33mLink[39m key[33m=[39m{href} href[33m=[39m{href} className[33m=[39m{active [33m?[39m [32m"active"[39m [33m:[39m [32m""[39m}[33m>[39m[0m
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 2.3s (675 modules)
+ ⨯ src\app\components\AppSidebar.tsx (117:11) @ React
+ ⨯ ReferenceError: React is not defined
+    at eval (./src/app/components/AppSidebar.tsx:208:137)
+    at Array.map (<anonymous>)
+    at AppSidebar (./src/app/components/AppSidebar.tsx:208:38)
+[0m [90m 115 |[39m       [33m<[39m[33mnav[39m aria[33m-[39mlabel[33m=[39m[32m"Primary navigation"[39m className[33m=[39m[32m"sidebar-nav"[39m[33m>[39m[0m
+[0m [90m 116 |[39m         {navigationGroups[33m.[39mmap((group[33m,[39m groupIdx) [33m=>[39m ([0m
+[0m[31m[1m>[22m[39m[90m 117 |[39m           [33m<[39m[33mReact[39m[33m.[39m[33mFragment[39m key[33m=[39m{group[33m.[39mtitle}[33m>[39m[0m
+[0m [90m     |[39m           [31m[1m^[22m[39m[0m
+[0m [90m 118 |[39m             [33m<[39m[33mp[39m className[33m=[39m{groupIdx [33m===[39m [35m0[39m [33m?[39m undefined [33m:[39m [32m"nav-spacer"[39m}[33m>[39m{group[33m.[39mtitle[33m.[39mtoUpperCase()}[33m<[39m[33m/[39m[33mp[39m[33m>[39m[0m
+[0m [90m 119 |[39m             {group[33m.[39mitems[33m.[39mmap(({ href[33m,[39m label[33m,[39m icon[33m:[39m [33mIcon[39m }) [33m=>[39m {[0m
+[0m [90m 120 |[39m               [36mconst[39m active [33m=[39m href [33m===[39m [32m"/"[39m [33m?[39m pathname [33m===[39m [32m"/"[39m [33m:[39m pathname[33m.[39mstartsWith(href)[33m;[39m[0m
+ ⨯ src\app\components\AppSidebar.tsx (117:11) @ React
+ ⨯ ReferenceError: React is not defined
+    at eval (./src/app/components/AppSidebar.tsx:208:137)
+    at Array.map (<anonymous>)
+    at AppSidebar (./src/app/components/AppSidebar.tsx:208:38)
+[0m [90m 115 |[39m       [33m<[39m[33mnav[39m aria[33m-[39mlabel[33m=[39m[32m"Primary navigation"[39m className[33m=[39m[32m"sidebar-nav"[39m[33m>[39m[0m
+[0m [90m 116 |[39m         {navigationGroups[33m.[39mmap((group[33m,[39m groupIdx) [33m=>[39m ([0m
+[0m[31m[1m>[22m[39m[90m 117 |[39m           [33m<[39m[33mReact[39m[33m.[39m[33mFragment[39m key[33m=[39m{group[33m.[39mtitle}[33m>[39m[0m
+[0m [90m     |[39m           [31m[1m^[22m[39m[0m
+[0m [90m 118 |[39m             [33m<[39m[33mp[39m className[33m=[39m{groupIdx [33m===[39m [35m0[39m [33m?[39m undefined [33m:[39m [32m"nav-spacer"[39m}[33m>[39m{group[33m.[39mtitle[33m.[39mtoUpperCase()}[33m<[39m[33m/[39m[33mp[39m[33m>[39m[0m
+[0m [90m 119 |[39m             {group[33m.[39mitems[33m.[39mmap(({ href[33m,[39m label[33m,[39m icon[33m:[39m [33mIcon[39m }) [33m=>[39m {[0m
+[0m [90m 120 |[39m               [36mconst[39m active [33m=[39m href [33m===[39m [32m"/"[39m [33m?[39m pathname [33m===[39m [32m"/"[39m [33m:[39m pathname[33m.[39mstartsWith(href)[33m;[39m[0m
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 3.4s (675 modules)
+ ✓ Compiled in 1046ms (675 modules)

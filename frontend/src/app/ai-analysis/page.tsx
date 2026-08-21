@@ -27,14 +27,38 @@ export default function AIAnalysisPage() {
   const [selectedCand, setSelectedCand] = useState(null as Candidate | null);
   const [dlResult, setDlResult] = useState(null as any);
   const [isLoadingDl, setIsLoadingDl] = useState(false);
-  
+
+  // Real training statistics from app/ml/dl_training_report.json, served via
+  // /predictions/dl_training. These were previously hardcoded in this file and had
+  // gone stale across a retrain, a metadata-vector expansion and a class-count
+  // change while still being displayed as current fact. Never falls back to a
+  // literal -- if the endpoint 503s (no artifact yet), the panel says so.
+  const [trainingReport, setTrainingReport] = useState(null as any);
+  const [trainingReportError, setTrainingReportError] = useState(null as string | null);
+
   // Custom interactive vetting parameters
   const [noiseStd, setNoiseStd] = useState(0.001);
   const [hasStarspots, setHasStarspots] = useState(true);
 
   useEffect(() => {
     fetchCandidates();
+    fetchTrainingReport();
   }, []);
+
+  const fetchTrainingReport = async () => {
+    try {
+      const res = await fetch(apiUrl('/api/v1/predictions/dl_training'));
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Backend returned ${res.status}`);
+      }
+      setTrainingReport(await res.json());
+      setTrainingReportError(null);
+    } catch (e) {
+      setTrainingReport(null);
+      setTrainingReportError(e instanceof Error ? e.message : 'Unable to reach the EEFN backend.');
+    }
+  };
 
   const fetchCandidates = async () => {
     setIsLoadingCand(true);
@@ -94,12 +118,23 @@ export default function AIAnalysisPage() {
   return (
     <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn font-mono text-xs text-ink/80">
 
-      <Callout tone="warning" title="Synthetic-trained model, illustrative architecture diagram">
-        LIMITATIONS.md &sect;1.7: this model is trained entirely on synthetic light curves, not real TESS data --
-        read `dl_classification` output as a demonstration of the architecture, not a validated classifier.
-        The block diagram below also doesn&apos;t yet depict the real 4th (centroid) branch added since it was
-        first drawn; the feature/parameter counts next to it have been corrected to the current real model.
-      </Callout>
+      {/* Driven by the real training artifact, not a hardcoded claim -- this banner
+          previously asserted "trained entirely on synthetic light curves" as a literal,
+          which would have silently become FALSE the moment the model was retrained on
+          real data (and was already stale in the other direction before that). */}
+      {trainingReport?.data_source?.includes("real") ? (
+        <Callout tone="info" title="Trained on real light curves">
+          Training data: {trainingReport.data_source}
+          {trainingReport.known_gaps ? ` Known gaps: ${trainingReport.known_gaps}` : null}
+          {" "}The block diagram below does not yet depict the 4th (centroid) branch.
+        </Callout>
+      ) : (
+        <Callout tone="warning" title="Model training provenance unverified">
+          No real training report is currently available from the backend, so nothing on this
+          page should be read as a validated performance claim. The block diagram below also
+          does not yet depict the 4th (centroid) branch.
+        </Callout>
+      )}
 
       {/* Title */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-5">
@@ -293,28 +328,62 @@ export default function AIAnalysisPage() {
               <Database className="h-4.5 w-4.5" /> Model Training Dataset & Augmentation Summary
             </h3>
             
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 my-2">
-              <div className="bg-surface-2/60 p-4 border border-border rounded-lg text-center">
-                <div className="text-muted text-[9px] uppercase tracking-wider">TOTAL SAMPLES</div>
-                <div className="text-2xl font-bold text-ink mt-1">1,182</div>
-                <div className="text-[8px] text-muted mt-1">Balanced 4-class space</div>
-              </div>
-              <div className="bg-surface-2/60 p-4 border border-border rounded-lg text-center">
-                <div className="text-muted text-[9px] uppercase tracking-wider">EPOCHS TRAINED</div>
-                <div className="text-2xl font-bold text-accent mt-1">35</div>
-                <div className="text-[8px] text-muted mt-1">Adam Optimizer</div>
-              </div>
-              <div className="bg-surface-2/60 p-4 border border-border rounded-lg text-center">
-                <div className="text-muted text-[9px] uppercase tracking-wider">FINAL ACCURACY</div>
-                <div className="text-2xl font-bold text-status-pass mt-1">99.58%</div>
-                <div className="text-[8px] text-muted mt-1">Training Set Convergence</div>
-              </div>
-              <div className="bg-surface-2/60 p-4 border border-border rounded-lg text-center">
-                <div className="text-muted text-[9px] uppercase tracking-wider">FINAL LOSS</div>
-                <div className="text-2xl font-bold text-ink mt-1">0.0114</div>
-                <div className="text-[8px] text-muted mt-1">CrossEntropy Evaluation</div>
-              </div>
-            </div>
+            {trainingReportError && (
+              <Callout tone="critical" title="No training report available">
+                {trainingReportError} No training statistics are shown -- this panel never
+                displays fallback numbers.
+              </Callout>
+            )}
+
+            {trainingReport && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 my-2">
+                  <div className="bg-surface-2/60 p-4 border border-border rounded-lg text-center">
+                    <div className="text-muted text-[9px] uppercase tracking-wider">REAL STARS</div>
+                    <div className="text-2xl font-bold text-ink mt-1">{trainingReport.num_real_stars}</div>
+                    <div className="text-[8px] text-muted mt-1">{trainingReport.train_samples} train samples after augmentation</div>
+                  </div>
+                  <div className="bg-surface-2/60 p-4 border border-border rounded-lg text-center">
+                    <div className="text-muted text-[9px] uppercase tracking-wider">EPOCHS TRAINED</div>
+                    <div className="text-2xl font-bold text-accent mt-1">{trainingReport.num_epochs}</div>
+                    <div className="text-[8px] text-muted mt-1">Adam Optimizer</div>
+                  </div>
+                  <div className="bg-surface-2/60 p-4 border border-border rounded-lg text-center">
+                    <div className="text-muted text-[9px] uppercase tracking-wider">HELD-OUT ACCURACY</div>
+                    <div className="text-2xl font-bold text-status-pass mt-1">
+                      {trainingReport.held_out_test_metrics?.accuracy != null
+                        ? `${(trainingReport.held_out_test_metrics.accuracy * 100).toFixed(2)}%`
+                        : "--"}
+                    </div>
+                    <div className="text-[8px] text-muted mt-1">
+                      On {trainingReport.held_out_test_stars} real stars never trained on
+                    </div>
+                  </div>
+                  <div className="bg-surface-2/60 p-4 border border-border rounded-lg text-center">
+                    <div className="text-muted text-[9px] uppercase tracking-wider">TRAIN ACCURACY</div>
+                    <div className="text-2xl font-bold text-ink mt-1">
+                      {trainingReport.final_train_accuracy != null
+                        ? `${(trainingReport.final_train_accuracy * 100).toFixed(2)}%`
+                        : "--"}
+                    </div>
+                    <div className="text-[8px] text-muted mt-1">Not a generalisation estimate</div>
+                  </div>
+                </div>
+
+                <Callout tone="info" title="Read the held-out number, not the training number">
+                  Training accuracy measures fit to data the model already saw. The held-out
+                  figure is computed on real stars excluded from training entirely (split at the
+                  star level, so augmented copies of a training star can never leak into the test
+                  set). Data source: {trainingReport.data_source}
+                </Callout>
+
+                {trainingReport.known_gaps && (
+                  <Callout tone="warning" title="Known gaps in this training run">
+                    {trainingReport.known_gaps}
+                  </Callout>
+                )}
+              </>
+            )}
 
             <h4 className="text-ink font-bold text-xs mt-2 border-b border-border pb-1.5 font-sans">
               Feature Centering & Scaling Configuration
@@ -353,61 +422,45 @@ export default function AIAnalysisPage() {
               <Database className="h-4.5 w-4.5" /> Dataset Class Balancer
             </h3>
             
-            <div className="flex flex-col gap-4 font-mono text-[10px] my-2">
-              
-              {/* EB */}
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-ink/80">
-                  <span>Class 1. Eclipsing Binaries (EB)</span>
-                  <span className="text-ink font-bold">336 samples (28.4%)</span>
-                </div>
-                <div className="w-full bg-surface-2 h-2 rounded overflow-hidden border border-border">
-                  <div className="bg-accent h-full rounded" style={{ width: '28.4%' }}></div>
-                </div>
-                <span className="text-muted text-[8px]">8 random noise/blending augmentations per catalog FP</span>
-              </div>
+            {trainingReportError && (
+              <span className="text-muted font-sans text-xs italic">
+                No class distribution shown -- training report unavailable.
+              </span>
+            )}
 
-              {/* Starspots */}
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-ink/80">
-                  <span>Class 2. Stellar Activity (Starspots)</span>
-                  <span className="text-ink font-bold">288 samples (24.4%)</span>
-                </div>
-                <div className="w-full bg-surface-2 h-2 rounded overflow-hidden border border-border">
-                  <div className="bg-accent h-full rounded" style={{ width: '24.4%' }}></div>
-                </div>
-                <span className="text-muted text-[8px]">3 pure spot simulation realizations per candidate parameters</span>
+            {trainingReport && (
+              <div className="flex flex-col gap-4 font-mono text-[10px] my-2">
+                {Object.entries(trainingReport.real_star_class_distribution || {}).map(([name, count]) => {
+                  const total = trainingReport.num_real_stars || 1;
+                  const pct = ((count as number) / total) * 100;
+                  const perClass = trainingReport.held_out_test_metrics?.per_class_accuracy?.[name];
+                  return (
+                    <div key={name} className="flex flex-col gap-1">
+                      <div className="flex justify-between text-ink/80">
+                        <span>{name}</span>
+                        <span className="text-ink font-bold">{count as number} real stars ({pct.toFixed(1)}%)</span>
+                      </div>
+                      <div className="w-full bg-surface-2 h-2 rounded overflow-hidden border border-border">
+                        <div className="bg-accent h-full rounded" style={{ width: `${pct}%` }}></div>
+                      </div>
+                      <span className="text-muted text-[8px]">
+                        Held-out accuracy for this class:{" "}
+                        {perClass != null ? `${(perClass * 100).toFixed(1)}%` : "not represented in held-out set"}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-
-              {/* Noise */}
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-ink/80">
-                  <span>Class 3. Instrumental Noise</span>
-                  <span className="text-ink font-bold">288 samples (24.4%)</span>
-                </div>
-                <div className="w-full bg-surface-2 h-2 rounded overflow-hidden border border-border">
-                  <div className="bg-severity-critical h-full rounded" style={{ width: '24.4%' }}></div>
-                </div>
-                <span className="text-muted text-[8px]">3 pure white/pink detector noise simulations per candidate</span>
-              </div>
-
-              {/* Planet */}
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-ink/80">
-                  <span>Class 0. Planet Transits</span>
-                  <span className="text-ink font-bold">270 samples (22.8%)</span>
-                </div>
-                <div className="w-full bg-surface-2 h-2 rounded overflow-hidden border border-border">
-                  <div className="bg-accent h-full rounded" style={{ width: '22.8%' }}></div>
-                </div>
-                <span className="text-muted text-[8px]">5 noise/crowded-field blended augmentations per catalog planet</span>
-              </div>
-
-            </div>
+            )}
 
             <div className="bg-surface-2 p-4 border border-border rounded-lg text-muted font-sans text-xs leading-relaxed mt-auto">
               <h4 className="font-bold text-ink mb-1">What is Augmentation?</h4>
-              Data augmentation applies minor variations in noise levels (0.001 to 0.003 std) and blending dilution factors (0.05 to 0.25) using unique random seeds, ensuring the CNN maps general physical profiles instead of overfitting to individual noise shapes.
+              Each real star&apos;s measured light curve is fixed &mdash; there is only one real
+              observation of it. Augmentation therefore varies only the <em>metadata presence
+              pattern</em>: optional catalog fields (RUWE, 2MASS/Pan-STARRS photometry, stellar
+              parameters) are randomly withheld per sample, so the network learns to handle
+              partial catalog coverage rather than assuming every field is always present. The
+              light-curve measurement itself is never synthesised or perturbed.
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -9,39 +10,66 @@ import {
   Bot,
   GitCompare,
   GitFork,
-  Globe2,
   HelpCircle,
   ListChecks,
   Orbit,
   SearchCheck,
-  Settings,
   TableProperties,
 } from "lucide-react";
 import { useTheme, Theme } from "../theme-provider";
 
-const navigation = [
-  { href: "/", label: "Triage Queue", icon: Orbit },
-  { href: "/fusion", label: "Evidence Explorer", icon: SearchCheck },
-  { href: "/compare", label: "Catalog Cross Reference", icon: TableProperties },
-  { href: "/graph", label: "Evidence Graph", icon: GitFork },
-  { href: "/batch", label: "Batch Workflow", icon: ListChecks },
-  { href: "/changes", label: "What Changed", icon: GitCompare },
-  // UPGRADE_PLAN.md H.3.10: renamed from "Validation" -- this page shows the deep
-  // learning model's demonstration classification pathway, which LIMITATIONS.md
-  // §1.7 discloses is trained entirely on synthetic light curves, not a validated
-  // classifier. The old label implied more than the page actually delivers.
-  { href: "/ai-analysis", label: "DL Model Demo", icon: Activity },
-  { href: "/admin", label: "Pipeline Admin", icon: Bell },
-  { href: "/predictions", label: "ML Predictions", icon: Bot },
+// DEMO_READINESS_PLAN.md 3.1: 12 flat top-level destinations was more than a reader
+// could hold in their head, and buried the two pages that actually carry the project
+// (the triage queue and the catalog-disagreement evidence). Grouped into labelled
+// sections by the question each page answers, primary work first.
+const navigationGroups = [
+  {
+    title: "Triage",
+    items: [
+      { href: "/", label: "Triage Queue", icon: Orbit },
+    ],
+  },
+  {
+    title: "Evidence",
+    items: [
+      { href: "/fusion", label: "Evidence Explorer", icon: SearchCheck },
+      { href: "/compare", label: "Catalog Cross Reference", icon: TableProperties },
+      { href: "/graph", label: "Evidence Graph", icon: GitFork },
+    ],
+  },
+  {
+    title: "Models",
+    items: [
+      { href: "/predictions", label: "ML Predictions", icon: Bot },
+      // UPGRADE_PLAN.md H.3.10: renamed from "Validation" -- this page shows the deep
+      // learning model's classification pathway. The old label implied more validation
+      // than the page actually delivers.
+      { href: "/ai-analysis", label: "DL Model", icon: Activity },
+    ],
+  },
+  {
+    title: "Operations",
+    items: [
+      { href: "/batch", label: "Batch Workflow", icon: ListChecks },
+      { href: "/changes", label: "What Changed", icon: GitCompare },
+      { href: "/admin", label: "Pipeline Admin", icon: Bell },
+    ],
+  },
+];
+
+// De-emphasised: reference/context rather than a working destination.
+const secondaryNavigation = [
   { href: "/about", label: "What This Tool Does", icon: HelpCircle },
 ];
 
 // UPGRADE_PLAN.md H.3.10: demo/showcase content for conference/outreach use --
 // kept (not deleted), but demoted out of primary navigation and unmistakably
 // badged so it can never be confused with the live triage tool.
+// DEMO_READINESS_PLAN.md 3.3: /demo re-exports /showcase (identical content), and
+// neither matched its former label ("API Explorer" / "Research Analytics"). Collapsed
+// to the single honest entry rather than showing the same deck under two invented names.
 const galleryNavigation = [
-  { href: "/showcase", label: "Research Analytics", icon: BarChart3 },
-  { href: "/demo", label: "API Explorer", icon: Globe2 },
+  { href: "/showcase", label: "Project Overview", icon: BarChart3 },
 ];
 
 const THEME_OPTIONS: { value: Theme; label: string }[] = [
@@ -84,9 +112,24 @@ export default function AppSidebar() {
       <ThemeToggle />
 
       <nav aria-label="Primary navigation" className="sidebar-nav">
-        <p>OBSERVATORY</p>
-        {navigation.map(({ href, label, icon: Icon }) => {
-          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        {navigationGroups.map((group, groupIdx) => (
+          <React.Fragment key={group.title}>
+            <p className={groupIdx === 0 ? undefined : "nav-spacer"}>{group.title.toUpperCase()}</p>
+            {group.items.map(({ href, label, icon: Icon }) => {
+              const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+              return (
+                <Link key={href} href={href} className={active ? "active" : ""}>
+                  <Icon size={16} />
+                  <span>{label}</span>
+                </Link>
+              );
+            })}
+          </React.Fragment>
+        ))}
+
+        <p className="nav-spacer">REFERENCE</p>
+        {secondaryNavigation.map(({ href, label, icon: Icon }) => {
+          const active = pathname.startsWith(href);
           return (
             <Link key={href} href={href} className={active ? "active" : ""}>
               <Icon size={16} />
@@ -94,7 +137,6 @@ export default function AppSidebar() {
             </Link>
           );
         })}
-        <p className="nav-spacer">GALLERY (DEMO CONTENT)</p>
         {galleryNavigation.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
@@ -105,11 +147,9 @@ export default function AppSidebar() {
             </Link>
           );
         })}
-        <p className="nav-spacer">SYSTEM</p>
-        <Link href="/admin">
-          <Settings size={16} />
-          <span>Settings</span>
-        </Link>
+        {/* Removed: a "SYSTEM > Settings" entry that pointed at /admin -- a mislabelled
+            duplicate of "Pipeline Admin" leading to the same page. There is no settings
+            screen in this application. */}
       </nav>
 
       <div className="sidebar-foot">
