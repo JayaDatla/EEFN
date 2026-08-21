@@ -1,0 +1,23 @@
+{
+  "generated_at_unix": 1787221159.6195936,
+  "elapsed_seconds": 15.1,
+  "per_class_requested": 1,
+  "per_class_attempted": {
+    "0": 1,
+    "1": 1,
+    "2": 1
+  },
+  "per_class_usable": {
+    "0": 1,
+    "1": 1,
+    "2": 1
+  },
+  "total_usable_samples": 3,
+  "label_names": {
+    "0": "Planet Transit",
+    "1": "Eclipsing Binary",
+    "2": "Not Transit-Like"
+  },
+  "source": "NASA Exoplanet Archive cumulative KOI table + real Kepler long-cadence light curves via lightkurve/MAST",
+  "note": "Real light curves and real disposition/false-positive-flag labels throughout. No real TPF centroid for Kepler stars in this pass -- centroid branch is honestly zeroed+presence=0 for every sample here, same convention as any TESS candidate with no real centroid measurement. Metadata vector uses real koi_steff/koi_srad/koi_depth only; no 2MASS/Pan-STARRS/RUWE cross-match attempted for these stars."
+}

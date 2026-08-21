@@ -1,0 +1,116 @@
+{
+  "run_at": "2026-08-12T06:48:23.009489+00:00",
+  "catalog": "III/286",
+  "attempted_this_run": 25,
+  "matched_this_run": 2,
+  "results_this_run": [
+    {
+      "hostname": "Gaia DR3 123456789",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 106997505",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 107782586",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 114018671",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 124709665",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 139853601",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 140706664",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 141482386",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 143994283",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 146172354",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 146589986",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 149601557",
+      "status": "matched",
+      "teff_spec": 6149.2998046875,
+      "fe_h": 0.1404999941587448,
+      "logg_spec": 4.184999942779541
+    },
+    {
+      "hostname": "TIC 149603524",
+      "status": "matched",
+      "teff_spec": 6108.7998046875,
+      "fe_h": 0.16820000112056732,
+      "logg_spec": 4.293000221252441
+    },
+    {
+      "hostname": "TIC 155044736",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 156115721",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 169904935",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 175310067",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 182943945",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 182943946",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 182943948",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 182943949",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 182943950",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 182943951",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 182943952",
+      "status": "no_match"
+    },
+    {
+      "hostname": "TIC 182943953",
+      "status": "no_match"
+    }
+  ],
+  "total_hosts_with_real_spectroscopy": 2,
+  "note": "APOGEE-2 is a targeted spectroscopic survey with limited sky coverage, not all-sky -- a low match rate here is the expected, honest result, not a bug. spectroscopy_is_real=True on a host star means teff_spec/fe_h came from a real VizieR query against APOGEE-2 DR17, not seed_db.py's fabricated demo values."
+}

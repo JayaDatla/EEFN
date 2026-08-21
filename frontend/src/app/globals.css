@@ -1,0 +1,441 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+@import './design-tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  UPGRADE_PLAN.md H.1/H.2: this file previously had a decorative animated nebula
+  gradient + starfield dot-grid behind every page (body:before/body:after), a
+  backdrop-filter: blur(18px) glassmorphic sidebar (a resting, non-overlay element --
+  blur is reserved for true floating overlays per H.1), a decorative glow
+  box-shadow on the status dot, and a purely-decorative circle outline stamped on
+  every stat card. All removed. Every color below is a token from design-tokens.css,
+  not a hardcoded hex value, so the three themes (light/dark/red-night) apply
+  correctly everywhere.
+
+  2026-08-13: shared surfaces (cards, sidebar, nav, badges) redrawn for the modern-
+  SaaS direction -- soft shadow elevation, rounder corners, more breathing room,
+  Inter as the dominant typeface (IBM Plex Mono narrowed to genuinely tabular data:
+  numbers, IDs, timestamps -- not every label). Red-night keeps the flat, no-shadow
+  treatment throughout (see design-tokens.css) since preserving night vision matters
+  more than matching the aesthetic there.
+*/
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: Inter, Arial, sans-serif;
+}
+
+/* ---------- Layout shell ---------- */
+
+.app-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 272px;
+  z-index: 30;
+  padding: 28px 16px 20px;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 4px 10px 24px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 35px;
+  height: 35px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-accent);
+  background: var(--color-surface-2);
+}
+
+.brand strong {
+  display: block;
+  font: 600 var(--text-lg) Inter;
+  letter-spacing: -0.01em;
+}
+
+.brand small {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 2px;
+}
+
+.mission-tag {
+  margin: 3px 8px 22px;
+  padding: 9px 11px;
+  color: var(--color-text-muted);
+  font: 500 var(--text-xs) Inter;
+  letter-spacing: 0.01em;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
+}
+
+/* Status is never color-alone (H.1): the dot is always paired with the
+   "NETWORK NOMINAL" text next to it. No decorative glow -- flat fill only. */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  display: inline-block;
+  border-radius: 50%;
+  background: var(--status-pass);
+  margin-right: 7px;
+}
+
+.sidebar-nav p {
+  font: 600 10px Inter;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--color-text-muted);
+  opacity: 0.75;
+  margin: 0 12px 10px;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  color: var(--color-text-muted);
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  font: 500 var(--text-sm) Inter;
+  margin: 1px 0;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.sidebar-nav a:hover {
+  color: var(--color-text);
+  background: var(--color-surface-2);
+}
+
+.sidebar-nav a.active {
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  font-weight: 600;
+}
+
+.nav-spacer {
+  margin-top: 25px !important;
+}
+
+/* UPGRADE_PLAN.md H.3.10: unmistakable badge on gallery/demo nav items so they
+   can never be confused with the live triage tool. */
+.nav-demo-badge {
+  margin-left: auto;
+  font: 600 9px Inter;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--severity-medium) 16%, transparent);
+  color: var(--severity-medium);
+}
+
+.sidebar-foot {
+  margin-top: auto;
+  padding: 14px 12px 0;
+  color: var(--color-text-muted);
+  font: 400 var(--text-2xs)/1.7 Inter;
+  opacity: 0.75;
+}
+
+.theme-toggle {
+  display: flex;
+  gap: 4px;
+  margin: 0 8px 18px;
+  background: var(--color-surface-2);
+  padding: 3px;
+  border-radius: var(--radius-md);
+}
+
+.theme-toggle button {
+  flex: 1;
+  padding: 6px 4px;
+  font: 500 var(--text-2xs) Inter;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.theme-toggle button[aria-pressed="true"] {
+  color: var(--color-accent-text);
+  background: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-frame {
+  margin-left: 272px;
+  min-height: 100vh;
+}
+
+.app-main {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 40px clamp(24px, 3vw, 56px) 60px;
+}
+
+.telemetry {
+  height: 40px;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 clamp(24px, 3vw, 56px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  font: 500 var(--text-2xs) Inter;
+  letter-spacing: 0.01em;
+}
+
+.telemetry strong,
+.telemetry span {
+  font-variant-numeric: tabular-nums;
+}
+
+.telemetry strong {
+  color: var(--color-text);
+}
+
+.telemetry .online {
+  color: var(--status-pass);
+}
+
+/* ---------- Content primitives ---------- */
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  font: 600 var(--text-2xs) Inter;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  letter-spacing: 0.08em;
+  margin: 0 0 10px;
+}
+
+.section-heading h1 {
+  font: 600 clamp(var(--text-xl), 3vw, var(--text-2xl))/1.12 Inter;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.section-description {
+  color: var(--color-text-muted);
+  font-size: var(--text-base);
+  margin: 12px 0 0;
+  max-width: 720px;
+  line-height: 1.6;
+}
+
+/* Modern-SaaS surfaces: soft shadow elevation + a hairline border for crispness at
+   the edge, generous radius. Red-night's --shadow-* tokens are all `none`, so this
+   automatically degrades to the flat, border-only look there (design-tokens.css). */
+.scientific-metric,
+.surface-card,
+.glass-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.scientific-metric {
+  padding: 20px;
+  min-height: 126px;
+  position: relative;
+}
+
+.scientific-metric p {
+  font: 500 var(--text-2xs) Inter;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.scientific-metric strong {
+  font: 600 32px Inter;
+  letter-spacing: -0.02em;
+  display: block;
+  margin: 12px 0 8px;
+  color: var(--color-text);
+}
+
+.scientific-metric span {
+  color: var(--color-text-muted);
+  font-size: var(--text-2xs);
+}
+
+.tone-blue { color: var(--grade-a); }
+.tone-cyan { color: var(--grade-b); }
+.tone-purple { color: var(--grade-c); }
+.tone-gold { color: var(--grade-d); }
+
+.confidence-badge,
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font: 500 var(--text-2xs) Inter;
+  letter-spacing: 0.01em;
+}
+
+.confidence-badge.good,
+.status-indicator.pass {
+  background: color-mix(in srgb, var(--status-pass) 12%, transparent);
+  color: var(--status-pass);
+  border: 1px solid color-mix(in srgb, var(--status-pass) 30%, transparent);
+}
+
+.confidence-badge.watch,
+.status-indicator.watch {
+  background: color-mix(in srgb, var(--status-watch) 12%, transparent);
+  color: var(--status-watch);
+  border: 1px solid color-mix(in srgb, var(--status-watch) 30%, transparent);
+}
+
+.confidence-badge.risk,
+.status-indicator.risk {
+  background: color-mix(in srgb, var(--status-risk) 12%, transparent);
+  color: var(--status-risk);
+  border: 1px solid color-mix(in srgb, var(--status-risk) 30%, transparent);
+}
+
+/* Motion communicates a real state change only where it's still used -- kept for
+   now (not applied uniformly to every card mount; callers opt in) but respects the
+   user's reduced-motion preference (H.4). */
+.animate-fadeIn {
+  animation: fade 0.42s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn {
+    animation: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+/* Broad elevation lift (2026-08-13 modern-SaaS pass): every bordered, rounded
+   card-like container across the app picks up the same soft resting shadow as
+   the shared primitives above, without hand-editing each page's JSX. Elements
+   that already declare their own Tailwind shadow-* utility are left alone so
+   this never fights an intentionally stronger/weaker shadow. Red-night's
+   --shadow-* tokens are all `none`, so this degrades to flat there too. */
+[class*="border-border"][class*="rounded"]:not([class*="shadow-"]) {
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 820px) {
+  .app-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    padding: 12px;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .brand {
+    padding: 0;
+  }
+
+  .mission-tag,
+  .sidebar-foot,
+  .theme-toggle {
+    display: none;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    overflow: auto;
+    margin-left: auto;
+  }
+
+  .sidebar-nav p,
+  .sidebar-nav a span {
+    display: none;
+  }
+
+  .sidebar-nav a {
+    padding: 9px;
+    margin: 0;
+  }
+
+  .app-frame {
+    margin-left: 0;
+  }
+
+  .app-main {
+    padding: 24px 16px;
+  }
+
+  .telemetry {
+    padding: 0 16px;
+  }
+
+  .telemetry span:nth-child(n + 2) {
+    display: none;
+  }
+
+  .section-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+}

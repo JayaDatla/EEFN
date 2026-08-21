@@ -1,0 +1,49 @@
+{
+  "run_at": "2026-08-12T07:03:30.953660+00:00",
+  "attempted_this_run": 5,
+  "measured_this_run": 5,
+  "results_this_run": [
+    {
+      "toi_id": 101.01,
+      "tic_id": 231663901,
+      "status": "measured",
+      "offset_arcsec": 0.004629437842601855,
+      "significance_sigma": 0.3789234324480726,
+      "sector": 1
+    },
+    {
+      "toi_id": 102.01,
+      "tic_id": 149603524,
+      "status": "measured",
+      "offset_arcsec": 0.025344726907549586,
+      "significance_sigma": 0.9082897051165189,
+      "sector": 1
+    },
+    {
+      "toi_id": 103.01,
+      "tic_id": 336732616,
+      "status": "measured",
+      "offset_arcsec": 0.0133354131791593,
+      "significance_sigma": 0.30863233680416596,
+      "sector": 1
+    },
+    {
+      "toi_id": 104.01,
+      "tic_id": 231670397,
+      "status": "measured",
+      "offset_arcsec": 0.11351457206631983,
+      "significance_sigma": 5.427125398827811,
+      "sector": 1
+    },
+    {
+      "toi_id": 1000.01,
+      "tic_id": 50365310,
+      "status": "measured",
+      "offset_arcsec": 0.01862976817041656,
+      "significance_sigma": 0.592207645669073,
+      "sector": 34
+    }
+  ],
+  "total_candidates_with_real_centroid": 5,
+  "note": "This is a small, manually-run verification subset (UPGRADE_PLAN.md F.6), not full-catalog coverage. centroid_is_real=True on a candidate means its centroid_shift_max/has_centroid_dip came from an actual downloaded MAST TPF, not seed_db.py's fabricated demo values."
+}

@@ -1,0 +1,35 @@
+{
+  "methodology": "Compares RF held-out performance on the full labeled dataset against a subset of TOIs whose `toi_created` timestamp predates the Gaia EDR3 release (2020-12-03) -- these targets' initial TOI catalog entry could not have been informed by Gaia (E)DR3 astrometry/RUWE. Each subset is independently split 80/20 (same methodology, seed, and RF hyperparameters as train_and_serialize_model.py) and evaluated on its own held-out test fold, not a shared test set reused across subsets.",
+  "caveat": "`tfopwg_disp` in this dataset snapshot reflects the CURRENT disposition value, not the disposition at the time of TOI creation -- a target created before Gaia EDR3 may have had its disposition revised afterward using Gaia data. This ablation measures a real but imperfect proxy for the leakage question, not a guarantee that pre-EDR3-created targets were never touched by Gaia-informed vetting. A clean-label holdout using only RV-mass-confirmed planets (attempted separately -- see leakage_rv_confirmed_report.json if present) is the stronger test the plan also asks for. See LIMITATIONS.md Section 1.1.",
+  "gaia_edr3_release_date": "2020-12-03",
+  "results": [
+    {
+      "subset": "full_dataset",
+      "n": 2667,
+      "test_size": 534,
+      "accuracy": 0.8502,
+      "roc_auc": 0.9237,
+      "f1_score": 0.8519,
+      "brier_score": 0.1127
+    },
+    {
+      "subset": "pre_gaia_edr3_toi_created",
+      "n": 1527,
+      "test_size": 306,
+      "accuracy": 0.866,
+      "roc_auc": 0.9399,
+      "f1_score": 0.8664,
+      "brier_score": 0.1008
+    },
+    {
+      "subset": "post_gaia_edr3_toi_created",
+      "n": 1140,
+      "test_size": 228,
+      "accuracy": 0.864,
+      "roc_auc": 0.9156,
+      "f1_score": 0.8681,
+      "brier_score": 0.123
+    }
+  ],
+  "generated_at": "2026-08-11T11:12:38.846011+00:00"
+}

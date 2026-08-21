@@ -1,0 +1,207 @@
+/*
+  Design tokens (UPGRADE_PLAN.md H.2). Single source of truth for color, type,
+  spacing, radius, and elevation -- every component should reference these custom
+  properties (directly, or via the Tailwind theme.extend mapping in
+  tailwind.config.js) rather than hardcoding hex/px values. Three themes switch by
+  setting `data-theme` on `<html>`: "light" (daytime control-room use), "dark"
+  (default), and "red-night" (telescope-side night-vision -- near-black background,
+  red-only text/accents, no blue light at all, a real functional requirement for
+  this user base).
+
+  Visual direction (2026-08-13, by explicit user request): modern SaaS dashboard --
+  generous whitespace, soft shadows, rounded corners, a lighter and more
+  approachable feel (Linear / Vercel / Notion / Stripe dashboard as the actual
+  visual model), a deliberate move away from the denser "instrument panel" look
+  this token set originally shipped with. Red-night is exempted from the shadow/
+  warmth treatment -- it stays flat and utilitarian, since visual "elegance" is not
+  the goal there, preserving night vision is.
+*/
+
+:root {
+  /* ---- Neutral ramp (10 steps, light-mode values) ---- */
+  --gray-50:  #f8fafc;
+  --gray-100: #eef2f7;
+  --gray-200: #dde3ec;
+  --gray-300: #c3ccd9;
+  --gray-400: #9aa7ba;
+  --gray-500: #71808f;
+  --gray-600: #4f5c6b;
+  --gray-700: #363f4c;
+  --gray-800: #232a34;
+  --gray-900: #151a21;
+  --gray-950: #0b0e13;
+
+  /* ---- Structural surfaces (mapped from the ramp; flip per theme below) ---- */
+  --color-background: var(--gray-50);
+  --color-surface:    #ffffff;
+  --color-surface-2:  var(--gray-100);
+  --color-border:     var(--gray-200);
+  --color-text:       var(--gray-900);
+  --color-text-muted: var(--gray-600);
+  --color-accent:     #4f46e5;
+  --color-accent-text: #ffffff;
+
+  /* ---- Semantic: health grade A-F -- sequential, colorblind-safe (validated
+     against a deuteranopia/protanopia simulation; never a raw red-green traffic
+     light per H.2). Based on ColorBrewer's diverging-safe "RdYlBu"-family logic
+     but constrained to a single perceptual path (dark blue -> amber), not
+     red<->green, so a red/green colorblind viewer keeps the ordering. */
+  --grade-a: #1d4ed8;
+  --grade-b: #2f8fd1;
+  --grade-c: #7a8f4a;
+  --grade-d: #bd8128;
+  --grade-f: #b5482f;
+
+  /* ---- Semantic: alert severity (consistent across every surface) ---- */
+  --severity-critical: #b5482f;
+  --severity-high:     #bd8128;
+  --severity-medium:   #8a7a2b;
+  --severity-low:      var(--gray-500);
+
+  /* ---- Semantic: status pass/watch/risk (paired with icon/label, never color alone) ---- */
+  --status-pass: #1f7a5c;
+  --status-watch: #b8842a;
+  --status-risk: #b5482f;
+
+  /* ---- Type scale (px) -- one strict scale, used everywhere ---- */
+  --text-2xs: 11px;
+  --text-xs:  12px;
+  --text-sm:  13px;
+  --text-base: 14px;
+  --text-md:  16px;
+  --text-lg:  20px;
+  --text-xl:  28px;
+  --text-2xl: 40px;
+
+  /* ---- Spacing scale (4px base) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ---- Radius scale -- soft, modern, generous (raised from the original
+     "precise, technical" 4/6/8px scale per the modern-SaaS direction). ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* ---- Elevation -- soft shadows for resting cards (the modern-SaaS direction
+     explicitly wants depth here; the prior "borders only, shadows are for true
+     overlays" rule is relaxed for card elevation, kept for true overlays getting
+     a stronger one). Dark/red-night override these to something much more subtle
+     below -- soft light-style shadows read as muddy haloes on a dark background. */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 16px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 4px 8px rgba(15, 23, 42, 0.04), 0 16px 32px rgba(15, 23, 42, 0.08);
+}
+
+/* ---- Dark theme (default when the OS/browser prefers dark and no explicit
+   choice has been made, and whenever data-theme="dark" is set explicitly) ---- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="red-night"]) {
+    --color-background: var(--gray-950);
+    --color-surface:    var(--gray-900);
+    --color-surface-2:  var(--gray-800);
+    --color-border:     var(--gray-700);
+    --color-text:       var(--gray-50);
+    --color-text-muted: var(--gray-400);
+    --color-accent:     #818cf8;
+    --color-accent-text: #1e1b3a;
+
+    --grade-a: #818cf8;
+    --grade-b: #6fc0e0;
+    --grade-c: #a8c07a;
+    --grade-d: #e8b563;
+    --grade-f: #e2795c;
+
+    --severity-critical: #e2795c;
+    --severity-high:     #e8b563;
+    --severity-medium:   #c9b463;
+    --severity-low:      var(--gray-400);
+
+    --status-pass: #5fd9ab;
+    --status-watch: #e8c777;
+    --status-risk: #f39aa8;
+
+    /* Shadows barely read on a near-black surface -- depth comes from a subtle
+       border + a soft glow instead of a light-style drop shadow. */
+    --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 8px 16px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 16px 32px rgba(0, 0, 0, 0.4);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-background: var(--gray-950);
+  --color-surface:    var(--gray-900);
+  --color-surface-2:  var(--gray-800);
+  --color-border:     var(--gray-700);
+  --color-text:       var(--gray-50);
+  --color-text-muted: var(--gray-400);
+  --color-accent:     #818cf8;
+  --color-accent-text: #1e1b3a;
+
+  --grade-a: #818cf8;
+  --grade-b: #6fc0e0;
+  --grade-c: #a8c07a;
+  --grade-d: #e8b563;
+  --grade-f: #e2795c;
+
+  --severity-critical: #e2795c;
+  --severity-high:     #e8b563;
+  --severity-medium:   #c9b463;
+  --severity-low:      var(--gray-400);
+
+  --status-pass: #5fd9ab;
+  --status-watch: #e8c777;
+  --status-risk: #f39aa8;
+
+  --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 8px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 16px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* ---- Red/night-vision theme -- near-black background, red-only text/accents, no
+   blue light at all. A real, specific need for telescope-side use (H.2): every
+   other theme's colors are deliberately NOT referenced here, this palette stands
+   alone so no accidental blue-ish gray creeps in. Deliberately exempted from the
+   "soft shadow" modern-SaaS treatment -- flat and utilitarian is correct here. ---- */
+:root[data-theme="red-night"] {
+  --color-background: #0a0000;
+  --color-surface:    #150202;
+  --color-surface-2:  #200404;
+  --color-border:     #3a0808;
+  --color-text:       #ff3b30;
+  --color-text-muted: #e7352d;
+  --color-accent:     #ff5c4d;
+  --color-accent-text: #0a0000;
+
+  /* No hue variation available without reintroducing non-red light -- grade/severity
+     distinctions fall back to weight/opacity + the mandatory icon/label pairing
+     (H.1: color is never the only signal) rather than a color ramp in this theme. */
+  --grade-a: #ff5c4d;
+  --grade-b: #ff5c4d;
+  --grade-c: #d94436;
+  --grade-d: #b5342a;
+  --grade-f: #ff3b30;
+
+  --severity-critical: #ff3b30;
+  --severity-high:     #d94436;
+  --severity-medium:   #bd2c25;
+  --severity-low:      #7a1e1a;
+
+  --status-pass: #d94436;
+  --status-watch: #b5342a;
+  --status-risk: #ff3b30;
+
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+}

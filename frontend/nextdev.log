@@ -1,0 +1,73 @@
+npm warn Unknown user config "msvs_version". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> eefn-frontend@1.0.0 dev
+> next dev
+
+   ▲ Next.js 14.0.3
+   - Local:        http://localhost:3000
+
+npm warn Unknown env config "msvs-version". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "msvs_version". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+ ✓ Ready in 16.6s
+ ○ Compiling / ...
+ ✓ Compiled / in 22.5s (557 modules)
+ ✓ Compiled in 1941ms (285 modules)
+ ○ Compiling /candidates/[id] ...
+ ✓ Compiled /candidates/[id] in 1555ms (592 modules)
+ ○ Compiling /fusion ...
+ ✓ Compiled /fusion in 574ms (602 modules)
+ ○ Compiling /showcase ...
+ ✓ Compiled /showcase in 856ms (614 modules)
+ ○ Compiling /compare ...
+ ✓ Compiled /compare in 778ms (622 modules)
+ ○ Compiling /graph ...
+ ✓ Compiled /graph in 574ms (640 modules)
+ ○ Compiling /admin ...
+ ✓ Compiled /admin in 559ms (652 modules)
+ ✓ Compiled /predictions in 325ms (662 modules)
+ ○ Compiling /ai-analysis ...
+ ✓ Compiled /ai-analysis in 664ms (674 modules)
+ ○ Compiling /batch ...
+ ✓ Compiled /batch in 616ms (665 modules)
+ ○ Compiling /changes ...
+ ✓ Compiled /changes in 694ms (673 modules)
+ ✓ Compiled /about in 280ms (676 modules)
+ ✓ Compiled /demo in 306ms (678 modules)
+ ✓ Compiled /showcase in 219ms (343 modules)
+ ✓ Compiled /fusion in 283ms (318 modules)
+ ✓ Compiled in 863ms (354 modules)
+ ✓ Compiled in 326ms (354 modules)
+ ✓ Compiled in 500ms (354 modules)
+ ✓ Compiled in 435ms (354 modules)
+ ✓ Compiled in 751ms (641 modules)
+ ✓ Compiled in 516ms (656 modules)
+ ○ Compiling /compare ...
+ ✓ Compiled /compare in 3.1s (316 modules)
+ ○ Compiling /admin ...
+ ✓ Compiled /admin in 835ms (311 modules)
+ ✓ Compiled /compare in 359ms (309 modules)
+ ○ Compiling /graph ...
+ ✓ Compiled /graph in 1138ms (317 modules)
+ ○ Compiling /changes ...
+ ✓ Compiled /changes in 853ms (313 modules)
+ ✓ Compiled in 2.4s (658 modules)
+ ✓ Compiled in 1559ms (658 modules)
+ ✓ Compiled in 1701ms (658 modules)
+ ✓ Compiled in 1329ms (658 modules)
+ ✓ Compiled in 1559ms (658 modules)
+ ✓ Compiled in 1747ms (658 modules)
+ ✓ Compiled in 707ms (352 modules)
+ ✓ Compiled in 1207ms (352 modules)
+ ✓ Compiled in 471ms (352 modules)
+ ○ Compiling /candidates/[id] ...
+ ✓ Compiled /candidates/[id] in 655ms (325 modules)
+ ○ Compiling /demo ...
+ ✓ Compiled /demo in 587ms (327 modules)
+ ✓ Compiled /showcase in 107ms (328 modules)
+ ✓ Compiled /admin in 236ms (324 modules)
+ ✓ Compiled /ai-analysis in 263ms (326 modules)
+ ○ Compiling /about ...
+ ✓ Compiled /about in 826ms (334 modules)
+ ✓ Compiled in 3s (664 modules)
+ ○ Compiling /candidates/[id] ...
+ ✓ Compiled /candidates/[id] in 1561ms (334 modules)

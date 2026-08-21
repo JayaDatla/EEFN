@@ -1,0 +1,193 @@
+DeepLearningVettingEngine failed to load D:\Gemini_Projects\EXO\backend\app\ml\model_weights.pth: Checkpoint architecture_version 'exofusion-net-v2.4branch.28feat.3ch-centroid.3' does not match current model architecture_version 'exofusion-net-v2.4branch.28feat.3ch-centroid.3class-real.1'.. Serving degraded (untrained) output -- every API/UI consumer must surface model_status.
+
+=== Label 0 (Planet Transit) ===
+  60 real KOI rows matched (requested up to 60).
+  [1/60] KIC 10797460 ... ok (64814 real cadences).
+  [2/60] KIC 10797460 ... ok (64814 real cadences).
+  [3/60] KIC 10854555 ... C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\lightkurve\prf\__init__.py:7: UserWarning: Warning: the tpfmodel submodule is not available without oktopus installed, which requires a current version of autograd. See #1452 for details.
+  warnings.warn(
+WARNING: File may have been truncated: actual file length (458752) is smaller than the expected size (498240) [astropy.io.fits.file]
+WARNING: File may have been truncated: actual file length (458752) is smaller than the expected size (498240) [astropy.io.fits.file]
+    fetch failed for KIC 10854555: Error in reading Data product C:\Users\Jai Surya\.cache\lightkurve\mastDownload\Kepler\kplr010854555_lc_Q001111111111111111\kplr010854555-2012277125453_llc.fits of type KeplerLightCurve .
+This file may be corrupt due to an interrupted download. Please remove it from your disk and try again.
+no real light curve available.
+  [4/60] KIC 10872983 ... ok (50107 real cadences).
+  [5/60] KIC 10872983 ... ok (50107 real cadences).
+  [6/60] KIC 10872983 ... ok (50107 real cadences).
+  [7/60] KIC 10910878 ... ok (51501 real cadences).
+  [8/60] KIC 11446443 ... ok (51970 real cadences).
+  [9/60] KIC 6922244 ... ok (65263 real cadences).
+  [10/60] KIC 10984090 ... ok (65264 real cadences).
+  [11/60] KIC 10526549 ... ok (64793 real cadences).
+  [12/60] KIC 10583066 ... ok (64793 real cadences).
+  [13/60] KIC 10601284 ... ok (64814 real cadences).
+  [14/60] KIC 10601284 ... ok (64814 real cadences).
+  [15/60] KIC 10601284 ... ok (64814 real cadences).
+  [16/60] KIC 10662202 ... ok (64792 real cadences).
+  [17/60] KIC 10682541 ... ok (50109 real cadences).
+  [18/60] KIC 11460018 ...     fetch failed for KIC 11460018: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Read timed out. (read timeout=None)
+no real light curve available.
+  [19/60] KIC 11507101 ...     fetch failed for KIC 11507101: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F78843890>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [20/60] KIC 10910878 ... ok (51501 real cadences).
+  [21/60] KIC 10910878 ... ok (51501 real cadences).
+  [22/60] KIC 10987985 ...     fetch failed for KIC 10987985: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F78843B10>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [23/60] KIC 11018648 ...     fetch failed for KIC 11018648: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F788439D0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [24/60] KIC 11018648 ...     fetch failed for KIC 11018648: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F4910>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [25/60] KIC 11138155 ...     fetch failed for KIC 11138155: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F4690>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [26/60] KIC 11153539 ...     fetch failed for KIC 11153539: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F4B90>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [27/60] KIC 9579641 ...     fetch failed for KIC 9579641: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F51D0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [28/60] KIC 11304958 ...     fetch failed for KIC 11304958: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F56D0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [29/60] KIC 11391957 ...     fetch failed for KIC 11391957: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F5BD0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [30/60] KIC 11403044 ...     fetch failed for KIC 11403044: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F60D0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [31/60] KIC 11414511 ...     fetch failed for KIC 11414511: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F65D0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [32/60] KIC 12110942 ...     fetch failed for KIC 12110942: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F6AD0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [33/60] KIC 12366084 ...     fetch failed for KIC 12366084: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F6FD0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [34/60] KIC 12366084 ...     fetch failed for KIC 12366084: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F74D0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [35/60] KIC 12404086 ...     fetch failed for KIC 12404086: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F79D0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [36/60] KIC 8395660 ...     fetch failed for KIC 8395660: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F7ED0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [37/60] KIC 9579641 ...     fetch failed for KIC 9579641: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F79D0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [38/60] KIC 11754553 ...     fetch failed for KIC 11754553: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F7B10>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [39/60] KIC 11754553 ...     fetch failed for KIC 11754553: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F7610>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [40/60] KIC 11754553 ...     fetch failed for KIC 11754553: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F7110>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [41/60] KIC 11812062 ...     fetch failed for KIC 11812062: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F6C10>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [42/60] KIC 11853255 ...     fetch failed for KIC 11853255: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F6710>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [43/60] KIC 11918099 ...     fetch failed for KIC 11918099: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F6210>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [44/60] KIC 11923270 ...     fetch failed for KIC 11923270: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F5D10>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [45/60] KIC 11960862 ...     fetch failed for KIC 11960862: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F5810>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [46/60] KIC 12020329 ...     fetch failed for KIC 12020329: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F5310>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [47/60] KIC 12066335 ...     fetch failed for KIC 12066335: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F4E10>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [48/60] KIC 12066335 ...     fetch failed for KIC 12066335: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F42D0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [49/60] KIC 12070811 ...     fetch failed for KIC 12070811: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F4A50>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [50/60] KIC 8395660 ...     fetch failed for KIC 8395660: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F78843750>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [51/60] KIC 3342970 ...     fetch failed for KIC 3342970: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F78842D50>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [52/60] KIC 3342970 ...     fetch failed for KIC 3342970: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F7767D950>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [53/60] KIC 12470844 ...     fetch failed for KIC 12470844: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F7CEC4050>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [54/60] KIC 12470844 ...     fetch failed for KIC 12470844: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F7CEC4A50>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [55/60] KIC 12644822 ...     fetch failed for KIC 12644822: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F7767D1D0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [56/60] KIC 2713049 ...     fetch failed for KIC 2713049: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F78843D90>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [57/60] KIC 3114167 ...     fetch failed for KIC 3114167: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F78843390>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [58/60] KIC 4139816 ...     fetch failed for KIC 4139816: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F4CD0>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [59/60] KIC 4139816 ...     fetch failed for KIC 4139816: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F4410>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  [60/60] KIC 8395660 ...     fetch failed for KIC 8395660: HTTPSConnectionPool(host='mast.stsci.edu', port=443): Max retries exceeded with url: /api/v0/invoke (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F4F50>: Failed to resolve 'mast.stsci.edu' ([Errno 11001] getaddrinfo failed)"))
+no real light curve available.
+  -> 18/60 real light curves usable for label 0.
+
+=== Label 1 (Eclipsing Binary) ===
+Traceback (most recent call last):
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 198, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\util\connection.py", line 60, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+               ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 488, in _make_request
+    raise new_e
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 464, in _make_request
+    self._validate_conn(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 1093, in _validate_conn
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 753, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 205, in _new_conn
+    raise NameResolutionError(self.host, self, e) from e
+urllib3.exceptions.NameResolutionError: <urllib3.connection.HTTPSConnection object at 0x0000017F789F5950>: Failed to resolve 'exoplanetarchive.ipac.caltech.edu' ([Errno 11001] getaddrinfo failed)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\adapters.py", line 644, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\util\retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='exoplanetarchive.ipac.caltech.edu', port=443): Max retries exceeded with url: /TAP/sync?query=SELECT+TOP+60+kepid%2Cra%2Cdec%2Ckoi_disposition%2Ckoi_fpflag_nt%2Ckoi_fpflag_ss%2Ckoi_fpflag_co%2Ckoi_fpflag_ec%2Ckoi_period%2Ckoi_duration%2Ckoi_time0bk%2Ckoi_depth%2Ckoi_steff%2Ckoi_srad%2Ckoi_slogg%2Ckoi_kepmag+FROM+cumulative+WHERE+koi_disposition%3D%27FALSE+POSITIVE%27+AND+%28koi_fpflag_ss%3D1+OR+koi_fpflag_co%3D1%29+AND+koi_period+IS+NOT+NULL+AND+koi_duration+IS+NOT+NULL+AND+koi_time0bk+IS+NOT+NULL&format=json (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F5950>: Failed to resolve 'exoplanetarchive.ipac.caltech.edu' ([Errno 11001] getaddrinfo failed)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Gemini_Projects\EXO\backend\validation\scripts\fetch_real_kepler_dataset.py", line 226, in <module>
+    run(args.per_class, args.sleep)
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Gemini_Projects\EXO\backend\validation\scripts\fetch_real_kepler_dataset.py", line 134, in run
+    rows = fetch_koi_rows(label, where, per_class)
+  File "D:\Gemini_Projects\EXO\backend\validation\scripts\fetch_real_kepler_dataset.py", line 73, in fetch_koi_rows
+    r = requests.get(NASA_TAP_URL, params={"query": query, "format": "json"}, timeout=30.0)
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\Jai Surya\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\adapters.py", line 677, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='exoplanetarchive.ipac.caltech.edu', port=443): Max retries exceeded with url: /TAP/sync?query=SELECT+TOP+60+kepid%2Cra%2Cdec%2Ckoi_disposition%2Ckoi_fpflag_nt%2Ckoi_fpflag_ss%2Ckoi_fpflag_co%2Ckoi_fpflag_ec%2Ckoi_period%2Ckoi_duration%2Ckoi_time0bk%2Ckoi_depth%2Ckoi_steff%2Ckoi_srad%2Ckoi_slogg%2Ckoi_kepmag+FROM+cumulative+WHERE+koi_disposition%3D%27FALSE+POSITIVE%27+AND+%28koi_fpflag_ss%3D1+OR+koi_fpflag_co%3D1%29+AND+koi_period+IS+NOT+NULL+AND+koi_duration+IS+NOT+NULL+AND+koi_time0bk+IS+NOT+NULL&format=json (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017F789F5950>: Failed to resolve 'exoplanetarchive.ipac.caltech.edu' ([Errno 11001] getaddrinfo failed)"))

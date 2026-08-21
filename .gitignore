@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+*.egg
+
+# Backend local dev database -- regenerable via `alembic upgrade head` +
+# `eefn sync` / seed_db.py, never committed (UPGRADE_PLAN.md D.5/D.1).
+backend/*.db
+backend/_alembic_*.db
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Playwright (H.4 e2e smoke tests) -- generated per-run artifacts
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
+frontend/screenshots/
+
+# Environment files (may contain secrets: API_KEY, DATABASE_URL, REDIS_URL)
+.env
+backend/.env
+
+# Historical planning docs, draft proposals, and one-off research/download
+# scripts (UPGRADE_PLAN.md D.5) -- not part of the shipped product. Kept on
+# disk (some, like scratch/download_real_sample_data.py, are still needed as
+# source material for Phase F.5) but excluded from version control. Disposition
+# to be finalized during Phase I OSS-release prep, not deleted now.
+project_dump/
+scratch/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db

@@ -1,0 +1,5 @@
+-r requirements.txt
+pytest==8.4.2
+requests-mock==1.12.1
+fakeredis==2.37.0
+lupa==2.8
