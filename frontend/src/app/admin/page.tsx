@@ -94,15 +94,12 @@ export default function AdminDashboard() {
   const formatTime = (iso: string | null) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "never");
 
   return (
-    <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn font-mono text-xs">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-5">
+    <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn text-xs">
+      <div className="section-heading">
         <div>
-          <h2 className="text-3xl font-display font-medium text-ink tracking-tight">
-            Pipeline Telemetry &amp; Admin
-          </h2>
-          <p className="text-sm text-muted mt-1">
-            Real per-source catalog health and pipeline run history -- no simulated data.
-          </p>
+          <p className="eyebrow">Operations / pipeline telemetry</p>
+          <h1>Pipeline Telemetry &amp; Admin</h1>
+          <p className="section-description">Real per-source catalog health and pipeline run history -- no simulated data.</p>
         </div>
         <button
           onClick={triggerPipelineSync}
@@ -139,8 +136,8 @@ export default function AdminDashboard() {
       )}
 
       <div className="surface-card p-5 flex flex-col gap-4">
-        <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-          <Layers className="h-4.5 w-4.5" /> PIPELINE RUN HISTORY
+        <h3 className="panel-title">
+          <Layers className="h-4.5 w-4.5" /> Pipeline run history
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left font-mono text-xs border-collapse">

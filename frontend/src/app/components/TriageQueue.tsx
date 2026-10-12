@@ -182,6 +182,23 @@ export default function TriageQueue() {
     return rows;
   }, [data, query, obsActive, onlyObservable, obsData]);
 
+  // Registry pulse: every figure is computed from the rows actually loaded -- nothing
+  // is estimated or filled in when a field is missing (a missing grade is just not counted).
+  const pulse = useMemo(() => {
+    if (!data.length) return null;
+    const grades: Record<string, number> = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+    let verified = 0, review = 0, flagged = 0, confSum = 0, confN = 0;
+    data.forEach(c => {
+      const g = (c.health_grade || "").toUpperCase();
+      if (g in grades) grades[g] += 1;
+      const st = healthStatus(c.health_grade, c.rade, c.evidence_consistency_score);
+      if (st === "pass") verified += 1; else if (st === "watch") review += 1; else flagged += 1;
+      if (typeof c.evidence_consistency_score === "number") { confSum += c.evidence_consistency_score; confN += 1; }
+    });
+    const graded = Object.values(grades).reduce((a, b) => a + b, 0);
+    return { grades, graded, verified, review, flagged, n: data.length, meanConf: confN ? confSum / confN : null };
+  }, [data]);
+
   const parentRef = useRef<HTMLDivElement>(null);
   const rowVirtualizer = useVirtualizer({
     count: filtered.length,
@@ -204,7 +221,7 @@ export default function TriageQueue() {
         title="Should I point a telescope at this tonight?"
         description="The full cross-matched TOI registry, server-paginated and virtualized -- sorted by follow-up priority by default. Set an observing site below to filter by real altitude, airmass, and moon separation for tonight."
         action={
-          <button onClick={load} className="inline-flex items-center gap-2 rounded-lg border border-accent/25 bg-accent/10 px-3 py-2 text-xs text-accent cursor-pointer">
+          <button onClick={load} className="btn-ghost">
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Sync registry
           </button>
         }
@@ -216,6 +233,46 @@ export default function TriageQueue() {
             {error}. No candidate data is shown below -- this is not a fallback, it is an empty result.
           </Callout>
         </div>
+      )}
+
+      {pulse && (
+        <section className="pulse" aria-label="Registry summary">
+          <div className="pulse-lead">
+            <span className="data-label">Registry</span>
+            <span className="display-figure">{(totalCount ?? pulse.n).toLocaleString()}</span>
+            <span className="pulse-note">cross-matched candidates</span>
+          </div>
+          <div className="pulse-fig">
+            <span className="data-label">Verified</span>
+            <strong>{Math.round((pulse.verified / pulse.n) * 100)}<small>%</small></strong>
+            <span className="pulse-note">{pulse.verified.toLocaleString()} of {pulse.n.toLocaleString()} loaded</span>
+          </div>
+          <div className="pulse-fig">
+            <span className="data-label">Need review</span>
+            <strong>{(pulse.review + pulse.flagged).toLocaleString()}</strong>
+            <span className="pulse-note">{pulse.review.toLocaleString()} review · {pulse.flagged.toLocaleString()} flagged</span>
+          </div>
+          <div className="pulse-fig">
+            <span className="data-label">Mean evidence confidence</span>
+            <strong>{pulse.meanConf != null ? Math.round(pulse.meanConf * 100) : "--"}<small>{pulse.meanConf != null ? "%" : ""}</small></strong>
+            <span className="pulse-note">across loaded candidates</span>
+          </div>
+          {pulse.graded > 0 && (
+            <div className="pulse-grades" role="img" aria-label={`Health grades: ${Object.entries(pulse.grades).map(([g, n]) => `${g} ${n}`).join(", ")}`}>
+              <div className="pulse-bar">
+                {Object.entries(pulse.grades).filter(([, n]) => n > 0).map(([g, n]) => (
+                  <span key={g} style={{ flexGrow: n, background: `var(--grade-${g.toLowerCase()})` }} title={`Grade ${g}: ${n}`} />
+                ))}
+              </div>
+              <div className="pulse-legend">
+                <span className="data-label">Health grade</span>
+                {Object.entries(pulse.grades).map(([g, n]) => (
+                  <span key={g} className="data-value"><i style={{ background: `var(--grade-${g.toLowerCase()})` }} />{g} <b>{n}</b></span>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
       )}
 
       <div className="surface-card mb-4 overflow-hidden">
@@ -234,21 +291,21 @@ export default function TriageQueue() {
             <div className="flex flex-wrap items-end gap-3">
               <label className="flex flex-col gap-1 text-2xs text-muted">
                 Latitude
-                <input value={obsLat} onChange={e => setObsLat(e.target.value)} placeholder="31.68" className="w-28 rounded-lg border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink outline-none" />
+                <input value={obsLat} onChange={e => setObsLat(e.target.value)} placeholder="31.68" className="w-28 rounded-md border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink outline-none" />
               </label>
               <label className="flex flex-col gap-1 text-2xs text-muted">
                 Longitude
-                <input value={obsLon} onChange={e => setObsLon(e.target.value)} placeholder="-110.88" className="w-28 rounded-lg border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink outline-none" />
+                <input value={obsLon} onChange={e => setObsLon(e.target.value)} placeholder="-110.88" className="w-28 rounded-md border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink outline-none" />
               </label>
               <label className="flex flex-col gap-1 text-2xs text-muted">
                 Elevation (m)
-                <input value={obsElevation} onChange={e => setObsElevation(e.target.value)} className="w-24 rounded-lg border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink outline-none" />
+                <input value={obsElevation} onChange={e => setObsElevation(e.target.value)} className="w-24 rounded-md border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink outline-none" />
               </label>
               <label className="flex flex-col gap-1 text-2xs text-muted">
                 Night of (UTC)
-                <input type="date" value={obsDate} onChange={e => setObsDate(e.target.value)} className="rounded-lg border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink outline-none" />
+                <input type="date" value={obsDate} onChange={e => setObsDate(e.target.value)} className="rounded-md border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink outline-none" />
               </label>
-              <button onClick={useMyLocation} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs text-ink cursor-pointer">
+              <button onClick={useMyLocation} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-2 px-3 py-1.5 text-xs text-ink cursor-pointer">
                 <MapPin size={12} /> Use my location
               </button>
               <button onClick={loadObservability} disabled={obsLoading} className="inline-flex items-center gap-1.5 rounded-lg border border-accent/25 bg-accent/10 px-3 py-1.5 text-xs text-accent cursor-pointer disabled:opacity-50">
@@ -273,7 +330,7 @@ export default function TriageQueue() {
       </div>
 
       <div className="surface-card overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-border p-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3 border-b border-hairline p-4 md:flex-row md:items-center md:justify-between">
           <div className="relative w-full max-w-sm">
             <Search size={16} className="absolute left-3 top-2.5 text-muted" />
             <input
@@ -281,7 +338,7 @@ export default function TriageQueue() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search within loaded page (name, TOI, TIC)"
-              className="w-full rounded-lg border border-border bg-surface-2 py-2 pl-9 pr-3 text-xs text-ink outline-none focus:border-accent/50"
+              className="w-full rounded-md border border-border bg-surface-2 py-2 pl-9 pr-3 text-xs text-ink outline-none focus:border-accent/50"
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -289,14 +346,14 @@ export default function TriageQueue() {
               aria-label="Sort by"
               value={sortBy}
               onChange={e => { setSortBy(e.target.value); setOffset(0); }}
-              className="rounded-lg border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink"
+              className="rounded-md border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink"
             >
               {SORT_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
             <button
               aria-label="Toggle sort direction"
               onClick={() => setSortDir(d => (d === "asc" ? "desc" : "asc"))}
-              className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink"
+              className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink"
             >
               <ArrowUpDown size={12} /> {sortDir === "desc" ? "High -> low" : "Low -> high"}
             </button>
@@ -304,7 +361,7 @@ export default function TriageQueue() {
               aria-label="Filter by disposition"
               value={dispositionFilter}
               onChange={e => { setDispositionFilter(e.target.value); setOffset(0); }}
-              className="rounded-lg border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink"
+              className="rounded-md border border-border bg-surface-2 px-2 py-1.5 text-xs text-ink"
             >
               <option value="">All dispositions</option>
               <option value="CP">CP</option>
@@ -319,7 +376,7 @@ export default function TriageQueue() {
           </div>
         </div>
 
-        <div className={`grid gap-0 border-b border-border bg-surface-2 px-5 py-3 text-2xs uppercase tracking-wider text-muted`} style={{ gridTemplateColumns: columns.replace(/_/g, " ") }}>
+        <div className="table-head grid gap-0 px-5 py-3" style={{ gridTemplateColumns: columns.replace(/_/g, " ") }}>
           <span>Candidate</span>
           <span>Disposition</span>
           {obsActive ? (
@@ -350,14 +407,14 @@ export default function TriageQueue() {
               return (
                 <div
                   key={c.toi_id}
-                  className="absolute left-0 top-0 grid w-full items-center gap-0 border-b border-border/60 px-5 text-xs transition-colors hover:bg-accent/5"
+                  className="absolute left-0 top-0 grid w-full items-center gap-0 row-line px-5 text-sm"
                   style={{ height: `${vRow.size}px`, transform: `translateY(${vRow.start}px)`, gridTemplateColumns: columns.replace(/_/g, " ").split(" ").join(" ") }}
                 >
                   <Link href={`/candidates/${c.toi_id}`} className="font-semibold text-ink hover:text-accent">
                     {c.pl_name}
-                    <span className="mt-1 block font-mono text-2xs font-normal text-muted">TIC {c.tic_id}</span>
+                    <span className="mt-1 block data-value text-2xs font-normal text-muted">TIC {c.tic_id}</span>
                   </Link>
-                  <span className="font-mono text-ink/80">{c.disposition}</span>
+                  <span className="data-value text-ink/80">{c.disposition}</span>
                   {obsActive ? (
                     obs ? (
                       <>
@@ -373,8 +430,8 @@ export default function TriageQueue() {
                     )
                   ) : (
                     <>
-                      <span className="text-muted">{Number(c.orbper).toFixed(3)} d</span>
-                      <span className={Number(c.rade) > 20 ? "text-severity-critical" : "text-muted"}>{Number(c.rade).toFixed(2)} R⊕</span>
+                      <span className="data-value text-muted">{Number(c.orbper).toFixed(3)} d</span>
+                      <span className={`data-value ${Number(c.rade) > 20 ? "text-severity-critical" : "text-muted"}`}>{Number(c.rade).toFixed(2)} R⊕</span>
                       <span><ConfidenceBadge score={c.evidence_consistency_score ?? 0.5} /></span>
                       <span><StatusIndicator status={healthStatus(c.health_grade, c.rade, c.evidence_consistency_score)} /></span>
                     </>
@@ -385,7 +442,7 @@ export default function TriageQueue() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-t border-border px-4 py-3">
+        <div className="flex items-center justify-between border-t border-hairline px-4 py-3">
           <span className="text-xs text-muted">
             Page {currentPage} of {totalPages ?? "?"} ({filtered.length} loaded)
           </span>
@@ -394,7 +451,7 @@ export default function TriageQueue() {
               aria-label="Previous page"
               disabled={offset === 0}
               onClick={() => setOffset(o => Math.max(o - PAGE_SIZE, 0))}
-              className="rounded border border-border p-1.5 disabled:opacity-30 cursor-pointer"
+              className="btn-icon"
             >
               <ChevronLeft size={15} />
             </button>
@@ -402,7 +459,7 @@ export default function TriageQueue() {
               aria-label="Next page"
               disabled={totalCount != null && offset + PAGE_SIZE >= totalCount}
               onClick={() => setOffset(o => o + PAGE_SIZE)}
-              className="rounded border border-border p-1.5 disabled:opacity-30 cursor-pointer"
+              className="btn-icon"
             >
               <ChevronRight size={15} />
             </button>

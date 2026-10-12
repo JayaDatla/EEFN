@@ -120,6 +120,14 @@ function generateSvgPath(time: number[], flux: number[], width: number, height: 
   return path;
 }
 
+// The backend returns dl_classification as an empty object (with a dl_model_status such as
+// "no_real_lightcurve" and an explanatory dl_note) when no real light curve has been
+// vetted for a candidate. {} is truthy, so a bare truthiness check then crashed the page
+// on Object.entries(...).reduce(...) -- treat "no output" explicitly.
+const hasDlOutput = (d: any): boolean =>
+  !!d && !!d.dl_classification && Object.keys(d.dl_classification).length > 0;
+
+
 export default function CandidateDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -924,105 +932,83 @@ export default function CandidateDetailPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn font-mono text-xs">
+    <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn text-xs">
       
       {/* Title */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-5">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => router.back()}
-            className="p-2 bg-surface-2 hover:bg-surface-2 border border-border rounded-lg text-muted hover:text-ink transition-all"
-          >
-            <ArrowLeft className="h-4 w-4" />
+      <header className="cand-head">
+        <div className="cand-head-main">
+          <button onClick={() => router.back()} className="cand-back" aria-label="Back to previous page">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back
           </button>
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-2xl font-display font-medium text-ink tracking-tight">
-                {planet.pl_name} Curation Audit File
-              </h2>
-              
-              {/* B7. Differentiated Classifications */}
-              <div className="flex gap-1.5 shrink-0">
-                <span className={`px-2 py-0.5 rounded font-mono font-bold text-[10px] ${
-                  planet.disposition === 'CP' ? 'bg-status-pass/10 text-status-pass border border-status-pass/20' :
-                  planet.disposition === 'FP' ? 'bg-severity-critical/10 text-severity-critical border border-severity-critical/20' :
-                  'bg-severity-high/10 text-severity-high border border-severity-high/20'
-                }`}>
-                  Archive Status: {planet.disposition === 'CP' ? 'CONFIRMED' : planet.disposition === 'FP' ? 'FALSE POSITIVE' : 'CANDIDATE'}
-                </span>
-                
-                <span className={`px-2 py-0.5 rounded font-mono font-bold text-[10px] ${
-                  isUnphysical || priorityScore < 0.3 ? 'bg-severity-critical/10 text-severity-critical border border-severity-critical/25 animate-pulse' :
-                  priorityScore > 0.7 ? 'bg-status-pass/10 text-status-pass border border-status-pass/20' :
-                  'bg-severity-high/10 text-severity-high border border-severity-high/20'
-                }`}>
-                  Model Curation: {isUnphysical || priorityScore < 0.3 ? 'HIGH FALSE POSITIVE RISK' : priorityScore > 0.7 ? 'LIKELY CONFIRMED' : 'REASSESS DETAILS'}
-                </span>
+          <p className="eyebrow">Evidence card / TIC {planet.tic_id}</p>
+          <h1 className="cand-name">{planet.pl_name}</h1>
+          <p className="section-description">Curation audit file: every catalog value, disagreement and model verdict behind this candidate.</p>
 
-                {/* UPGRADE_PLAN.md H.3.2: which model tier produced this score, and
-                    how many of the 7 catalogs actually contributed -- never presented
-                    as complete coverage when it isn't. */}
-                <span
-                  title={`Available: ${profile.model_tier.catalogs_available.join(", ")}. Missing: ${profile.model_tier.catalogs_missing.join(", ") || "none"}.`}
-                  className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-accent/10 text-accent border border-accent/20"
-                >
-                  Tier {profile.model_tier.tier} &middot; {profile.model_tier.catalogs_available.length}/{profile.model_tier.catalogs_total} catalogs
-                </span>
-              </div>
-            </div>
-            
-            {/* View Selection Toggle */}
-            <div className="flex gap-2 mt-2">
-              <button 
-                onClick={() => setActiveView('telemetry')}
-                className={`px-3 py-1 font-mono text-[10px] font-bold rounded-md transition-all border ${
-                  activeView === 'telemetry' ? 'bg-accent/15 border-accent/35 text-accent' : 'border-border text-muted hover:text-ink/80'
-                }`}
-              >
-                TELEMETRY & PROVENANCE
-              </button>
-              <button 
-                onClick={() => setActiveView('explorer')}
-                className={`px-3 py-1 font-mono text-[10px] font-bold rounded-md transition-all border flex items-center gap-1 ${
-                  activeView === 'explorer' ? 'bg-accent/15 border-accent/35 text-accent' : 'border-border text-muted hover:text-ink/80'
-                }`}
-              >
-                <Globe className="h-3 w-3" /> ASTRONOMICAL VISUALIZER
-              </button>
-              <button 
-                onClick={() => setActiveView('demo')}
-                className={`px-3 py-1 font-mono text-[10px] font-bold rounded-md transition-all border flex items-center gap-1 ${
-                  activeView === 'demo' ? 'bg-accent/15 border-accent/35 text-accent' : 'border-border text-muted hover:text-ink/80'
-                }`}
-              >
-                <BookOpen className="h-3 w-3" /> CONFERENCE DEMO MODE
-              </button>
-              <button 
-                onClick={() => setActiveView('pipeline')}
-                className={`px-3 py-1 font-mono text-[10px] font-bold rounded-md transition-all border flex items-center gap-1 ${
-                  activeView === 'pipeline' ? 'bg-accent/15 border-accent/35 text-accent' : 'border-border text-muted hover:text-ink/80'
-                }`}
-              >
-                <Sliders className="h-3 w-3" /> AI PIPELINE DIAGNOSTICS
-              </button>
-            </div>
+          {/* B7. Differentiated Classifications */}
+          <div className="cand-chips">
+            <span className={`cand-chip ${
+              planet.disposition === 'CP' ? 'bg-status-pass/10 text-status-pass border-status-pass/30' :
+              planet.disposition === 'FP' ? 'bg-severity-critical/10 text-severity-critical border-severity-critical/30' :
+              'bg-severity-high/10 text-severity-high border-severity-high/30'
+            }`}>
+              Archive status: {planet.disposition === 'CP' ? 'CONFIRMED' : planet.disposition === 'FP' ? 'FALSE POSITIVE' : 'CANDIDATE'}
+            </span>
+
+            <span className={`cand-chip ${
+              isUnphysical || priorityScore < 0.3 ? 'bg-severity-critical/10 text-severity-critical border-severity-critical/30' :
+              priorityScore > 0.7 ? 'bg-status-pass/10 text-status-pass border-status-pass/30' :
+              'bg-severity-high/10 text-severity-high border-severity-high/30'
+            }`}>
+              Model curation: {isUnphysical || priorityScore < 0.3 ? 'HIGH FALSE POSITIVE RISK' : priorityScore > 0.7 ? 'LIKELY CONFIRMED' : 'REASSESS DETAILS'}
+            </span>
+
+            {/* UPGRADE_PLAN.md H.3.2: which model tier produced this score, and
+                how many of the 7 catalogs actually contributed -- never presented
+                as complete coverage when it isn't. */}
+            <span
+              title={`Available: ${profile.model_tier.catalogs_available.join(", ")}. Missing: ${profile.model_tier.catalogs_missing.join(", ") || "none"}.`}
+              className="cand-chip bg-accent/10 text-accent border-accent/30"
+            >
+              Tier {profile.model_tier.tier} &middot; {profile.model_tier.catalogs_available.length}/{profile.model_tier.catalogs_total} catalogs
+            </span>
           </div>
         </div>
-        
-        <div className="bg-surface-2 border border-border p-3 rounded-lg flex gap-4 text-xs font-mono">
+
+        <dl className="cand-figures">
           <div>
-            <span className="text-muted block text-[10px] uppercase font-bold tracking-wider">Curation Score</span>
-            <span className={`text-base font-extrabold ${agreementScore > 0.85 ? 'text-status-pass' : (agreementScore < 0.5 ? 'text-severity-critical animate-pulse' : 'text-severity-high')}`}>
-              {(agreementScore * 100).toFixed(0)}% Score
-            </span>
+            <dt className="data-label">Curation score</dt>
+            <dd className={`${agreementScore > 0.85 ? 'text-status-pass' : (agreementScore < 0.5 ? 'text-severity-critical' : 'text-severity-high')}`}>
+              {(agreementScore * 100).toFixed(0)}<small>%</small>
+            </dd>
           </div>
-          <div className="border-l border-border pl-4">
-            <span className="text-muted block text-[10px] uppercase font-bold tracking-wider">RUWE Astrometric Noise</span>
-            <span className={`text-base font-extrabold ${agreement_metrics.ruwe && agreement_metrics.ruwe > 1.4 ? 'text-severity-critical' : 'text-ink/80'}`}>
+          <div>
+            <dt className="data-label">RUWE astrometric noise</dt>
+            <dd className={`${agreement_metrics.ruwe && agreement_metrics.ruwe > 1.4 ? 'text-severity-critical' : ''}`}>
               {agreement_metrics.ruwe ? `${agreement_metrics.ruwe.toFixed(3)}` : "N/A"}
-            </span>
+            </dd>
           </div>
-        </div>
+        </dl>
+      </header>
+
+      {/* View selection */}
+      <div className="cand-tabs" role="tablist" aria-label="Candidate views">
+        {([
+          ['telemetry', 'Telemetry & provenance', null],
+          ['explorer', 'Astronomical visualizer', <Globe key="g" className="h-3.5 w-3.5" />],
+          ['demo', 'Conference demo mode', <BookOpen key="b" className="h-3.5 w-3.5" />],
+          ['pipeline', 'AI pipeline diagnostics', <Sliders key="s" className="h-3.5 w-3.5" />],
+        ] as const).map(([key, label, icon]) => (
+          <button
+            key={key}
+            role="tab"
+            aria-selected={activeView === key}
+            onClick={() => setActiveView(key as typeof activeView)}
+            className={`cand-tab ${activeView === key ? 'is-active' : ''}`}
+          >
+            {icon}
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Main View */}
@@ -1039,7 +1025,7 @@ export default function CandidateDetailPage() {
               <span className={`font-mono text-[10px] font-bold uppercase tracking-wider ${isUnphysical ? 'text-severity-critical' : 'text-status-pass'}`}>
                 {isUnphysical ? 'CRITICAL RADIAL AUDIT ALERT: UNPHYSICAL PLANET SIZE' : 'RADIAL AUDIT PASSED: PHYSICAL PLANET SIZE'}
               </span>
-              <h4 className="text-lg font-display font-medium text-ink tracking-tight uppercase">Derived Planet Radius Audit</h4>
+              <h4 className="text-lg font-display font-medium text-ink tracking-tight">Derived Planet Radius Audit</h4>
               <p className="text-xs text-muted max-w-3xl leading-normal font-sans">
                 {isUnphysical 
                   ? "Recalculation of the planetary radius using Gaia DR3 host star specifications reveals that the transiting body is physically too large to be an exoplanet. This points to a secondary stellar companion (e.g. eclipsing binary star blend)." 
@@ -1153,8 +1139,8 @@ export default function CandidateDetailPage() {
             
             {/* Active Quality Alerts Card */}
             <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4">
-              <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-                <ShieldAlert className="h-4.5 w-4.5 text-severity-high" /> ACTIVE QUALITY DIAGNOSTIC ALERTS
+              <h3 className="panel-title">
+                <ShieldAlert className="h-4.5 w-4.5 text-severity-high" /> Active quality diagnostic alerts
               </h3>
               
               <div className="flex flex-col gap-3">
@@ -1229,8 +1215,8 @@ export default function CandidateDetailPage() {
 
             {/* Catalog Parameter Cross-Comparison Grid (B1 & B5) */}
             <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4">
-              <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-                <Database className="h-4.5 w-4.5" /> CROSS-CATALOG MEASUREMENT COMPARISONS (± UNCERTAINTIES)
+              <h3 className="panel-title">
+                <Database className="h-4.5 w-4.5" /> Cross-catalog measurement comparisons (± uncertainties)
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1291,8 +1277,8 @@ export default function CandidateDetailPage() {
 
             {/* Scientific Metadata Panel */}
             <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4">
-              <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-                <FileText className="h-4.5 w-4.5 text-accent" /> SCIENTIFIC METADATA PANEL
+              <h3 className="panel-title">
+                <FileText className="h-4.5 w-4.5 text-accent" /> Scientific metadata panel
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
@@ -1422,8 +1408,8 @@ export default function CandidateDetailPage() {
             
             {/* Curation Telemetry Card (B3 & B8) */}
             <div className="surface-card p-5 flex flex-col gap-4">
-              <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-                <CheckCircle2 className="h-4.5 w-4.5 text-accent" /> EVIDENCE HEALTH BREAKDOWN
+              <h3 className="panel-title">
+                <CheckCircle2 className="h-4.5 w-4.5 text-accent" /> Evidence health breakdown
               </h3>
 
               <div className="flex flex-col gap-3 font-mono text-xs text-muted">
@@ -1507,8 +1493,8 @@ export default function CandidateDetailPage() {
 
             {/* Timeline workflow history (B4) */}
             <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4 flex-1">
-              <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-                <GitPullRequest className="h-4.5 w-4.5 text-accent" /> TIMELINE & EVIDENCE PROVENANCE
+              <h3 className="panel-title">
+                <GitPullRequest className="h-4.5 w-4.5 text-accent" /> Timeline & evidence provenance
               </h3>
               
               <div className="flex flex-col gap-4 font-mono text-[10px] text-muted mt-2 pl-2">
@@ -1530,8 +1516,8 @@ export default function CandidateDetailPage() {
 
           {/* Database Provenance Table */}
           <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4 lg:col-span-3">
-            <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-              <Database className="h-4.5 w-4.5 text-accent" /> EVIDENCE PROVENANCE & DATABASE SIGNATURES
+            <h3 className="panel-title">
+              <Database className="h-4.5 w-4.5 text-accent" /> Evidence provenance & database signatures
             </h3>
             
             <div className="overflow-x-auto">
@@ -1580,7 +1566,7 @@ export default function CandidateDetailPage() {
             
             <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4">
               <div className="flex justify-between items-center border-b border-border pb-2">
-                <h3 className="font-bold text-xs text-accent uppercase font-mono tracking-wider flex items-center gap-1.5">
+                <h3 className="font-bold text-xs text-accent font-mono  flex items-center gap-1.5">
                   <Compass className="h-4 w-4" /> Sky View & Imagery
                 </h3>
                 <div className="flex gap-2">
@@ -1718,7 +1704,7 @@ export default function CandidateDetailPage() {
             {/* Neighborhood analysis card */}
             <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4">
               <div className="flex justify-between items-center border-b border-border pb-2.5">
-                <h3 className="font-bold text-xs text-accent uppercase tracking-wider font-mono flex items-center gap-1.5">
+                <h3 className="font-bold text-xs text-accent  font-mono flex items-center gap-1.5">
                   <Map className="h-4.5 w-4.5" /> Neighborhood Analysis
                 </h3>
                 <div className="flex gap-1 font-mono text-[10px]">
@@ -1792,7 +1778,7 @@ export default function CandidateDetailPage() {
             
             <div className="glass-panel p-5 rounded-xl shadow-xl flex-1 flex flex-col gap-4 relative">
               <div className="flex justify-between items-center border-b border-border pb-2.5 font-mono">
-                <h3 className="font-bold text-xs text-accent uppercase tracking-wider flex items-center gap-1.5">
+                <h3 className="font-bold text-xs text-accent  flex items-center gap-1.5">
                   <Globe className="h-4.5 w-4.5" /> 3D Galactic Space
                 </h3>
                 <div className="flex gap-1 text-[10px]">
@@ -1858,7 +1844,7 @@ export default function CandidateDetailPage() {
             {/* Transit Size Revision */}
             <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4">
               <div className="flex justify-between items-center border-b border-border pb-2.5">
-                <h3 className="font-bold text-xs text-accent uppercase tracking-wider font-mono flex items-center gap-1.5">
+                <h3 className="font-bold text-xs text-accent  font-mono flex items-center gap-1.5">
                   <Play className="h-4 w-4" /> Transit Size Revision
                 </h3>
                 <div className="flex gap-2">
@@ -1897,7 +1883,7 @@ export default function CandidateDetailPage() {
 
             {/* Scientific Story Mode */}
             <div className="glass-panel p-5 rounded-xl shadow-xl flex-1 flex flex-col gap-4">
-              <h3 className="font-bold text-xs text-accent border-b border-border pb-2.5 uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <h3 className="panel-title">
                 <GitPullRequest className="h-4.5 w-4.5" /> Scientific Story Mode
               </h3>
 
@@ -2081,8 +2067,8 @@ export default function CandidateDetailPage() {
           {/* Column 1: Interactive Simulation Parameters */}
           <div className="flex flex-col gap-6">
             <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4">
-              <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-                <Sliders className="h-4.5 w-4.5" /> SIMULATION TUNING CONTROLS
+              <h3 className="panel-title">
+                <Sliders className="h-4.5 w-4.5" /> Simulation tuning controls
               </h3>
               <p className="text-[10px] text-muted text-muted font-sans leading-normal font-sans">
                 Adjust the physical and noise parameters below to simulate how crowded stellar fields and detector noise contaminate the candidate's light curve, affecting the AI detection pipeline.
@@ -2175,11 +2161,11 @@ export default function CandidateDetailPage() {
             
             {/* SVG Charts Panel */}
             <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4">
-              <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center justify-between font-mono">
+              <h3 className="panel-title justify-between">
                 <span className="flex items-center gap-2">
-                  <Activity className="h-4.5 w-4.5 text-accent" /> TRANSIT SIGNAL VISUALIZATIONS
+                  <Activity className="h-4.5 w-4.5 text-accent" /> Transit signal visualizations
                 </span>
-                {isPipelineLoading && <span className="text-[10px] text-accent animate-pulse font-bold">RECALCULATING SIGNAL...</span>}
+                {isPipelineLoading && <span className="text-[10px] text-accent animate-pulse font-bold">Recalculating signal...</span>}
               </h3>
 
               {!pipelineData ? (
@@ -2467,8 +2453,8 @@ export default function CandidateDetailPage() {
                 
                 {/* Physical Metrics Section */}
                 <div className="flex flex-col gap-4">
-                  <h4 className="font-bold text-xs text-accent border-b border-border pb-2 flex items-center gap-1.5 font-mono">
-                    <FileText className="h-4 w-4" /> RECOVERED SIGNAL METRICS
+                  <h4 className="panel-title">
+                    <FileText className="h-4 w-4" /> Recovered signal metrics
                   </h4>
                   
                   <div className="flex flex-col gap-3 font-mono text-[11px] text-ink/80 mt-1">
@@ -2530,8 +2516,8 @@ export default function CandidateDetailPage() {
 
                 {/* AI Classification Probability Section */}
                 <div className="flex flex-col gap-4">
-                  <h4 className="font-bold text-xs text-accent border-b border-border pb-2 flex items-center gap-1.5 font-mono">
-                    <Wand2 className="h-4 w-4" /> AI CLASSIFIER PROBABILITIES
+                  <h4 className="panel-title">
+                    <Wand2 className="h-4 w-4" /> AI classifier probabilities
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2580,7 +2566,7 @@ export default function CandidateDetailPage() {
                           <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                           <span><strong>Untrained fallback network.</strong> The trained checkpoint failed to load for this architecture version, so this model is running on random, untrained weights. The percentages below are noise, not a prediction — do not use them for triage.</span>
                         </div>
-                      ) : pipelineData.dl_classification ? (
+                      ) : hasDlOutput(pipelineData) ? (
                         <div className="text-muted text-[10px] font-sans leading-normal">
                           {/* Was hardcoded "Synthetic-trained checkpoint... not a validated
                               classifier" -- went stale the moment the model was retrained on
@@ -2590,11 +2576,11 @@ export default function CandidateDetailPage() {
                               real accuracy (see DL Model page for the actual held-out
                               number) -- neither overclaimed nor understated here. */}
                           Trained on real Kepler light curves + real disposition labels (no synthetic light curve in this training set) — see the DL Model page for held-out accuracy before treating this as more than a modest first result.
-                          {pipelineData.dl_centroid_available === false && " Centroid branch has no real measurement for this candidate."}
+                          {pipelineData.centroid_measured === false && " No real centroid measurement exists for this candidate yet (the centroid check is reported separately from this score)."}
                         </div>
                       ) : null}
                       <div className="flex flex-col gap-2.5 font-mono text-[10px]">
-                        {pipelineData.dl_classification ? (
+                        {hasDlOutput(pipelineData) ? (
                           Object.entries(pipelineData.dl_classification).map(([name, prob]) => {
                             const pVal = prob as number;
                             const percentage = (pVal * 100).toFixed(1);
@@ -2619,7 +2605,7 @@ export default function CandidateDetailPage() {
                           })
                         ) : (
                           <div className="h-full flex items-center justify-center text-muted text-[10px] italic py-8">
-                            Deep Learning model outputs not available
+                            {pipelineData.dl_note || "Deep Learning model outputs not available"}
                           </div>
                         )}
                       </div>
@@ -2638,7 +2624,7 @@ export default function CandidateDetailPage() {
                       (a, b) => ((a[1] as number) > (b[1] as number) ? a : b)
                     )[0];
                     const dlDegraded = pipelineData.dl_model_status === "untrained_fallback";
-                    const highestDlClass = (pipelineData.dl_classification && !dlDegraded) ? Object.entries(pipelineData.dl_classification).reduce(
+                    const highestDlClass = (hasDlOutput(pipelineData) && !dlDegraded) ? Object.entries(pipelineData.dl_classification).reduce(
                       (a, b) => ((a[1] as number) > (b[1] as number) ? a : b)
                     )[0] : "Unknown";
 
@@ -2700,7 +2686,7 @@ export default function CandidateDetailPage() {
 
                         <div className="text-muted text-[10px] border-t border-border pt-2 flex flex-col gap-1 mt-1 font-mono">
                           <div>• HEURISTIC VERDICT: {highestClass} (Confidence: {(pipelineData.classification[highestClass] * 100).toFixed(0)}%)</div>
-                          <div>• PYTORCH VERDICT: {dlDegraded ? 'DEGRADED (untrained weights, excluded from consensus)' : `${highestDlClass} ${pipelineData.dl_classification ? `(Confidence: ${(pipelineData.dl_classification[highestDlClass] * 100).toFixed(0)}%)` : ''}`}</div>
+                          <div>• PYTORCH VERDICT: {dlDegraded ? 'DEGRADED (untrained weights, excluded from consensus)' : `${highestDlClass} ${hasDlOutput(pipelineData) ? `(Confidence: ${(pipelineData.dl_classification[highestDlClass] * 100).toFixed(0)}%)` : ''}`}</div>
                           <div>• GAIA PHYSICAL RADIUS CONSTRAINT: {isUnphysical ? 'INVALID SIZE (STARS & EBS ONLY)' : 'VALID SIZE (PLANETARY RANGE)'}</div>
                         </div>
                       </div>

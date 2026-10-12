@@ -8,6 +8,7 @@ import {
   BarChart3,
   Bell,
   Bot,
+  Database,
   GitCompare,
   GitFork,
   HelpCircle,
@@ -44,7 +45,7 @@ const navigationGroups = [
       // UPGRADE_PLAN.md H.3.10: renamed from "Validation" -- this page shows the deep
       // learning model's classification pathway. The old label implied more validation
       // than the page actually delivers.
-      { href: "/ai-analysis", label: "DL Model", icon: Activity },
+      { href: "/ai-analysis", label: "Light-Curve Vetting", icon: Activity },
     ],
   },
   {
@@ -59,6 +60,7 @@ const navigationGroups = [
 
 // De-emphasised: reference/context rather than a working destination.
 const secondaryNavigation = [
+  { href: "/data-pipeline", label: "Catalogs & Data Flow", icon: Database },
   { href: "/about", label: "What This Tool Does", icon: HelpCircle },
 ];
 
@@ -102,7 +104,16 @@ export default function AppSidebar() {
   return (
     <aside className="app-sidebar">
       <Link href="/" className="brand" aria-label="EEFN mission overview">
-        <img src="/logo.png" alt="EEFN Logo" className="h-8 md:h-10 w-auto object-contain rounded-md" />
+        <svg className="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <circle cx="20" cy="20" r="17.5" stroke="currentColor" strokeWidth="1" opacity="0.45" />
+          <ellipse cx="20" cy="20" rx="17.5" ry="6.5" transform="rotate(-28 20 20)" stroke="currentColor" strokeWidth="1" opacity="0.9" />
+          <circle cx="20" cy="20" r="3.4" fill="currentColor" />
+          <circle cx="33.2" cy="12.4" r="1.9" fill="currentColor" />
+        </svg>
+        <span className="brand-text">
+          <strong>EEFN</strong>
+          <small>Evidence Fusion Network</small>
+        </span>
       </Link>
 
       <div className="mission-tag">

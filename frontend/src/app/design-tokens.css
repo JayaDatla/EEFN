@@ -8,65 +8,66 @@
   red-only text/accents, no blue light at all, a real functional requirement for
   this user base).
 
-  Visual direction (2026-08-13, by explicit user request): modern SaaS dashboard --
-  generous whitespace, soft shadows, rounded corners, a lighter and more
-  approachable feel (Linear / Vercel / Notion / Stripe dashboard as the actual
-  visual model), a deliberate move away from the denser "instrument panel" look
-  this token set originally shipped with. Red-night is exempted from the shadow/
-  warmth treatment -- it stays flat and utilitarian, since visual "elegance" is not
-  the goal there, preserving night vision is.
+  Visual direction (2026-10, explicit user request -- "Observatory editorial"): a deep
+  ink-navy canvas (warm "paper" in light), one starlight-gold accent, a large light
+  serif for headlines and figures, hairline borders instead of heavy shadows, and a
+  faint ambient glow plus film grain for depth. Red-night is exempt from all
+  decoration (no glow, no grain, no shadows) -- preserving night vision is the goal.
 */
 
 :root {
-  /* ---- Typefaces: display (page headlines) / body (Inter, unchanged) / mono
-     (genuine data values and codes only -- see globals.css .section-heading h1 for
-     the reasoning). Design pass 2026-08-21. ---- */
-  --font-display: 'Newsreader', Georgia, 'Iowan Old Style', serif;
+  /* ---- Typefaces (2026-10 "Observatory editorial" redesign): Newsreader display
+     serif for headlines and big figures, Geist for UI text, Geist Mono for genuine
+     data (IDs, coordinates, timestamps, tabular numbers). ---- */
+  --font-display: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-data: 'Geist Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
-  /* ---- Neutral ramp (10 steps, light-mode values) ---- */
-  --gray-50:  #f8fafc;
-  --gray-100: #eef2f7;
-  --gray-200: #dde3ec;
-  --gray-300: #c3ccd9;
-  --gray-400: #9aa7ba;
-  --gray-500: #71808f;
-  --gray-600: #4f5c6b;
-  --gray-700: #363f4c;
-  --gray-800: #232a34;
-  --gray-900: #151a21;
-  --gray-950: #0b0e13;
+  /* ---- Neutral ramp, light "paper" theme: one warm family, never mixed with cool ---- */
+  --gray-50:  #f6f3ec;
+  --gray-100: #eeeadf;
+  --gray-200: #e0dbcd;
+  --gray-300: #cbc5b3;
+  --gray-400: #a29b88;
+  --gray-500: #7a7464;
+  --gray-600: #565142;
+  --gray-700: #3a3629;
+  --gray-800: #25221a;
+  --gray-900: #17150f;
+  --gray-950: #0d0c08;
 
-  /* ---- Structural surfaces (mapped from the ramp; flip per theme below) ---- */
+  /* ---- Structural surfaces (flip per theme below) ---- */
   --color-background: var(--gray-50);
-  --color-surface:    #ffffff;
+  --color-surface:    #fbf9f4;
   --color-surface-2:  var(--gray-100);
   --color-border:     var(--gray-200);
+  --color-hairline:   rgba(23, 21, 15, 0.08);
   --color-text:       var(--gray-900);
   --color-text-muted: var(--gray-600);
-  --color-accent:     #4f46e5;
-  --color-accent-text: #ffffff;
+  --color-accent:     #8a5a12;
+  --color-accent-text: #fbf9f4;
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 11%, transparent);
+  --color-glow:       rgba(138, 90, 18, 0.10);
+  --grain-opacity:    0.035;
 
-  /* ---- Semantic: health grade A-F -- sequential, colorblind-safe (validated
-     against a deuteranopia/protanopia simulation; never a raw red-green traffic
-     light per H.2). Based on ColorBrewer's diverging-safe "RdYlBu"-family logic
-     but constrained to a single perceptual path (dark blue -> amber), not
-     red<->green, so a red/green colorblind viewer keeps the ordering. */
-  --grade-a: #1d4ed8;
-  --grade-b: #2f8fd1;
-  --grade-c: #7a8f4a;
-  --grade-d: #bd8128;
-  --grade-f: #b5482f;
+  /* ---- Semantic: health grade A-F -- one perceptual path (deep blue -> orange),
+     never red<->green, so a red/green colorblind viewer keeps the ordering. ---- */
+  --grade-a: #1f4fb0;
+  --grade-b: #2a82b8;
+  --grade-c: #6f8a45;
+  --grade-d: #b8741e;
+  --grade-f: #a8412a;
 
   /* ---- Semantic: alert severity (consistent across every surface) ---- */
-  --severity-critical: #b5482f;
-  --severity-high:     #bd8128;
-  --severity-medium:   #8a7a2b;
+  --severity-critical: #a8412a;
+  --severity-high:     #b8741e;
+  --severity-medium:   #857528;
   --severity-low:      var(--gray-500);
 
   /* ---- Semantic: status pass/watch/risk (paired with icon/label, never color alone) ---- */
   --status-pass: #1f7a5c;
-  --status-watch: #b8842a;
-  --status-risk: #b5482f;
+  --status-watch: #a8741a;
+  --status-risk: #a8412a;
 
   /* ---- Type scale (px) -- one strict scale, used everywhere ---- */
   --text-2xs: 11px;
@@ -90,44 +91,59 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* ---- Radius scale -- soft, modern, generous (raised from the original
-     "precise, technical" 4/6/8px scale per the modern-SaaS direction). ---- */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  /* ---- Radius scale -- editorial, not bubbly: tight on controls, softer on panels. ---- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 18px;
 
-  /* ---- Elevation -- soft shadows for resting cards (the modern-SaaS direction
-     explicitly wants depth here; the prior "borders only, shadows are for true
-     overlays" rule is relaxed for card elevation, kept for true overlays getting
-     a stronger one). Dark/red-night override these to something much more subtle
-     below -- soft light-style shadows read as muddy haloes on a dark background. */
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 16px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 4px 8px rgba(15, 23, 42, 0.04), 0 16px 32px rgba(15, 23, 42, 0.08);
+  /* ---- Elevation: depth comes from hairlines + a faint top highlight, with a soft
+     tinted shadow only for true overlays. ---- */
+  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 1px 2px rgba(60, 45, 20, 0.06);
+  --shadow-md: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 6px 18px rgba(60, 45, 20, 0.08);
+  --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 18px 40px rgba(60, 45, 20, 0.12);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ---- Dark theme (default when the OS/browser prefers dark and no explicit
    choice has been made, and whenever data-theme="dark" is set explicitly) ---- */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]):not([data-theme="red-night"]) {
-    --color-background: var(--gray-950);
-    --color-surface:    var(--gray-900);
-    --color-surface-2:  var(--gray-800);
-    --color-border:     var(--gray-700);
-    --color-text:       var(--gray-50);
-    --color-text-muted: var(--gray-400);
-    --color-accent:     #818cf8;
-    --color-accent-text: #1e1b3a;
+    --gray-50:  #f3efe6;
+    --gray-100: #e4dfd3;
+    --gray-200: #c9c6c2;
+    --gray-300: #a7aebd;
+    --gray-400: #8f98ab;
+    --gray-500: #6c758a;
+    --gray-600: #4d566b;
+    --gray-700: #2f384d;
+    --gray-800: #1c2335;
+    --gray-900: #111726;
+    --gray-950: #080b12;
 
-    --grade-a: #818cf8;
+    --color-background: #080b12;
+    --color-surface:    #0d121d;
+    --color-surface-2:  #131a29;
+    --color-border:     #212a3f;
+    --color-hairline:   rgba(235, 230, 219, 0.075);
+    --color-text:       #ece7dc;
+    --color-text-muted: #8f98ab;
+    --color-accent:     #e7c98a;
+    --color-accent-text: #1a1408;
+    --color-accent-soft: color-mix(in srgb, var(--color-accent) 11%, transparent);
+    --color-glow:       rgba(231, 201, 138, 0.07);
+    --grain-opacity:    0.05;
+
+    --grade-a: #8db0f0;
     --grade-b: #6fc0e0;
     --grade-c: #a8c07a;
-    --grade-d: #e8b563;
+    --grade-d: #e59a5c;
     --grade-f: #e2795c;
 
     --severity-critical: #e2795c;
-    --severity-high:     #e8b563;
+    --severity-high:     #e59a5c;
     --severity-medium:   #c9b463;
     --severity-low:      var(--gray-400);
 
@@ -135,42 +151,56 @@
     --status-watch: #e8c777;
     --status-risk: #f39aa8;
 
-    /* Shadows barely read on a near-black surface -- depth comes from a subtle
-       border + a soft glow instead of a light-style drop shadow. */
-    --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 8px 16px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 16px 32px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 10px 24px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 24px 48px rgba(0, 0, 0, 0.5);
   }
 }
 
 :root[data-theme="dark"] {
-  --color-background: var(--gray-950);
-  --color-surface:    var(--gray-900);
-  --color-surface-2:  var(--gray-800);
-  --color-border:     var(--gray-700);
-  --color-text:       var(--gray-50);
-  --color-text-muted: var(--gray-400);
-  --color-accent:     #818cf8;
-  --color-accent-text: #1e1b3a;
+  --gray-50:  #f3efe6;
+  --gray-100: #e4dfd3;
+  --gray-200: #c9c6c2;
+  --gray-300: #a7aebd;
+  --gray-400: #8f98ab;
+  --gray-500: #6c758a;
+  --gray-600: #4d566b;
+  --gray-700: #2f384d;
+  --gray-800: #1c2335;
+  --gray-900: #111726;
+  --gray-950: #080b12;
 
-  --grade-a: #818cf8;
+  --color-background: #080b12;
+  --color-surface:  #0d121d;
+  --color-surface-2:  #131a29;
+  --color-border:   #212a3f;
+  --color-hairline:   rgba(235, 230, 219, 0.075);
+  --color-text:     #ece7dc;
+  --color-text-muted: #8f98ab;
+  --color-accent:   #e7c98a;
+  --color-accent-text: #1a1408;
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 11%, transparent);
+  --color-glow:     rgba(231, 201, 138, 0.07);
+  --grain-opacity:  0.05;
+
+  --grade-a: #8db0f0;
   --grade-b: #6fc0e0;
   --grade-c: #a8c07a;
-  --grade-d: #e8b563;
+  --grade-d: #e59a5c;
   --grade-f: #e2795c;
 
   --severity-critical: #e2795c;
-  --severity-high:     #e8b563;
+  --severity-high:   #e59a5c;
   --severity-medium:   #c9b463;
-  --severity-low:      var(--gray-400);
+  --severity-low:    var(--gray-400);
 
   --status-pass: #5fd9ab;
   --status-watch: #e8c777;
   --status-risk: #f39aa8;
 
-  --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 8px 16px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 16px 32px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 10px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 24px 48px rgba(0, 0, 0, 0.5);
 }
 
 /* ---- Red/night-vision theme -- near-black background, red-only text/accents, no
@@ -205,6 +235,11 @@
   --status-pass: #d94436;
   --status-watch: #b5342a;
   --status-risk: #ff3b30;
+
+  --color-hairline:   rgba(255, 59, 48, 0.18);
+  --color-accent-soft: rgba(255, 92, 77, 0.10);
+  --color-glow:       transparent;
+  --grain-opacity:    0;
 
   --shadow-sm: none;
   --shadow-md: none;

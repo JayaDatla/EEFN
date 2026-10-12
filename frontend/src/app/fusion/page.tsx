@@ -120,22 +120,19 @@ export default function FusionDashboard() {
 
   return (
     <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-5">
+      <div className="section-heading">
         <div>
-          <h2 className="text-3xl font-display font-medium text-ink tracking-tight">
-            Catalog Metric Fusion Workspace
-          </h2>
-          <p className="text-sm text-muted mt-1">
-            Real parameter alignment between Gaia DR3 and the TOI catalog, for the {profiles.length || "--"} candidates currently loaded.
-          </p>
+          <p className="eyebrow">Evidence / catalog fusion</p>
+          <h1>Catalog Metric Fusion Workspace</h1>
+          <p className="section-description">Real parameter alignment between Gaia DR3 and the TOI catalog, for the {profiles.length || "--"} candidates currently loaded.</p>
         </div>
       </div>
 
       {error && <Callout tone="critical" title="Backend unavailable">{error}. No fusion data is shown -- this is not a fallback, it is an empty result.</Callout>}
 
       <div className="surface-card p-5 flex flex-col gap-4">
-        <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-          <BarChart3 className="h-4.5 w-4.5" /> CATALOG CONSENSUS (this page's loaded sample, not the full registry)
+        <h3 className="panel-title">
+          <BarChart3 className="h-4.5 w-4.5" /> Catalog consensus (this page's loaded sample, not the full registry)
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ConsensusDial label="Radius Consensus" value={radConsensus} measuredCount={withRad.length} detail={`Stellar radii agreeing within ${RAD_THRESHOLD} R_sun (the real alert threshold). Candidates with no Gaia match are excluded, not counted as agreeing.`} />
@@ -146,8 +143,8 @@ export default function FusionDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="surface-card p-5 flex flex-col gap-4">
-          <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-            <Scale className="h-4 w-4" /> STELLAR RADIUS CROSS-CHECK (R_sun)
+          <h3 className="panel-title">
+            <Scale className="h-4 w-4" /> Stellar radius cross-check (R_sun)
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-xs">
@@ -194,8 +191,8 @@ export default function FusionDashboard() {
         </div>
 
         <div className="surface-card p-5 flex flex-col gap-4">
-          <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-            <Scale className="h-4 w-4" /> STELLAR DISTANCE CROSS-CHECK (pc)
+          <h3 className="panel-title">
+            <Scale className="h-4 w-4" /> Stellar distance cross-check (pc)
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-xs">

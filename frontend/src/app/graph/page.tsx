@@ -261,7 +261,7 @@ export default function IdentityResolutionCenter() {
   };
 
   return (
-    <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn font-mono text-xs">
+    <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn text-xs">
 
       {graphError && (
         <Callout tone="critical" title="Backend unavailable">
@@ -284,14 +284,11 @@ export default function IdentityResolutionCenter() {
       </Callout>
 
       {/* Title */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-5">
+      <div className="section-heading">
         <div>
-          <h2 className="text-3xl font-display font-medium text-ink tracking-tight">
-            Identity Resolution Center
-          </h2>
-          <p className="text-sm text-muted mt-1">
-            Audit cross-catalog object identity, provenance, and match confidence.
-          </p>
+          <p className="eyebrow">Evidence / identity resolution</p>
+          <h1>Identity Resolution Center</h1>
+          <p className="section-description">Audit cross-catalog object identity, provenance, and match confidence.</p>
         </div>
 
         {/* Search Bar - Functional */}
@@ -391,8 +388,8 @@ export default function IdentityResolutionCenter() {
 
           {/* A6. Identity Risks Panel */}
           <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-3">
-            <h4 className="font-bold text-xs text-accent border-b border-border pb-2 flex items-center gap-1.5">
-              <AlertTriangle className="h-4 w-4 text-severity-high" /> IDENTITY VALIDITY RISKS
+            <h4 className="panel-title">
+              <AlertTriangle className="h-4 w-4 text-severity-high" /> Identity validity risks
             </h4>
             
             <div className="flex flex-col gap-2.5">
@@ -423,7 +420,7 @@ export default function IdentityResolutionCenter() {
           
           {/* A4. Match Confidence Breakdown */}
           <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4">
-            <h4 className="font-bold text-xs text-accent border-b border-border pb-2.5 uppercase tracking-wider font-mono flex items-center gap-1.5">
+            <h4 className="panel-title">
               <ShieldCheck className="h-4.5 w-4.5 text-accent" /> Catalog Linkage Confidence Breakdown
             </h4>
             
@@ -461,7 +458,7 @@ export default function IdentityResolutionCenter() {
 
           {/* A5. Ambiguous Match Detector */}
           <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-3">
-            <h4 className="font-bold text-xs text-accent border-b border-border pb-2.5 uppercase tracking-wider font-mono flex items-center gap-1.5">
+            <h4 className="panel-title">
               <Activity className="h-4.5 w-4.5 text-accent" /> Ambiguous Match Detector
             </h4>
             
@@ -737,7 +734,7 @@ export default function IdentityResolutionCenter() {
 
             {/* Right: Technical Inspector Panel */}
             <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4 border border-border">
-              <h4 className="font-bold text-accent border-b border-border pb-2.5 uppercase tracking-wider font-mono">
+              <h4 className="panel-title">
                 Catalog Node Attributes
               </h4>
               

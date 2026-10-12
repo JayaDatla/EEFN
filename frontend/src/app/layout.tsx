@@ -29,11 +29,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
+        <a href="#main-content" className="skip-link">Skip to content</a>
         <ThemeProvider>
           <AppSidebar />
           <div className="app-frame">
             <TelemetryBar />
-            <main className="app-main">{children}</main>
+            <main id="main-content" className="app-main">{children}</main>
           </div>
         </ThemeProvider>
       </body>

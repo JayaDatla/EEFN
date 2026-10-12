@@ -135,17 +135,14 @@ export default function ComparePage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn font-mono text-xs">
+    <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn text-xs">
       
       {/* Header & Target Selectors */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-5">
+      <div className="section-heading">
         <div>
-          <h2 className="text-3xl font-display font-medium text-ink tracking-tight flex items-center gap-2">
-            <Scale className="h-7 w-7 text-accent" /> Side-by-Side Comparison Workspace
-          </h2>
-          <p className="text-sm text-muted mt-1">
-            Examine and align two candidates simultaneously to identify target blending.
-          </p>
+          <p className="eyebrow">Evidence / side-by-side</p>
+          <h1>Side-by-Side Comparison Workspace</h1>
+          <p className="section-description">Examine and align two candidates simultaneously to identify target blending.</p>
         </div>
         
         {/* Selector Inputs */}
@@ -231,7 +228,7 @@ export default function ComparePage() {
 
       {/* SECTION B: CATALOG AGREEMENT COMPARISON */}
       <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4">
-        <h3 className="font-bold text-xs text-accent border-b border-border pb-2.5 uppercase tracking-wider">
+        <h3 className="panel-title">
           Catalog Parameter Comparisons
         </h3>
         
@@ -246,7 +243,7 @@ export default function ComparePage() {
           </thead>
           <tbody className="divide-y divide-slate-900/60 text-ink/80">
             <tr>
-              <td className="p-3 font-bold">{"Effective Temperature ($T_{eff}$)"}</td>
+              <td className="p-3 font-bold">Effective temperature (T_eff)</td>
               <td className="p-3">{profileA.star.teff ? `${profileA.star.teff.toFixed(0)} K` : 'N/A'}</td>
               <td className="p-3">{profileB.star.teff ? `${profileB.star.teff.toFixed(0)} K` : 'N/A'}</td>
               <td className="p-3 text-right font-bold text-accent">
@@ -254,7 +251,7 @@ export default function ComparePage() {
               </td>
             </tr>
             <tr>
-              <td className="p-3 font-bold">Host Star Radius ($R_\odot$)</td>
+              <td className="p-3 font-bold">Host star radius (R_sun)</td>
               <td className="p-3">{profileA.star.rad ? `${profileA.star.rad.toFixed(3)} R_☉` : 'N/A'}</td>
               <td className="p-3">{profileB.star.rad ? `${profileB.star.rad.toFixed(3)} R_☉` : 'N/A'}</td>
               <td className="p-3 text-right font-bold text-accent">
@@ -308,7 +305,7 @@ export default function ComparePage() {
 
       {/* SECTION D: 3D POSITION IN GALACTIC SPACE */}
       <div className="glass-panel p-5 rounded-xl shadow-xl flex flex-col gap-4 relative">
-        <h3 className="font-bold text-xs text-accent border-b border-border pb-2.5 uppercase tracking-wider">
+        <h3 className="panel-title">
           3D Galactic Space Alignment
         </h3>
         

@@ -35,17 +35,14 @@ export default function PredictionsPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn font-mono text-xs">
+    <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full py-4 animate-fadeIn text-xs">
       
       {/* Title */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-5">
+      <div className="section-heading">
         <div>
-          <h2 className="text-3xl font-display font-medium text-ink tracking-tight">
-            Quality Classifier Calibration
-          </h2>
-          <p className="text-sm text-muted mt-1">
-            Validation metrics and predictive weight analysis for exoplanet validation classifiers.
-          </p>
+          <p className="eyebrow">Models / calibration</p>
+          <h1>Quality Classifier Calibration</h1>
+          <p className="section-description">Validation metrics and predictive weight analysis for exoplanet validation classifiers.</p>
         </div>
         <button
           onClick={fetchMetrics}
@@ -97,8 +94,8 @@ export default function PredictionsPage() {
         
         {/* Left Card: ROC Curve Visualization */}
         <div className="glass-panel p-5 rounded-xl lg:col-span-2 shadow-xl flex flex-col gap-4">
-          <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-            <LineChart className="h-4.5 w-4.5" /> MODEL PERFORMANCE CURVES
+          <h3 className="panel-title">
+            <LineChart className="h-4.5 w-4.5" /> Model performance curves
           </h3>
           
           <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -145,8 +142,8 @@ export default function PredictionsPage() {
             <div className="flex-1 flex flex-col gap-3 font-sans text-xs text-muted leading-relaxed">
               <h4 className="text-ink font-bold font-sans text-sm">Model summary</h4>
               <p>
-                EEFN&apos;s Random Forest classifier is trained on cross-catalog disagreement metrics
-                (derived planet size deltas, Teff mismatch, RUWE, distance mismatch, and related fields).
+                EEFN&apos;s LightGBM gradient-boosted classifier is trained on cross-catalog disagreement metrics
+                (derived planet size deltas, Teff mismatch, RUWE, distance mismatch, 2MASS/Pan-STARRS colours, and related fields).
               </p>
               {metrics && (
                 <div className="bg-surface-2 p-2.5 border border-border rounded-lg flex items-start gap-2">
@@ -165,8 +162,8 @@ export default function PredictionsPage() {
 
         {/* Right Card: Features used in training */}
         <div className="surface-card p-5 flex flex-col gap-4">
-          <h3 className="font-bold text-sm text-accent border-b border-border pb-2.5 flex items-center gap-2 font-mono">
-            <BarChart3 className="h-4.5 w-4.5" /> FEATURES USED IN TRAINING
+          <h3 className="panel-title">
+            <BarChart3 className="h-4.5 w-4.5" /> Features used in training
           </h3>
           {/* UPGRADE_PLAN.md A.14: per-feature "importance" weights here used to be
               fabricated -- undefined for every real feature and silently defaulted

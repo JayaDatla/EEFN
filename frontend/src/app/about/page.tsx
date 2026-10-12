@@ -30,7 +30,7 @@ export default function AboutPage() {
         <section>
           <h2 className="mb-2 text-sm font-semibold text-ink">What EEFN is not</h2>
           <p>
-            EEFN does not independently confirm exoplanets. The disposition labels its Random Forest model was
+            EEFN does not independently confirm exoplanets. The disposition labels its gradient-boosted model was
             trained on come from human astronomers who already used Gaia RUWE and distance to classify
             candidates -- so a model trained on those labels partly learns to reproduce that human
             categorization, not to detect planets from first principles. Treat every probability as
@@ -48,26 +48,27 @@ export default function AboutPage() {
               resolution. See <code>LIMITATIONS.md</code> §1.1 for the full methodology and caveats.
             </Callout>
             <Callout tone="warning" title="Calibration is measured, and imperfect">
-              Brier score 0.1127 on held-out data. The model is well-calibrated at the extremes but measurably
-              overconfident in the 0.2-0.4 predicted-probability range -- treat scores in that band as a modest
-              overestimate.
+              Brier score 0.100 on held-out data (the previous Random Forest scored 0.113). The score is well
+              calibrated at the extremes but mildly <em>under</em>-confident in the 0.2-0.5 range (predicted ~0.26,
+              observed ~0.41) -- treat scores in that band as a modest underestimate.
             </Callout>
-            <Callout tone="warning" title="The deep-learning model is real-trained, on a small sample">
-              Retrained 2026-08-21 on 116 real Kepler stars (real light curves, real disposition + real
-              false-positive-reason labels from the NASA Exoplanet Archive) -- no synthetic light curve
-              remains in this training set. Held-out accuracy is <strong>60.9%</strong> on 92 real samples
-              never trained on, against 100% training accuracy: a real, expected overfitting gap on a
-              sample this small. It reliably separates a non-detection from a real signal (100% held-out on
-              "Not Transit-Like") but cannot yet reliably tell a real planet transit from a real eclipsing
-              binary (33-50% held-out on those two). Centroid data still has no real measurement for these
-              Kepler stars. See <code>LIMITATIONS.md</code> §1.7 and the DL Model page for the full report.
+            <Callout tone="warning" title="Light-curve vetting: measured on Kepler, weaker on TESS">
+              A gradient-boosted model over physics features (odd/even depth, secondary eclipse, transit shape,
+              implied radius) vets each candidate&apos;s <strong>real</strong> TESS light curve. Star-grouped
+              cross-validation on 169 real Kepler stars: <strong>83%</strong> (&plusmn;6). On 50 real TESS targets
+              with known TFOP dispositions it agrees with the human label <strong>76%</strong> of the time
+              (ROC-AUC 0.81; it finds 88% of planets but also calls 36% of false positives planets, so a "Planet"
+              verdict is weaker evidence than "Not Transit-Like") -- a real drop from the Kepler number, and those labels were assigned by people who
+              inspected the same light curves, so this measures reproduction of human vetting. It replaced a CNN
+              that scored 64% under the same protocol. Outputs are not calibrated. See{" "}
+              <code>LIMITATIONS.md</code> §1.7 and the Light-Curve Vetting page.
             </Callout>
-            <Callout tone="info" title="Only 5 of 7 planned catalogs are live">
+            <Callout tone="info" title="Only 5 of 7 planned catalogs feed every candidate">
               NASA/TOI, Gaia DR3 (source + astroparams), 2MASS, and Pan-STARRS are live with real provenance.
-              Real MAST target-pixel-file centroid extraction and real spectroscopy cross-matching are limited
-              to a small verification subset today, not full production coverage -- every response reports
-              which model tier ran and how many catalogs actually contributed, rather than presenting a number
-              computed from silently zero-filled missing catalogs as if it were complete.
+              Real TESS centroid offsets, APOGEE-2 spectroscopy and real light-curve vetting now run on a nightly
+              schedule, a few candidates per night, so coverage grows incrementally rather than being complete
+              today -- every response reports which model tier ran and how many catalogs actually contributed,
+              and an unmeasured value is reported as unmeasured, never as a clean zero.
             </Callout>
           </div>
         </section>

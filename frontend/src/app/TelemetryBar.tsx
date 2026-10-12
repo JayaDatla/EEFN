@@ -72,29 +72,29 @@ export default function TelemetryBar() {
         <div className="flex items-center gap-2">
           <span className={`h-1.5 w-1.5 rounded-full ${statusColor}`} />
           <span>
-            API Status: <strong className="online">{data.networkStatus}</strong>
+            API <strong className="online">{data.networkStatus}</strong>
           </span>
         </div>
-        <div className="hidden md:flex items-center gap-5 border-l border-border pl-5">
+        <div className="hidden md:flex items-center gap-7 border-l border-hairline pl-6">
           <span>
-            Gaia DR3 Sync: <strong>{data.gaiaSync ?? "unavailable"} UT</strong>
+            Gaia DR3 sync <strong>{data.gaiaSync ?? "unavailable"} UT</strong>
           </span>
           <span>
-            NASA Archive Sync: <strong>{data.nasaSync ?? "unavailable"} UT</strong>
+            NASA sync <strong>{data.nasaSync ?? "unavailable"} UT</strong>
           </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
-        <div className="hidden lg:flex items-center gap-5">
+      <div className="flex items-center gap-7">
+        <div className="hidden lg:flex items-center gap-7">
           <span>
-            Targets: <span className="font-bold text-ink">{data.resolvedConflicts ?? "—"}</span>
+            Targets <span className="font-medium text-ink">{data.resolvedConflicts ?? "—"}</span>
           </span>
           <span>
-            Discrepancy Alerts: <span className="font-bold text-severity-high">{data.activeAlerts ?? "—"}</span>
+            Alerts <span className="font-medium text-severity-high">{data.activeAlerts ?? "—"}</span>
           </span>
         </div>
-        <span className="hidden sm:inline border-l border-border pl-5 text-muted">
+        <span className="hidden 2xl:inline border-l border-hairline pl-5 text-muted">
           DATA CONTEXT: <span className="text-ink/70">CROSS-CATALOG AUDITING</span>
         </span>
       </div>

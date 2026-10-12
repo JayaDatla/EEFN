@@ -15,7 +15,7 @@ const TONE_CONFIG: Record<Tone, { className: string; Icon: typeof Info }> = {
 export function Callout({ tone = "info", title, children }: { tone?: Tone; title?: string; children: ReactNode }) {
   const { className, Icon } = TONE_CONFIG[tone];
   return (
-    <div className={`flex items-start gap-3 rounded-lg border px-4 py-3 text-xs ${className}`} role={tone === "critical" || tone === "warning" ? "alert" : "status"}>
+    <div className={`flex items-start gap-3 rounded-md border px-4 py-3 text-xs ${className}`} role={tone === "critical" || tone === "warning" ? "alert" : "status"}>
       <Icon size={16} className="mt-0.5 shrink-0" />
       <div>
         {title && <p className="mb-0.5 font-semibold">{title}</p>}

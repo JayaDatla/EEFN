@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&display=swap');
 @import './design-tokens.css';
 
 @tailwind base;
@@ -6,32 +6,82 @@
 @tailwind utilities;
 
 /*
-  UPGRADE_PLAN.md H.1/H.2: this file previously had a decorative animated nebula
-  gradient + starfield dot-grid behind every page (body:before/body:after), a
-  backdrop-filter: blur(18px) glassmorphic sidebar (a resting, non-overlay element --
-  blur is reserved for true floating overlays per H.1), a decorative glow
-  box-shadow on the status dot, and a purely-decorative circle outline stamped on
-  every stat card. All removed. Every color below is a token from design-tokens.css,
-  not a hardcoded hex value, so the three themes (light/dark/red-night) apply
-  correctly everywhere.
+  EEFN "Observatory editorial" design language (2026-10 redesign).
 
-  2026-08-13: shared surfaces (cards, sidebar, nav, badges) redrawn for the modern-
-  SaaS direction -- soft shadow elevation, rounder corners, more breathing room,
-  Inter as the dominant typeface (IBM Plex Mono narrowed to genuinely tabular data:
-  numbers, IDs, timestamps -- not every label). Red-night keeps the flat, no-shadow
-  treatment throughout (see design-tokens.css) since preserving night vision matters
-  more than matching the aesthetic there.
+  * Canvas: deep ink-navy in dark, warm paper in light; one starlight-gold accent.
+  * Type: Newsreader (display/figures), Geist (UI), Geist Mono (data only).
+  * Depth: hairline borders + a faint top highlight + soft ambient glow and film grain,
+    instead of drop-shadow cards. Radii are tight on controls, softer on panels.
+  * Motion: transform/opacity only, staggered on entry, always disabled under
+    prefers-reduced-motion. Red-night stays flat: no glow, no grain, no shadows.
+
+  Everything below reads tokens from design-tokens.css, so all three themes
+  (light/dark/red-night) apply everywhere with no per-page overrides.
 */
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
-  background: var(--color-background);
+  min-height: 100dvh;
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(1100px 620px at 8% -8%, var(--color-glow), transparent 62%),
+    radial-gradient(900px 540px at 108% 105%, color-mix(in srgb, var(--grade-a) 7%, transparent), transparent 60%);
+  background-attachment: fixed;
   color: var(--color-text);
-  font-family: Inter, Arial, sans-serif;
+  font-family: var(--font-body);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Film grain: a fixed, click-through noise layer that breaks up flat digital fills. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 32%, transparent);
+  color: var(--color-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 200;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  font: 600 var(--text-sm) var(--font-body);
+  transform: translateY(-160%);
+  transition: transform 0.2s var(--ease-out);
+}
+
+.skip-link:focus {
+  transform: none;
 }
 
 /* ---------- Layout shell ---------- */
@@ -39,186 +89,261 @@ body {
 .app-sidebar {
   position: fixed;
   inset: 0 auto 0 0;
-  width: 272px;
+  width: 256px;
   z-index: 30;
-  padding: 28px 16px 20px;
-  border-right: 1px solid var(--color-border);
-  background: var(--color-surface);
+  padding: 26px 14px 18px;
+  border-right: 1px solid var(--color-hairline);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 94%, transparent), color-mix(in srgb, var(--color-background) 96%, transparent));
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.app-sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 4px 10px 24px;
+  gap: 12px;
+  padding: 2px 10px 22px;
   color: var(--color-text);
   text-decoration: none;
 }
 
 .brand-mark {
-  display: grid;
-  place-items: center;
-  width: 35px;
-  height: 35px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  flex: none;
+  width: 34px;
+  height: 34px;
   color: var(--color-accent);
-  background: var(--color-surface-2);
 }
 
-.brand strong {
+.brand-text strong {
   display: block;
-  font: 600 var(--text-lg) Inter;
-  letter-spacing: -0.01em;
+  font: 500 23px/1 var(--font-display);
+  letter-spacing: 0.02em;
 }
 
-.brand small {
+.brand-text small {
   display: block;
+  margin-top: 5px;
   color: var(--color-text-muted);
-  font-size: var(--text-2xs);
+  font: 500 9px/1.2 var(--font-data);
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-top: 2px;
+  white-space: nowrap;
 }
 
 .mission-tag {
-  margin: 3px 8px 22px;
-  padding: 9px 11px;
+  display: flex;
+  align-items: center;
+  margin: 0 8px 16px;
+  padding: 8px 11px;
   color: var(--color-text-muted);
-  font: 500 var(--text-xs) Inter;
-  letter-spacing: 0.01em;
-  background: var(--color-surface-2);
+  font: 500 10px var(--font-data);
+  letter-spacing: 0.12em;
+  border: 1px solid var(--color-hairline);
   border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface-2) 55%, transparent);
 }
 
-/* Status is never color-alone (H.1): the dot is always paired with the
-   "NETWORK NOMINAL" text next to it. No decorative glow -- flat fill only. */
+/* Status is never color-alone: the dot is always paired with its text label. */
 .status-dot {
+  position: relative;
   width: 6px;
   height: 6px;
   display: inline-block;
   border-radius: 50%;
   background: var(--status-pass);
-  margin-right: 7px;
+  margin-right: 9px;
+}
+
+.status-dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid var(--status-pass);
+  opacity: 0;
+  animation: ping 2.6s var(--ease-out) infinite;
+}
+
+@keyframes ping {
+  0% { transform: scale(0.6); opacity: 0.7; }
+  80%, 100% { transform: scale(1.7); opacity: 0; }
 }
 
 .sidebar-nav p {
-  font: 600 10px Inter;
+  font: 500 9.5px var(--font-data);
   text-transform: uppercase;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.16em;
   color: var(--color-text-muted);
-  opacity: 0.75;
-  margin: 0 12px 10px;
+  opacity: 0.7;
+  margin: 0 12px 8px;
 }
 
 .sidebar-nav a {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 11px;
   text-decoration: none;
   color: var(--color-text-muted);
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-radius: var(--radius-md);
-  font: 500 var(--text-sm) Inter;
+  font: 450 var(--text-sm) var(--font-body);
   margin: 1px 0;
-  transition: background-color 0.12s ease, color 0.12s ease;
+  transition: background-color 0.18s var(--ease-out), color 0.18s var(--ease-out), transform 0.18s var(--ease-out);
+}
+
+.sidebar-nav a svg {
+  flex: none;
+  opacity: 0.8;
 }
 
 .sidebar-nav a:hover {
   color: var(--color-text);
-  background: var(--color-surface-2);
+  background: color-mix(in srgb, var(--color-surface-2) 70%, transparent);
+}
+
+.sidebar-nav a:active {
+  transform: scale(0.985);
 }
 
 .sidebar-nav a.active {
+  color: var(--color-text);
+  background: var(--color-accent-soft);
+  font-weight: 550;
+}
+
+.sidebar-nav a.active svg {
   color: var(--color-accent);
-  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  font-weight: 600;
+  opacity: 1;
+}
+
+.sidebar-nav a.active::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+  background: var(--color-accent);
 }
 
 .nav-spacer {
-  margin-top: 25px !important;
+  margin-top: 22px !important;
 }
 
-/* UPGRADE_PLAN.md H.3.10: unmistakable badge on gallery/demo nav items so they
-   can never be confused with the live triage tool. */
+/* Gallery/demo nav items stay unmistakably badged so they can't be confused with the
+   live triage tool (UPGRADE_PLAN.md H.3.10). Square badge, not a pill. */
 .nav-demo-badge {
   margin-left: auto;
-  font: 600 9px Inter;
-  letter-spacing: 0.04em;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--severity-medium) 16%, transparent);
+  font: 600 8.5px var(--font-data);
+  letter-spacing: 0.1em;
+  padding: 2px 5px;
+  border-radius: 3px;
+  border: 1px solid color-mix(in srgb, var(--severity-medium) 45%, transparent);
   color: var(--severity-medium);
 }
 
 .sidebar-foot {
   margin-top: auto;
-  padding: 14px 12px 0;
+  padding: 18px 12px 0;
   color: var(--color-text-muted);
-  font: 400 var(--text-2xs)/1.7 Inter;
-  opacity: 0.75;
+  font: 400 10px/1.7 var(--font-data);
+  letter-spacing: 0.04em;
+  opacity: 0.7;
 }
 
 .theme-toggle {
   display: flex;
-  gap: 4px;
-  margin: 0 8px 18px;
-  background: var(--color-surface-2);
+  gap: 2px;
+  margin: 0 8px 20px;
   padding: 3px;
+  border: 1px solid var(--color-hairline);
   border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface-2) 55%, transparent);
 }
 
 .theme-toggle button {
   flex: 1;
-  padding: 6px 4px;
-  font: 500 var(--text-2xs) Inter;
+  padding: 5px 4px;
+  font: 500 10.5px var(--font-body);
+  letter-spacing: 0.02em;
   color: var(--color-text-muted);
   background: transparent;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.12s ease, color 0.12s ease;
+  transition: background-color 0.18s var(--ease-out), color 0.18s var(--ease-out);
+}
+
+.theme-toggle button:hover {
+  color: var(--color-text);
 }
 
 .theme-toggle button[aria-pressed="true"] {
-  color: var(--color-accent-text);
-  background: var(--color-accent);
-  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-hairline), var(--shadow-sm);
 }
 
 .app-frame {
-  margin-left: 272px;
-  min-height: 100vh;
+  margin-left: 256px;
+  min-height: 100dvh;
 }
 
 .app-main {
-  max-width: 1800px;
+  max-width: 1680px;
   margin: 0 auto;
-  padding: 40px clamp(24px, 3vw, 56px) 60px;
+  padding: 44px clamp(24px, 3.4vw, 64px) 96px;
 }
 
+.app-main > * {
+  animation: rise 0.7s var(--ease-out) both;
+}
+
+.app-main > *:nth-child(2) { animation-delay: 0.06s; }
+.app-main > *:nth-child(3) { animation-delay: 0.12s; }
+.app-main > *:nth-child(4) { animation-delay: 0.18s; }
+.app-main > *:nth-child(n + 5) { animation-delay: 0.24s; }
+
 .telemetry {
-  height: 40px;
-  border-bottom: 1px solid var(--color-border);
-  padding: 0 clamp(24px, 3vw, 56px);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: 38px;
+  border-bottom: 1px solid var(--color-hairline);
+  padding: 0 clamp(24px, 3.4vw, 64px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   color: var(--color-text-muted);
-  background: var(--color-surface);
-  font: 500 var(--text-2xs) Inter;
-  letter-spacing: 0.01em;
+  background: color-mix(in srgb, var(--color-background) 82%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  font: 450 10.5px var(--font-data);
+  letter-spacing: 0.03em;
 }
 
 .telemetry strong,
 .telemetry span {
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.telemetry {
+  overflow: hidden;
 }
 
 .telemetry strong {
   color: var(--color-text);
+  font-weight: 500;
 }
 
 .telemetry .online {
@@ -230,80 +355,104 @@ body {
 .section-heading {
   display: flex;
   justify-content: space-between;
-  gap: 24px;
+  gap: 32px;
   align-items: end;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--color-hairline);
 }
 
 .eyebrow {
-  font: 600 var(--text-2xs) Inter;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 500 10.5px var(--font-data);
   text-transform: uppercase;
   color: var(--color-accent);
-  letter-spacing: 0.08em;
-  margin: 0 0 10px;
+  letter-spacing: 0.16em;
+  margin: 0 0 16px;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: var(--color-accent);
+  opacity: 0.8;
 }
 
 .section-heading h1 {
-  /* Design pass (2026-08-21, explicit user request): a real display face for every
-     page headline instead of routing everything through the same mono/uppercase
-     "instrument panel" voice. Newsreader is an optical-size serif -- built to read
-     as considered and editorial at large display sizes without tipping into the
-     cream+serif "AI-generated" cliche (no cream background, no terracotta accent;
-     this pairs with the existing indigo accent and dark/light/red-night themes
-     unchanged). Weight drops from 600 to 500 because serif display faces read as
-     heavier than a grotesk at the same weight. */
-  font: 500 clamp(var(--text-xl), 3vw, var(--text-2xl))/1.15 var(--font-display);
-  letter-spacing: -0.01em;
+  /* Large optical-size serif, light weight, tight leading: the page's one loud voice. */
+  font: 400 clamp(34px, 3.6vw, 56px)/1.04 var(--font-display);
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.022em;
   margin: 0;
   color: var(--color-text);
   text-wrap: balance;
+  max-width: 21ch;
 }
 
 .section-description {
+  font-family: var(--font-body);
   color: var(--color-text-muted);
-  font-size: var(--text-base);
-  margin: 12px 0 0;
-  max-width: 720px;
-  line-height: 1.6;
+  font-size: var(--text-md);
+  font-weight: 350;
+  margin: 18px 0 0;
+  max-width: 62ch;
+  line-height: 1.65;
+  text-wrap: pretty;
 }
 
-/* Modern-SaaS surfaces: soft shadow elevation + a hairline border for crispness at
-   the edge, generous radius. Red-night's --shadow-* tokens are all `none`, so this
-   automatically degrades to the flat, border-only look there (design-tokens.css). */
+/* Panels: hairline edge, a faint lit top edge, no heavy shadow. */
 .scientific-metric,
 .surface-card,
 .glass-panel {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  position: relative;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-surface-2) 40%, var(--color-surface)), var(--color-surface));
+  border: 1px solid var(--color-hairline);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
 
+.glass-panel {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+}
+
 .scientific-metric {
-  padding: 20px;
-  min-height: 126px;
-  position: relative;
+  padding: 22px 22px 20px;
+  min-height: 132px;
+  overflow: hidden;
+  transition: border-color 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+}
+
+.scientific-metric:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-hairline));
+  transform: translateY(-2px);
 }
 
 .scientific-metric p {
-  font: 500 var(--text-2xs) Inter;
+  font: 500 10px var(--font-data);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.14em;
   color: var(--color-text-muted);
   margin: 0;
 }
 
 .scientific-metric strong {
-  font: 600 32px Inter;
+  font: 400 44px/1 var(--font-display);
+  font-variant-numeric: lining-nums tabular-nums;
   letter-spacing: -0.02em;
   display: block;
-  margin: 12px 0 8px;
+  margin: 16px 0 10px;
   color: var(--color-text);
 }
 
 .scientific-metric span {
   color: var(--color-text-muted);
-  font-size: var(--text-2xs);
+  font-size: var(--text-xs);
 }
 
 .tone-blue { color: var(--grade-a); }
@@ -315,51 +464,257 @@ body {
 .status-indicator {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  border-radius: 999px;
-  padding: 5px 10px;
-  font: 500 var(--text-2xs) Inter;
-  letter-spacing: 0.01em;
+  gap: 6px;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font: 500 10.5px var(--font-data);
+  letter-spacing: 0.04em;
 }
 
 .confidence-badge.good,
 .status-indicator.pass {
-  background: color-mix(in srgb, var(--status-pass) 12%, transparent);
+  background: color-mix(in srgb, var(--status-pass) 10%, transparent);
   color: var(--status-pass);
-  border: 1px solid color-mix(in srgb, var(--status-pass) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--status-pass) 32%, transparent);
 }
 
 .confidence-badge.watch,
 .status-indicator.watch {
-  background: color-mix(in srgb, var(--status-watch) 12%, transparent);
+  background: color-mix(in srgb, var(--status-watch) 10%, transparent);
   color: var(--status-watch);
-  border: 1px solid color-mix(in srgb, var(--status-watch) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--status-watch) 32%, transparent);
 }
 
 .confidence-badge.risk,
 .status-indicator.risk {
-  background: color-mix(in srgb, var(--status-risk) 12%, transparent);
+  background: color-mix(in srgb, var(--status-risk) 10%, transparent);
   color: var(--status-risk);
-  border: 1px solid color-mix(in srgb, var(--status-risk) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--status-risk) 32%, transparent);
 }
 
-/* Motion communicates a real state change only where it's still used -- kept for
-   now (not applied uniformly to every card mount; callers opt in) but respects the
-   user's reduced-motion preference (H.4). */
-.animate-fadeIn {
-  animation: fade 0.42s ease-out both;
+/* ---------- Shared helpers for page redesigns ---------- */
+
+.hairline-top { border-top: 1px solid var(--color-hairline); }
+.hairline-bottom { border-bottom: 1px solid var(--color-hairline); }
+
+.display-figure {
+  font: 400 clamp(40px, 5vw, 76px)/0.95 var(--font-display);
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: -0.03em;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-fadeIn {
-    animation: none;
+.data-label {
+  font: 500 10px var(--font-data);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-text-muted);
+}
+
+.data-value {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+}
+
+.rule-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: 500 10.5px var(--font-data);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-text-muted);
+}
+
+.rule-heading::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-hairline);
+}
+
+/* ---------- Buttons ---------- */
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 38%, var(--color-hairline));
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font: 500 var(--text-xs) var(--font-body);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+
+.btn-ghost:hover {
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  border-color: var(--color-accent);
+}
+
+.btn-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.btn-icon:hover:not(:disabled) {
+  color: var(--color-text);
+  border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-hairline));
+}
+
+.btn-icon:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ---------- Tables ---------- */
+
+.table-head {
+  background: color-mix(in srgb, var(--color-surface-2) 55%, transparent);
+  border-bottom: 1px solid var(--color-hairline);
+  font: 500 10px var(--font-data);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-text-muted);
+}
+
+.row-line {
+  border-bottom: 1px solid var(--color-hairline);
+  transition: background-color 0.18s var(--ease-out);
+}
+
+.row-line:hover {
+  background: var(--color-accent-soft);
+}
+
+/* ---------- Registry pulse (home) ---------- */
+
+.pulse {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, 1fr);
+  gap: 0;
+  margin-bottom: 28px;
+  border-top: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.pulse-lead,
+.pulse-fig {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px 28px 22px;
+  border-right: 1px solid var(--color-hairline);
+}
+
+.pulse-lead {
+  padding-left: 0;
+  gap: 14px;
+}
+
+.pulse-lead .display-figure {
+  padding-bottom: 4px;
+}
+
+.pulse-fig:last-of-type {
+  border-right: none;
+}
+
+.pulse-fig strong {
+  font: 400 clamp(36px, 3.4vw, 52px)/1 var(--font-display);
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: -0.025em;
+}
+
+.pulse-fig strong small {
+  margin-left: 2px;
+  font-size: 0.5em;
+  color: var(--color-text-muted);
+  letter-spacing: 0;
+}
+
+.pulse-note {
+  color: var(--color-text-muted);
+  font: 400 11px var(--font-body);
+}
+
+.pulse-grades {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 14px 0 16px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.pulse-bar {
+  display: flex;
+  flex: 1;
+  gap: 3px;
+  height: 6px;
+}
+
+.pulse-bar span {
+  min-width: 4px;
+  border-radius: 3px;
+}
+
+.pulse-legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.pulse-legend i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 2px;
+}
+
+.pulse-legend b {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+@media (max-width: 1100px) {
+  .pulse {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pulse-lead,
+  .pulse-fig {
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .pulse-legend {
+    display: none;
   }
 }
 
-@keyframes fade {
+/* ---------- Motion (transform/opacity only; disabled for reduced-motion) ---------- */
+
+.animate-fadeIn {
+  animation: rise 0.6s var(--ease-out) both;
+}
+
+@keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -367,28 +722,80 @@ body {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn,
+  .app-main > *,
+  .status-dot::after {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  .scientific-metric:hover {
+    transform: none;
+  }
+}
+
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
-  border-radius: 8px;
+  border-radius: 10px;
+  border: 2px solid var(--color-background);
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-surface);
+  background: transparent;
 }
 
-/* Broad elevation lift (2026-08-13 modern-SaaS pass): every bordered, rounded
-   card-like container across the app picks up the same soft resting shadow as
-   the shared primitives above, without hand-editing each page's JSX. Elements
-   that already declare their own Tailwind shadow-* utility are left alone so
-   this never fights an intentionally stronger/weaker shadow. Red-night's
-   --shadow-* tokens are all `none`, so this degrades to flat there too. */
+/* Any bordered, rounded container in the pages picks up the panel treatment without
+   hand-editing every JSX tree; elements with their own shadow-* utility are left alone. */
 [class*="border-border"][class*="rounded"]:not([class*="shadow-"]) {
   box-shadow: var(--shadow-sm);
+  border-color: var(--color-hairline);
+}
+
+/* Form controls inherit the editorial look everywhere. */
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+}
+
+input[type="search"],
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  background: color-mix(in srgb, var(--color-surface-2) 55%, transparent);
+  border-color: var(--color-hairline);
+  transition: border-color 0.18s var(--ease-out), background-color 0.18s var(--ease-out);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 30%, var(--color-hairline));
+}
+
+button:not(:disabled),
+a {
+  transition-property: background-color, border-color, color, transform, opacity;
+  transition-duration: 0.18s;
+  transition-timing-function: var(--ease-out);
+}
+
+button:not(:disabled):active {
+  transform: scale(0.985);
+}
+
+table {
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 820px) {
@@ -399,12 +806,14 @@ body {
     padding: 12px;
     flex-direction: row;
     align-items: center;
+    overflow: visible;
   }
 
   .brand {
     padding: 0;
   }
 
+  .brand-text small,
   .mission-tag,
   .sidebar-foot,
   .theme-toggle {
@@ -427,12 +836,16 @@ body {
     margin: 0;
   }
 
+  .sidebar-nav a.active::before {
+    display: none;
+  }
+
   .app-frame {
     margin-left: 0;
   }
 
   .app-main {
-    padding: 24px 16px;
+    padding: 28px 16px 64px;
   }
 
   .telemetry {
@@ -446,5 +859,220 @@ body {
   .section-heading {
     align-items: start;
     flex-direction: column;
+  }
+}
+
+/* ---------- Editorial headings used across the pages ---------- */
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-hairline);
+  font: 400 21px/1.2 var(--font-display);
+  font-variation-settings: "opsz" 28;
+  letter-spacing: -0.012em;
+  color: var(--color-text);
+  text-wrap: balance;
+}
+
+:where(.panel-title) svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--color-accent);
+}
+
+.page-title {
+  margin: 0;
+  font: 400 clamp(30px, 3vw, 46px)/1.06 var(--font-display);
+  font-variation-settings: "opsz" 60;
+  letter-spacing: -0.022em;
+  color: var(--color-text);
+  text-wrap: balance;
+}
+
+/* Small-caps labels (everything that still carries Tailwind's `uppercase`) read as
+   instrument-style data labels rather than shouting UI text. */
+.uppercase:not(h1):not(h2):not(h3):not(h4) {
+  font-family: var(--font-data);
+  letter-spacing: 0.1em;
+}
+
+button.uppercase,
+a.uppercase {
+  font-family: var(--font-body);
+  letter-spacing: 0.06em;
+}
+
+
+/* ---------- Candidate evidence card header ---------- */
+
+.cand-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  padding-bottom: 28px;
+}
+
+.cand-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 26px;
+  padding: 5px 10px 5px 8px;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  font: 500 11px var(--font-body);
+  cursor: pointer;
+}
+
+.cand-back:hover {
+  color: var(--color-text);
+  border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-hairline));
+}
+
+.cand-name {
+  margin: 0;
+  font: 400 clamp(44px, 5.4vw, 84px)/0.98 var(--font-display);
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.03em;
+  font-variant-numeric: lining-nums;
+}
+
+.cand-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.cand-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border: 1px solid;
+  border-radius: 4px;
+  font: 500 10px var(--font-data);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cand-figures {
+  display: flex;
+  flex: none;
+  margin: 0;
+  border-left: 1px solid var(--color-hairline);
+}
+
+.cand-figures > div {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 32px;
+  border-right: 1px solid var(--color-hairline);
+}
+
+.cand-figures > div:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.cand-figures dd {
+  margin: 0;
+  font: 400 clamp(38px, 3.6vw, 56px)/1 var(--font-display);
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: -0.025em;
+}
+
+.cand-figures dd small {
+  margin-left: 2px;
+  font-size: 0.5em;
+  color: var(--color-text-muted);
+}
+
+.cand-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0 8px;
+  border-bottom: 1px solid var(--color-hairline);
+  overflow-x: auto;
+}
+
+.cand-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: 500 var(--text-sm) var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cand-tab:hover {
+  color: var(--color-text);
+}
+
+.cand-tab.is-active {
+  color: var(--color-text);
+}
+
+.cand-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--color-accent);
+}
+
+@media (max-width: 900px) {
+  .cand-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .cand-figures {
+    border-left: none;
+  }
+
+  .cand-figures > div:first-child {
+    padding-left: 0;
+  }
+}
+
+
+/* Solid accent fills always carry the theme's on-accent text colour, so a gold button
+   never ends up with pale text on it (contrast), in any theme. */
+.bg-accent {
+  color: var(--color-accent-text);
+}
+
+/* Native controls (sliders, checkboxes, radios) follow the theme accent and scheme. */
+html {
+  accent-color: var(--color-accent);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"],
+:root[data-theme="red-night"] {
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
   }
 }
