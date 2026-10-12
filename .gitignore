@@ -37,3 +37,9 @@ scratch/
 .DS_Store
 Thumbs.db
 *.log
+
+# Re-downloadable raw Kepler light-curve cache and TS build info
+backend/validation/data/kepler_lc_cache/
+*.tsbuildinfo
+backend/validation/data/kepler_study_*
+backend/validation/data/tess_transfer_cache.json
