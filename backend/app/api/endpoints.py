@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import asc, desc
 from typing import List, Dict, Any, Optional
+from app.pipeline import sync_status as S
 from app.db.session import get_db, SessionLocal
 from app.db.models import ExoplanetCandidate, HostStar, AgreementMetrics, MLPrediction, CatalogSource, PipelineRun, DispositionChangeEvent
 from pydantic import BaseModel
@@ -115,6 +116,7 @@ class CandidateProfileResponse(BaseModel):
     prediction: PredictionResponse
     model_tier: ModelTierResponse
     health: HealthBreakdownResponse
+    real_observations: Dict[str, Any] = {}
 
 _CANDIDATE_SORT_FIELDS = {
     "toi_id": ExoplanetCandidate.toi_id,
@@ -482,6 +484,7 @@ def get_candidate_detail(toi_id: float, db: Session = Depends(get_db)):
         prediction=PredictionResponse(**profile["prediction"]),
         model_tier=ModelTierResponse(**profile["model_tier"]),
         health=HealthBreakdownResponse(**profile["health"]),
+        real_observations=profile.get("real_observations", {}),
     )
 
 class PipelineRunResponse(BaseModel):
@@ -649,6 +652,36 @@ def get_dl_training_report():
         )
     with open(report_path, "r") as f:
         return json.load(f)
+
+
+_ML_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ml")
+
+
+@router.get("/predictions/lightcurve_vetter")
+def get_lightcurve_vetter_report():
+    """
+    Real evaluation of the production light-curve vetter (star-grouped cross-validation on
+    real Kepler data) plus the architecture study that chose it over the CNN. Same honesty
+    contract as /predictions/metrics: 503 if the artifact is missing, never a fallback number.
+    """
+    report_path = os.path.normpath(os.path.join(_ML_DIR, "lightcurve_vetter_report.json"))
+    if not os.path.exists(report_path):
+        raise HTTPException(
+            status_code=503,
+            detail="No lightcurve_vetter_report.json artifact found. Run "
+                   "validation/scripts/train_lightcurve_vetter.py to generate one.",
+        )
+    with open(report_path, "r") as f:
+        report = json.load(f)
+    study_path = os.path.normpath(os.path.join(_ML_DIR, "dl_architecture_study.json"))
+    if os.path.exists(study_path):
+        with open(study_path, "r") as f:
+            report["architecture_study"] = json.load(f)
+    tess_path = os.path.normpath(os.path.join(_ML_DIR, "tess_transfer_report.json"))
+    if os.path.exists(tess_path):
+        with open(tess_path, "r") as f:
+            report["tess_transfer"] = json.load(f)
+    return report
 
 
 @router.get("/predictions/calibration")
@@ -839,45 +872,32 @@ def get_candidate_transit_pipeline(
         rstar_solar=rstar_solar
     )
     
-    # Prepare stellar metadata for Deep Learning late-fusion pathway
-    stellar_params = {
-        'st_teff': cand.host.teff if cand.host else None,
-        'st_rad': cand.host.rad if cand.host else None,
-        'st_dist': cand.host.distance if cand.host else None,
-        'gaia_rad': cand.host.rad if cand.host else None,
-        'trandep': cand.trandep or 1500.0,
-        'ruwe': cand.agreement_metrics.ruwe if cand.agreement_metrics else (cand.host.ruwe if cand.host else None),
-        'j_mag': cand.host.j_mag if cand.host else None,
-        'k_mag': cand.host.k_mag if cand.host else None,
-        'h_mag': cand.host.h_mag if cand.host else None,
-        'g_mag': cand.host.g_mag if cand.host else None,
-        'r_mag': cand.host.r_mag if cand.host else None,
-        'fe_h': cand.host.fe_h if cand.host else None,
-        'teff_diff': cand.agreement_metrics.teff_disagreement if cand.agreement_metrics else None,
-        'rad_diff': cand.agreement_metrics.rad_disagreement if cand.agreement_metrics else None,
-        'derived_rp_diff': cand.agreement_metrics.derived_rp_diff if cand.agreement_metrics else None,
-        'density_discrepancy_sigma': cand.density_discrepancy_sigma,
-        'query_failed': bool(cand.query_failed),
-        'completeness': cand.agreement_metrics.completeness_score if cand.agreement_metrics else None,
-        'blending': blending_factor,
-    }
-    # UPGRADE_PLAN.md F.6: only set centroid_dx/centroid_dy when a real MAST TPF
-    # measurement backs this candidate (validation/scripts/run_real_centroid_subset.py)
-    # -- centroid_is_real distinguishes that from seed_db.py's fabricated demo values,
-    # so a candidate this script hasn't touched still honestly reports
-    # centroid_available=False rather than a flat/fabricated measurement.
-    if cand.centroid_is_real and cand.centroid_dx_json and cand.centroid_dy_json:
-        stellar_params['centroid_dx'] = cand.centroid_dx_json
-        stellar_params['centroid_dy'] = cand.centroid_dy_json
-    
-    dl_results = dl_vetting_engine.vet_candidate(
-        time=time_arr,
-        detrended_flux=detrended,
-        period=cand.orbper or 3.0,
-        duration_hours=cand.trandurh or 2.5,
-        stellar_params=stellar_params
-    )
-    
+    # The light curve above is a SIMULATION built from this candidate's own catalog
+    # period/depth/duration (a what-if playground for the noise/blending/starspot
+    # sliders). Classifying it would just reflect those catalog numbers back as if they
+    # were evidence, so the vetting model is never run on it. The vetting result served
+    # here comes from the candidate's REAL SPOC TESS light curve, computed by the
+    # scheduled sync (app/pipeline/real_sync.py::sync_real_lightcurve_vetting) and stored
+    # on the candidate; if none exists yet we say so instead of faking one.
+    vet = cand.lc_vetting_json if cand.lc_vetting_status == S.VETTED and cand.lc_vetting_json else None
+    if vet:
+        dl_view_global, dl_view_local = vet["global_view"], vet["local_view"]
+        dl_classification = vet["classification"]
+        dl_status, dl_degraded, dl_source = "trained", False, "real_tess_spoc_2min"
+        dl_note = None
+    else:
+        g_view, l_view = dl_vetting_engine.preprocess_lightcurve(
+            time=time_arr, flux=detrended, period=cand.orbper or 3.0, duration_hours=cand.trandurh or 2.5,
+        )
+        dl_view_global, dl_view_local = (g_view - 1.0).tolist(), (l_view - 1.0).tolist()
+        dl_classification = {}
+        dl_status, dl_degraded, dl_source = "no_real_lightcurve", True, "simulated_not_classified"
+        dl_note = (
+            "No real TESS light curve has been vetted for this candidate yet "
+            f"(status: {cand.lc_vetting_status or 'not attempted'}). The views shown are of the simulated "
+            "curve above and are not classified."
+        )
+
     return {
         "time": sim["time"],
         "raw_flux": sim["raw_flux"],
@@ -894,13 +914,19 @@ def get_candidate_transit_pipeline(
             "derived_rp_earth": results["derived_rp_earth"]
         },
         "classification": results["classification"],
-        # Deep learning outputs
-        "dl_global_view": dl_results["global_view"],
-        "dl_local_view": dl_results["local_view"],
-        "dl_classification": dl_results["classification"],
-        # Must be surfaced by the UI, never buried: see UPGRADE_PLAN.md C.2. If
-        # dl_model_status != "trained", dl_classification is untrained-network noise.
-        "dl_model_status": dl_results["model_status"],
-        "dl_model_degraded": dl_results["degraded"],
-        "dl_centroid_available": dl_results["centroid_available"],
+        # Light-curve vetting (real data only) -- see the comment above.
+        "dl_global_view": dl_view_global,
+        "dl_local_view": dl_view_local,
+        "dl_classification": dl_classification,
+        "dl_model_status": dl_status,
+        "dl_model_degraded": dl_degraded,
+        "dl_input_source": dl_source,
+        "dl_model_version": vet["model_version"] if vet else None,
+        "dl_vetted_sectors": vet.get("sectors") if vet else None,
+        "dl_features": vet["features"] if vet else None,
+        "dl_vetted_at": cand.lc_vetting_at.isoformat() if vet and cand.lc_vetting_at else None,
+        "dl_note": dl_note,
+        # Reported separately from the classification: the vetter does not consume the centroid,
+        # so this must not read as "the classifier used it".
+        "centroid_measured": bool(cand.centroid_is_real),
     }

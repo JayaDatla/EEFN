@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
 
+from app.pipeline import sync_status as S
 from app.db.models import ExoplanetCandidate, HostStar, AgreementMetrics, MLPrediction, MeasurementHistory
 from app.science.tiers import compute_model_tier
 from app.science.health import compute_health_score
@@ -43,7 +44,7 @@ def build_candidate_profile(db: Session, toi_id: float) -> Optional[Dict[str, An
     }
 
     tier_result = compute_model_tier(
-        cand, star, has_real_light_curve=False,
+        cand, star, has_real_light_curve=(cand.lc_vetting_status == S.VETTED),
         has_real_centroid=cand.centroid_is_real,
         has_real_spectroscopy=bool(star and star.spectroscopy_is_real),
     )
@@ -115,6 +116,9 @@ def build_candidate_profile(db: Session, toi_id: float) -> Optional[Dict[str, An
             "catalogs_total": tier_result.catalogs_total,
             "coverage_fraction": tier_result.coverage_fraction,
         },
+        # Measurements from the nightly real-data syncs (app/pipeline/real_sync.py). Absent
+        # data is reported as such (status + None), never as a clean/zero result.
+        "real_observations": _real_observations(cand),
         "health": {
             "score": cand.health_score if cand.health_score is not None else health_result.score,
             "grade": cand.health_grade if cand.health_grade else health_result.grade,
@@ -125,5 +129,37 @@ def build_candidate_profile(db: Session, toi_id: float) -> Optional[Dict[str, An
             # independently-drifting implementation the way a frontend
             # reimplementation of this formula would be.
             "factors": health_result.factors,
+        },
+    }
+
+
+def _real_observations(cand) -> dict:
+    centroid_ok = bool(cand.centroid_is_real)
+    vet_ok = cand.lc_vetting_status == S.VETTED
+    vet = (cand.lc_vetting_json or {}) if vet_ok else {}
+
+    def if_measured(value):
+        return value if centroid_ok else None
+
+    return {
+        "centroid": {
+            "measured": centroid_ok,
+            "status": cand.centroid_status or (S.MEASURED if centroid_ok else None),
+            "photocentre_shift_arcsec": if_measured(cand.centroid_shift_max),
+            "significance_sigma": if_measured(cand.centroid_significance_sigma),
+            "implied_source_offset_arcsec": if_measured(cand.centroid_implied_offset_arcsec),
+            "implied_source_offset_err_arcsec": if_measured(cand.centroid_implied_offset_err_arcsec),
+            # None = the dip test could not run (no measurable depth); distinct from False (clean).
+            "is_dip": if_measured(None if cand.has_centroid_dip is None else bool(cand.has_centroid_dip)),
+            "sector": if_measured(cand.centroid_sector),
+            "measured_at": cand.centroid_computed_at.isoformat() if centroid_ok and cand.centroid_computed_at else None,
+        },
+        "lightcurve_vetting": {
+            "status": cand.lc_vetting_status,
+            "classification": vet.get("classification"),
+            "best_class": vet.get("best_class"),
+            "sectors": vet.get("sectors"),
+            "model_version": vet.get("model_version"),
+            "vetted_at": cand.lc_vetting_at.isoformat() if cand.lc_vetting_at else None,
         },
     }

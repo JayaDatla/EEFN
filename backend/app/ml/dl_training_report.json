@@ -33,5 +33,6 @@
     }
   },
   "data_source": "NASA Exoplanet Archive cumulative KOI table (real disposition + real false-positive-reason flags) + real Kepler long-cadence light curves via lightkurve/MAST. No synthetic light curves in this training set.",
-  "known_gaps": "Centroid branch honestly zeroed/absent for every sample (no real Kepler TPF centroid ingestion in this pass). Metadata vector uses only real koi_steff/koi_srad/koi_depth; no 2MASS/Pan-STARRS/RUWE cross-match attempted for these Kepler stars, so those fields are honestly absent (presence=0), not fabricated."
+  "known_gaps": "Centroid branch honestly zeroed/absent for every sample (no real Kepler TPF centroid ingestion in this pass). Metadata vector uses only real koi_steff/koi_srad/koi_depth; no 2MASS/Pan-STARRS/RUWE cross-match attempted for these Kepler stars, so those fields are honestly absent (presence=0), not fabricated.",
+  "superseded": "2026-10-11: DeepExoFusionNet is no longer used for any served output. Under star-grouped cross-validation (205 KOIs / 169 stars) it scores 63.9% +/- 10.4; the gradient-boosted physics-feature vetter that replaced it scores 83.9% +/- 4.4 on the same folds. The 60.9% figure above came from a single 23-star split and should not be read as a reliable estimate. See lightcurve_vetter_report.json and dl_architecture_study.json."
 }

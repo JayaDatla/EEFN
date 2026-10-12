@@ -8,28 +8,28 @@
       "n": 2667,
       "test_size": 534,
       "accuracy": 0.8502,
-      "roc_auc": 0.9237,
-      "f1_score": 0.8519,
-      "brier_score": 0.1127
+      "roc_auc": 0.9282,
+      "f1_score": 0.8507,
+      "brier_score": 0.1101
     },
     {
       "subset": "pre_gaia_edr3_toi_created",
       "n": 1527,
       "test_size": 306,
       "accuracy": 0.866,
-      "roc_auc": 0.9399,
-      "f1_score": 0.8664,
-      "brier_score": 0.1008
+      "roc_auc": 0.9418,
+      "f1_score": 0.8647,
+      "brier_score": 0.0995
     },
     {
       "subset": "post_gaia_edr3_toi_created",
       "n": 1140,
       "test_size": 228,
-      "accuracy": 0.864,
-      "roc_auc": 0.9156,
-      "f1_score": 0.8681,
-      "brier_score": 0.123
+      "accuracy": 0.8465,
+      "roc_auc": 0.9074,
+      "f1_score": 0.8523,
+      "brier_score": 0.1293
     }
   ],
-  "generated_at": "2026-08-11T11:12:38.846011+00:00"
+  "generated_at": "2026-10-11T14:43:03.693121+00:00"
 }

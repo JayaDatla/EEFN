@@ -1,6 +1,9 @@
 import logging
+import math
 import os
 import pickle
+
+import sklearn
 import uuid
 import numpy as np
 import pandas as pd
@@ -32,6 +35,11 @@ class PredictionEngine:
                 self.model = artifacts["model"]
                 self.imputer = artifacts["imputer"]
                 self.feature_names = artifacts["features"]
+                trained_with = artifacts.get("sklearn_version")
+                if trained_with and trained_with != sklearn.__version__:
+                    logger.warning("model_artifacts.pkl was trained with scikit-learn %s but %s is "
+                                   "installed; retrain via validation/scripts/train_and_serialize_model.py "
+                                   "if predictions misbehave.", trained_with, sklearn.__version__)
                 self.loaded = True
                 logger.info("EEFN PredictionEngine loaded Random Forest model successfully.")
             except Exception as e:
@@ -52,14 +60,14 @@ class PredictionEngine:
         Rad = data.get("Rad", st_rad)
         st_dist = data.get("st_dist")
         Dist = data.get("Dist", st_dist)
-        st_tmag = data.get("st_tmag")
-        Gmag = data.get("Gmag", st_tmag)
 
         return {
             "st_teff": st_teff, "Teff": Teff,
             "st_rad": st_rad, "Rad": Rad,
             "st_dist": st_dist, "Dist": Dist,
-            "st_tmag": st_tmag, "Gmag": Gmag,
+            "Plx": data.get("Plx"),
+            "Jmag": data.get("Jmag"), "Hmag": data.get("Hmag"), "Kmag": data.get("Kmag"),
+            "PS_gmag": data.get("PS_gmag"), "PS_rmag": data.get("PS_rmag"),
             "pl_trandep": data.get("pl_trandep"),
             "pl_rade": data.get("pl_rade"),
             "RUWE": data.get("RUWE"),
@@ -81,7 +89,6 @@ class PredictionEngine:
         st_teff, Teff = raw["st_teff"], raw["Teff"]
         st_rad, Rad = raw["st_rad"], raw["Rad"]
         st_dist, Dist = raw["st_dist"], raw["Dist"]
-        st_tmag, Gmag = raw["st_tmag"], raw["Gmag"]
         pl_trandep, pl_rade, RUWE = raw["pl_trandep"], raw["pl_rade"], raw["RUWE"]
 
         def diff(a, b):
@@ -93,7 +100,14 @@ class PredictionEngine:
         teff_diff = diff(st_teff, Teff)
         rad_diff = diff(st_rad, Rad)
         dist_diff = diff(st_dist, Dist)
-        tmag_gmag_diff = diff(st_tmag, Gmag)
+
+        def colour(a, b):
+            return a - b if a is not None and b is not None else None
+
+        # abs_K from the Gaia parallax (mas): M = m + 5*log10(plx_mas) - 10. An independent
+        # luminosity-class indicator (giants vs dwarfs) to hold against the catalog radius.
+        Plx, Kmag = raw["Plx"], raw["Kmag"]
+        abs_K = (Kmag + 5.0 * math.log10(max(Plx, 1e-3)) - 10.0) if Plx is not None and Kmag is not None else None
 
         # Shared with ingest.py via app.science.radius (UPGRADE_PLAN.md E.3) so the two
         # can never compute a different derived radius for the same inputs.
@@ -115,7 +129,6 @@ class PredictionEngine:
             "pl_rade": pl_rade,
             "pl_insol": raw["pl_insol"],
             "pl_eqt": raw["pl_eqt"],
-            "st_tmag": st_tmag,
             "st_teff": st_teff,
             "st_rad": st_rad,
             "st_logg": raw["st_logg"],
@@ -126,7 +139,6 @@ class PredictionEngine:
             "rad_diff_rel": rel(rad_diff, Rad),
             "dist_diff": dist_diff,
             "dist_diff_rel": rel(dist_diff, Dist),
-            "tmag_gmag_diff": tmag_gmag_diff,
             "derived_rp_gaia": derived_rp_gaia,
             "derived_rp_diff": derived_rp_diff,
             "derived_rp_diff_rel": rel(derived_rp_diff, pl_rade),
@@ -134,7 +146,26 @@ class PredictionEngine:
             "RUWE": RUWE,
             "high_ruwe": high_ruwe,
             "completeness": completeness,
+            "j_k": colour(raw["Jmag"], Kmag),
+            "h_k": colour(raw["Hmag"], Kmag),
+            "abs_K": abs_K,
+            "ps_g_r": colour(raw["PS_gmag"], raw["PS_rmag"]),
         }
+
+    def _contributions(self, X_imputed: np.ndarray) -> Tuple[np.ndarray, float]:
+        """Per-feature attribution of the positive-class probability, in probability units
+        (they sum to p - bias). LightGBM supplies exact TreeSHAP values in log-odds space;
+        those are rescaled proportionally so the total shift matches the probability shift
+        from the base rate, which keeps the API's existing 'percentage-point' meaning."""
+        if hasattr(self.model, "estimators_"):
+            return self._rf_contributions(X_imputed)
+        raw = self.model.predict(X_imputed, pred_contrib=True)[0]
+        phi, base_logit = raw[:-1], float(raw[-1])
+        bias = 1.0 / (1.0 + math.exp(-base_logit))
+        p = float(self.model.predict_proba(X_imputed)[0][1])
+        total = float(phi.sum())
+        scale = (p - bias) / total if abs(total) > 1e-12 else 0.0
+        return phi * scale, bias
 
     def _rf_contributions(self, X_imputed: np.ndarray) -> Tuple[np.ndarray, float]:
         """Per-instance feature attribution for the RF's positive-class probability,
@@ -188,17 +219,26 @@ class PredictionEngine:
 
             host_obj = candidate_obj.host
 
+            # The model is trained on TIC/Gaia Teff and radius, so serving must feed it the same
+            # quantities. An earlier version substituted APOGEE spectroscopic Teff/radius for hosts
+            # with spectroscopy_is_real, which silently changed the distribution of teff_diff/
+            # rad_diff relative to training (and, before real_sync nulled seed values, could even
+            # pass fabricated numbers). Spectroscopy is reported as evidence, not model input.
             data = {
                 "st_teff": host_obj.teff if host_obj else None,
-                "Teff": (host_obj.teff_spec if host_obj and host_obj.teff_spec is not None else (host_obj.teff if host_obj else None)),
+                "Teff": host_obj.teff if host_obj else None,
                 "st_rad": host_obj.rad if host_obj else None,
-                "Rad": (host_obj.rad_spec if host_obj and host_obj.rad_spec is not None else (host_obj.rad if host_obj else None)),
+                "Rad": host_obj.rad if host_obj else None,
                 "st_dist": host_obj.distance if host_obj else None,
                 "Dist": host_obj.distance if host_obj else None,
-                # No TESS magnitude column exists in HostStar/ExoplanetCandidate today --
-                # left unset (None) rather than a fabricated 10.0; the imputer handles it.
-                "st_tmag": None,
-                "Gmag": host_obj.g_mag if host_obj else None,
+                "Plx": host_obj.parallax if host_obj else None,
+                "Jmag": host_obj.j_mag if host_obj else None,
+                "Hmag": host_obj.h_mag if host_obj else None,
+                "Kmag": host_obj.k_mag if host_obj else None,
+                # HostStar.g_mag/r_mag are Pan-STARRS DR1 bands (not Gaia G) -- matches the
+                # PS_gmag/PS_rmag columns the model was trained on.
+                "PS_gmag": host_obj.g_mag if host_obj else None,
+                "PS_rmag": host_obj.r_mag if host_obj else None,
                 "pl_trandep": candidate_obj.trandep,
                 "pl_rade": candidate_obj.rade,
                 "RUWE": host_obj.ruwe if host_obj else None,
@@ -236,7 +276,7 @@ class PredictionEngine:
         # here; C.5 will change this multiplier to a softer, density-aware weighting.
         priority_score = evidence_score * (0.1 if is_unphysical else 1.0)
 
-        contributions, bias = self._rf_contributions(X_imputed)
+        contributions, bias = self._contributions(X_imputed)
         contrib_by_feature = dict(zip(self.feature_names, contributions))
         top_contrib = dict(
             sorted(contrib_by_feature.items(), key=lambda kv: abs(kv[1]), reverse=True)[:5]

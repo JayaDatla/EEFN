@@ -1,0 +1,60 @@
+{
+  "n_kois": 205,
+  "n_stars": 169,
+  "class_counts": {
+    "Planet Transit": 100,
+    "Eclipsing Binary": 66,
+    "Not Transit-Like": 39
+  },
+  "protocol": "StratifiedGroupKFold(k=5) x 2 repeats, grouped by KIC",
+  "models": {
+    "features_gbm": {
+      "accuracy_mean": 0.8390243902439025,
+      "accuracy_std": 0.04390243902439024,
+      "macro_f1_mean": 0.8202684931509022,
+      "macro_f1_std": 0.057358653377509394,
+      "per_class_recall": {
+        "Planet Transit": 0.88,
+        "Eclipsing Binary": 0.819,
+        "Not Transit-Like": 0.77
+      },
+      "n_folds": 10
+    },
+    "compact_cnn": {
+      "accuracy_mean": 0.7207317073170731,
+      "accuracy_std": 0.06240995893621456,
+      "macro_f1_mean": 0.7226973665219334,
+      "macro_f1_std": 0.07006075160137017,
+      "per_class_recall": {
+        "Planet Transit": 0.63,
+        "Eclipsing Binary": 0.833,
+        "Not Transit-Like": 0.758
+      },
+      "n_folds": 20
+    },
+    "hybrid": {
+      "accuracy_mean": 0.8365853658536586,
+      "accuracy_std": 0.06639345165276195,
+      "macro_f1_mean": 0.8202307825908306,
+      "macro_f1_std": 0.07961078862478861,
+      "per_class_recall": {
+        "Planet Transit": 0.91,
+        "Eclipsing Binary": 0.789,
+        "Not Transit-Like": 0.727
+      },
+      "n_folds": 10
+    },
+    "baseline_cnn": {
+      "accuracy_mean": 0.6390243902439025,
+      "accuracy_std": 0.10393793050079278,
+      "macro_f1_mean": 0.5877885396965212,
+      "macro_f1_std": 0.1371103584879972,
+      "per_class_recall": {
+        "Planet Transit": 0.775,
+        "Eclipsing Binary": 0.508,
+        "Not Transit-Like": 0.516
+      },
+      "n_folds": 10
+    }
+  }
+}

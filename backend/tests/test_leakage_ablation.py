@@ -40,6 +40,12 @@ def _synthetic_labeled_df(n=200, seed=0):
         "Dist": rng.uniform(10, 500, n),
         "Gmag": rng.uniform(8, 14, n),
         "RUWE": rng.uniform(0.8, 2.0, n),
+        "Plx": rng.uniform(2, 50, n),
+        "Jmag": rng.uniform(8, 13, n),
+        "Hmag": rng.uniform(8, 13, n),
+        "Kmag": rng.uniform(8, 13, n),
+        "PS_gmag": rng.uniform(9, 15, n),
+        "PS_rmag": rng.uniform(9, 15, n),
     })
     return df
 

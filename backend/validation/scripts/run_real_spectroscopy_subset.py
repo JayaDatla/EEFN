@@ -21,76 +21,38 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from app.db.session import SessionLocal
 from app.db.models import HostStar
-from app.pipeline.spectroscopy import fetch_real_spectroscopy, APOGEE_DR17_CATALOG
+from app.pipeline.real_sync import sync_real_spectroscopy
+from app.pipeline.spectroscopy import APOGEE_DR17_CATALOG
 
 
 def run(limit: int) -> dict:
     db = SessionLocal()
-    stars = (
-        db.query(HostStar)
-        .filter(HostStar.spectroscopy_is_real.is_(False))
-        .order_by(HostStar.hostname.asc())
-        .limit(limit)
-        .all()
-    )
+    try:
+        summary = sync_real_spectroscopy(db, limit=limit)
+        total = db.query(HostStar).filter(HostStar.spectroscopy_is_real.is_(True)).count()
+    finally:
+        db.close()
 
-    results = []
-    for star in stars:
-        spec = fetch_real_spectroscopy(star.ra, star.dec)
-        if not spec:
-            results.append({"hostname": star.hostname, "status": "no_match"})
-            continue
-
-        if spec.teff_spec is not None:
-            star.teff_spec = spec.teff_spec
-        if spec.fe_h is not None:
-            star.fe_h = spec.fe_h
-        star.spectroscopy_is_real = True
-        star.spectroscopy_source = f"APOGEE-2 DR17 (VizieR {APOGEE_DR17_CATALOG})"
-        star.spectroscopy_computed_at = datetime.now(timezone.utc)
-        db.add(star)
-        db.commit()
-
-        print(f"{star.hostname}: teff_spec={spec.teff_spec} fe_h={spec.fe_h} logg={spec.logg_spec}")
-        results.append({
-            "hostname": star.hostname, "status": "matched",
-            "teff_spec": spec.teff_spec, "fe_h": spec.fe_h, "logg_spec": spec.logg_spec,
-        })
-
-    db.close()
-
-    total_real = db_count_real_spectroscopy()
     report = {
         "run_at": datetime.now(timezone.utc).isoformat(),
         "catalog": APOGEE_DR17_CATALOG,
-        "attempted_this_run": len(results),
-        "matched_this_run": sum(1 for r in results if r["status"] == "matched"),
-        "results_this_run": results,
-        "total_hosts_with_real_spectroscopy": total_real,
+        "attempted_this_run": summary["attempted"],
+        "matched_this_run": summary["matched"],
+        "results_this_run": summary["results"],
+        "total_hosts_with_real_spectroscopy": total,
         "note": (
             "APOGEE-2 is a targeted spectroscopic survey with limited sky coverage, not "
-            "all-sky -- a low match rate here is the expected, honest result, not a bug. "
-            "spectroscopy_is_real=True on a host star means teff_spec/fe_h came from a real "
-            "VizieR query against APOGEE-2 DR17, not seed_db.py's fabricated demo values."
+            "all-sky -- a low match rate is the expected, honest result, not a bug."
         ),
     }
-
     report_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
         "app", "ml", "spectroscopy_subset_report.json",
     )
     with open(report_path, "w") as f:
         json.dump(report, f, indent=2)
-    print(f"\nWrote report to {report_path}")
+    print(f"Wrote report to {report_path}")
     return report
-
-
-def db_count_real_spectroscopy() -> int:
-    db = SessionLocal()
-    try:
-        return db.query(HostStar).filter(HostStar.spectroscopy_is_real.is_(True)).count()
-    finally:
-        db.close()
 
 
 if __name__ == "__main__":

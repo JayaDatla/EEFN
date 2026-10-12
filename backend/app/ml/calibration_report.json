@@ -1,79 +1,79 @@
 {
-  "model_version": "rf-evidence-consistency-1.1.0",
+  "model_version": "lgbm-evidence-consistency-2.0.0",
   "test_size": 534,
-  "brier_score": 0.1127,
+  "brier_score": 0.1003,
   "reliability_bins": [
     {
       "bin_lower": 0.0,
       "bin_upper": 0.1,
-      "count": 86,
-      "mean_predicted_probability": 0.0483,
-      "observed_frequency": 0.0
+      "count": 164,
+      "mean_predicted_probability": 0.0302,
+      "observed_frequency": 0.0061
     },
     {
       "bin_lower": 0.1,
       "bin_upper": 0.2,
-      "count": 53,
-      "mean_predicted_probability": 0.1362,
-      "observed_frequency": 0.0377
+      "count": 33,
+      "mean_predicted_probability": 0.1544,
+      "observed_frequency": 0.1212
     },
     {
       "bin_lower": 0.2,
       "bin_upper": 0.3,
-      "count": 47,
-      "mean_predicted_probability": 0.2434,
-      "observed_frequency": 0.1277
+      "count": 22,
+      "mean_predicted_probability": 0.2584,
+      "observed_frequency": 0.4091
     },
     {
       "bin_lower": 0.3,
       "bin_upper": 0.4,
-      "count": 35,
-      "mean_predicted_probability": 0.352,
-      "observed_frequency": 0.2286
+      "count": 13,
+      "mean_predicted_probability": 0.35,
+      "observed_frequency": 0.4615
     },
     {
       "bin_lower": 0.4,
       "bin_upper": 0.5,
-      "count": 36,
-      "mean_predicted_probability": 0.4444,
-      "observed_frequency": 0.5
+      "count": 25,
+      "mean_predicted_probability": 0.4556,
+      "observed_frequency": 0.52
     },
     {
       "bin_lower": 0.5,
       "bin_upper": 0.6,
-      "count": 39,
-      "mean_predicted_probability": 0.5533,
-      "observed_frequency": 0.7179
+      "count": 21,
+      "mean_predicted_probability": 0.5296,
+      "observed_frequency": 0.5238
     },
     {
       "bin_lower": 0.6,
       "bin_upper": 0.7,
-      "count": 44,
-      "mean_predicted_probability": 0.66,
-      "observed_frequency": 0.6818
+      "count": 18,
+      "mean_predicted_probability": 0.6597,
+      "observed_frequency": 0.5556
     },
     {
       "bin_lower": 0.7,
       "bin_upper": 0.8,
-      "count": 46,
-      "mean_predicted_probability": 0.7548,
-      "observed_frequency": 0.8043
+      "count": 28,
+      "mean_predicted_probability": 0.7572,
+      "observed_frequency": 0.8571
     },
     {
       "bin_lower": 0.8,
       "bin_upper": 0.9,
-      "count": 76,
-      "mean_predicted_probability": 0.8488,
-      "observed_frequency": 0.8684
+      "count": 68,
+      "mean_predicted_probability": 0.8466,
+      "observed_frequency": 0.8529
     },
     {
       "bin_lower": 0.9,
       "bin_upper": 1.0,
-      "count": 72,
-      "mean_predicted_probability": 0.9432,
-      "observed_frequency": 0.9722
+      "count": 142,
+      "mean_predicted_probability": 0.9525,
+      "observed_frequency": 0.9085
     }
   ],
-  "evaluated_at": "2026-08-11T11:08:18.187409+00:00",
+  "evaluated_at": "2026-10-11T13:56:13.911256+00:00",
   "note": "Reliability bins group predicted probabilities into 10 equal-width buckets on the same held-out test split as model_metrics.json; a well-calibrated model has observed_frequency close to mean_predicted_probability in every bin with a non-trivial count. Bins with count=0 have null frequencies -- never interpolated or fabricated."
 }

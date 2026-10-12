@@ -28,10 +28,13 @@ OUTPUT_PATH = os.path.join(REPO_ROOT, "backend", "app", "ml", "leakage_rv_confir
 
 
 def fetch_rv_confirmed_tic_ids() -> set:
-    query = "SELECT DISTINCT tic_id FROM ps WHERE discoverymethod = 'Radial Velocity' AND tic_id IS NOT NULL"
-    r = requests.get(NASA_TAP_URL, params={"query": query, "format": "csv"}, timeout=30)
+    # Lower-case and without "IS NOT NULL": the archive's web-application firewall started
+    # answering HTTP 403 to the upper-case `... AND tic_id IS NOT NULL` form of this query
+    # (the same query without that clause returns 200), so nulls are dropped client-side.
+    query = "select distinct tic_id from ps where discoverymethod='Radial Velocity'"
+    r = requests.get(NASA_TAP_URL, params={"query": query, "format": "csv"}, timeout=60)
     r.raise_for_status()
-    tics = pd.read_csv(io.StringIO(r.text))
+    tics = pd.read_csv(io.StringIO(r.text)).dropna(subset=["tic_id"])
     return set(tics["tic_id"].str.replace("TIC ", "", regex=False).astype(int))
 
 

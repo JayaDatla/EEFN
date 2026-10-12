@@ -37,8 +37,10 @@ with no network access needed at train time.
 import argparse
 import json
 import os
+import shutil
 import sys
 import time
+from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 import requests
@@ -130,7 +132,49 @@ def fetch_real_lightcurve(kepid: int) -> dict | None:
         return {"time": time_arr, "flux": flux}
     except Exception as e:
         print(f"    fetch failed for KIC {kepid}: {e}")
+        _purge_lightkurve_cache(kepid)
         return None
+
+
+def _purge_lightkurve_cache(kepid: int) -> None:
+    """A download interrupted mid-file leaves a truncated FITS in lightkurve's own cache
+    that makes every later attempt for that star fail with 'file may be corrupt'.
+    Removing it lets a re-run fetch the star cleanly."""
+    import glob
+    cache_root = os.path.join(os.path.expanduser("~"), ".cache", "lightkurve", "mastDownload", "Kepler")
+    for path in glob.glob(os.path.join(cache_root, f"kplr{int(kepid):09d}_lc_*")):
+        shutil.rmtree(path, ignore_errors=True)
+
+
+class _NoLimit:
+    def acquire(self):
+        time.sleep(0.5)
+
+
+def crossmatch_photometry(rows: list) -> dict:
+    """Real CDS X-Match of every Kepler star against 2MASS and Pan-STARRS DR1 (the same
+    two catalogs ingest.py wires in for TESS candidates, via the same xmatch_catalog
+    helper). Returns {kepid: {j_mag, h_mag, k_mag, g_mag, r_mag}}; stars with no match
+    are simply absent (presence=0 downstream), never filled with a default."""
+    import pandas as pd
+    from app.pipeline import catalog_registry as catalog
+    from app.pipeline.ingest import xmatch_catalog
+
+    lines = [f"{r['kepid']},{r['ra']},{r['dec']}" for r in rows if r.get("ra") is not None]
+    csv = "\n".join(["toi,ra,dec"] + lines)
+    limiter = _NoLimit()
+    out: dict = {}
+    two = xmatch_catalog(catalog.TWO_MASS, csv, limiter, ["toi", "Jmag", "Hmag", "Kmag"])
+    ps = xmatch_catalog(catalog.PAN_STARRS, csv, limiter, ["toi", "gmag", "rmag"])
+    for df, mapping in ((two, {"Jmag": "j_mag", "Hmag": "h_mag", "Kmag": "k_mag"}),
+                        (ps, {"gmag": "g_mag", "rmag": "r_mag"})):
+        for _, r in df.iterrows():
+            entry = out.setdefault(int(r["toi"]), {})
+            for src, dst in mapping.items():
+                v = r.get(src)
+                if v is not None and pd.notna(v):
+                    entry[dst] = float(v)
+    return out
 
 
 def build_metadata(row: dict) -> dict:
@@ -138,11 +182,16 @@ def build_metadata(row: dict) -> dict:
     other optional field (RUWE, 2MASS/Pan-STARRS photometry, catalog-disagreement
     deltas) is genuinely not cross-matched here and stays absent -- build_metadata_vector
     marks it with a real presence=0 bit rather than substituting a fabricated value."""
-    return {
+    meta = {
         "st_teff": row.get("koi_steff"),
         "st_rad": row.get("koi_srad"),
         "trandep": row.get("koi_depth"),
+        "kepid": row.get("kepid"),
+        "period": row.get("koi_period"),
+        "duration_hours": row.get("koi_duration"),
     }
+    meta.update(row.get("_photometry") or {})
+    return meta
 
 
 def save_dataset(data_list: list) -> None:
@@ -161,7 +210,7 @@ def save_dataset(data_list: list) -> None:
         json.dump([d[3] for d in data_list], f)
 
 
-def run(per_class: int, sleep_between: float = 0.5):
+def run(per_class: int, sleep_between: float = 0.0, workers: int = 4):
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(LC_CACHE_DIR, exist_ok=True)
 
@@ -175,6 +224,15 @@ def run(per_class: int, sleep_between: float = 0.5):
         rows = fetch_koi_rows(label, where, per_class)
         print(f"  {len(rows)} real KOI rows matched (requested up to {per_class}).")
         per_label_attempted[label] = len(rows)
+        phot = crossmatch_photometry(rows)
+        print(f"  2MASS/Pan-STARRS matched {len(phot)}/{len(rows)} stars.")
+        for row in rows:
+            row["_photometry"] = phot.get(int(row["kepid"]), {})
+        todo = [r["kepid"] for r in rows if not os.path.exists(os.path.join(LC_CACHE_DIR, f"{r['kepid']}.npz"))]
+        if todo:
+            print(f"  prefetching {len(todo)} uncached light curves with {workers} processes ...")
+            with ProcessPoolExecutor(max_workers=workers) as ex:
+                list(ex.map(fetch_real_lightcurve, todo))
         n_ok = 0
         for i, row in enumerate(rows):
             kepid = row["kepid"]
@@ -256,6 +314,7 @@ def run(per_class: int, sleep_between: float = 0.5):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--per-class", type=int, default=8)
-    parser.add_argument("--sleep", type=float, default=0.5, help="seconds between star downloads (politeness)")
+    parser.add_argument("--sleep", type=float, default=0.0, help="seconds between star downloads (politeness)")
+    parser.add_argument("--workers", type=int, default=4, help="parallel MAST downloads")
     args = parser.parse_args()
-    run(args.per_class, args.sleep)
+    run(args.per_class, args.sleep, args.workers)

@@ -1,17 +1,17 @@
 {
   "methodology": "`holdout` = TOI candidates whose TIC ID hosts a radial-velocity-discovered confirmed planet per the NASA Exoplanet Archive `ps` table -- ground truth entirely independent of TESS/TFOP/Gaia-informed disposition. `model_never_saw_holdout` is trained with these rows excluded entirely (a true generalization test); `model_trained_on_full_dataset` matches the production model_artifacts.pkl methodology and includes these rows in training, shown for comparison -- a large gap between the two would suggest the production model's apparent skill on similar targets is driven by memorization rather than genuine signal.",
-  "n_rv_confirmed_tic_ids_in_archive": 872,
-  "n_holdout_candidates": 103,
+  "n_rv_confirmed_tic_ids_in_archive": 876,
+  "n_holdout_candidates": 104,
   "holdout_all_positive_label": true,
   "model_never_saw_holdout": {
-    "recall_on_rv_confirmed_planets": 0.932,
-    "mean_predicted_probability": 0.7683,
-    "n_train": 2564
+    "recall_on_rv_confirmed_planets": 0.9135,
+    "mean_predicted_probability": 0.7638,
+    "n_train": 2563
   },
   "model_trained_on_full_dataset": {
     "recall_on_rv_confirmed_planets": 1.0,
-    "mean_predicted_probability": 0.9223
+    "mean_predicted_probability": 0.9237
   },
   "caveat": "This checks recall on independently-confirmed real planets only -- it cannot by itself measure false-positive rate on this clean-label set, since RV-mass confirmation doesn't produce independently-verified negative examples the same way. See LIMITATIONS.md Section 1.1.",
-  "generated_at": "2026-08-11T11:14:30.589830+00:00"
+  "generated_at": "2026-10-11T15:15:11.199736+00:00"
 }

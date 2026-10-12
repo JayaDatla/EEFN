@@ -61,7 +61,7 @@ def test_get_model_metrics():
     response = client.get("/api/v1/predictions/metrics")
     assert response.status_code == 200
     data = response.json()
-    assert data["model_type"] == "Random Forest Classifier"
+    assert data["model_type"] == "LightGBM gradient-boosted trees"
     assert "metrics" in data
     assert "accuracy" in data["metrics"]
     assert "evaluated_at" in data
@@ -145,10 +145,43 @@ def test_quality_endpoints():
         assert "gaia_matched" in res_res.json()
         
         # Test Override
-        override_res = client.post(f"/api/v1/candidates/{toi_id}/resolution/override", json={"gaia_id": "123456789"})
-        assert override_res.status_code == 200
-        assert override_res.json()["status"] == "success"
-        
+        # This test runs against the shared live dev DB, not an isolated fixture
+        # (test_ingest_upsert.py's isolated_db pattern would be the real fix, out of
+        # scope here) -- so a destructive write must restore what it changed, or every
+        # pytest run permanently corrupts whichever real candidate ranks #1 by
+        # follow-up priority. Found live: this test had been silently overwriting that
+        # candidate's real host_star.hostname with a hardcoded fake "Gaia DR3
+        # 123456789" on every run all session, with no restore -- two real candidates
+        # (whichever ranked #1 at the time) ended up with a corrupted hostname that no
+        # longer matches ingest.py's `f"TIC {tid}"` upsert key, so a future re-sync
+        # would silently create a duplicate host row instead of updating the real one.
+        # The endpoint (audit_timeline.manual_override_link) unconditionally writes
+        # `f"Gaia DR3 {new_gaia_id}"`, so it cannot itself restore a "TIC ..."
+        # original hostname -- the restore has to go directly through the DB.
+        from app.db.session import SessionLocal
+        from app.db import models as _models
+
+        original_hostname = None
+        detail_res = client.get(f"/api/v1/candidates/{toi_id}")
+        if detail_res.status_code == 200:
+            original_hostname = detail_res.json().get("star", {}).get("hostname")
+        try:
+            override_res = client.post(f"/api/v1/candidates/{toi_id}/resolution/override", json={"gaia_id": "123456789"})
+            assert override_res.status_code == 200
+            assert override_res.json()["status"] == "success"
+        finally:
+            if original_hostname:
+                restore_db = SessionLocal()
+                try:
+                    cand_row = restore_db.query(_models.ExoplanetCandidate).filter(
+                        _models.ExoplanetCandidate.toi_id == toi_id
+                    ).first()
+                    if cand_row and cand_row.host:
+                        cand_row.host.hostname = original_hostname
+                        restore_db.commit()
+                finally:
+                    restore_db.close()
+
         # Test Timeline
         tl_res = client.get(f"/api/v1/candidates/{toi_id}/timeline")
         assert tl_res.status_code == 200
@@ -278,3 +311,55 @@ def test_write_endpoints_require_api_key_when_configured(monkeypatch):
     # auth is scoped to write endpoints only, per the plan.
     read_resp = client.get("/api/v1/candidates?limit=1")
     assert read_resp.status_code == 200
+
+
+def test_lightcurve_vetter_report_is_served_from_real_artifact():
+    import json
+    from app.api.endpoints import _ML_DIR
+
+    path = os.path.normpath(os.path.join(_ML_DIR, "lightcurve_vetter_report.json"))
+    response = client.get("/api/v1/predictions/lightcurve_vetter")
+    assert response.status_code == 200
+    data = response.json()
+    with open(path) as f:
+        on_disk = json.load(f)
+    assert data["cv_accuracy_mean"] == on_disk["cv_accuracy_mean"]
+    assert 0.0 < data["cv_accuracy_mean"] <= 1.0
+    assert data["cv_accuracy_mean"] > data["majority_class_baseline"]
+    assert data["known_gaps"]
+
+
+def test_transit_pipeline_never_classifies_the_simulated_curve():
+    """/transit_pipeline synthesises its light curve from the candidate's own catalog
+    numbers, so it must not run the vetting model on it: with no stored real-light-curve
+    result the classification is empty and the source says so."""
+    cands = client.get("/api/v1/candidates?limit=1").json()
+    items = cands["items"] if isinstance(cands, dict) else cands
+    if not items:
+        return
+    toi_id = items[0]["toi_id"]
+    r = client.get(f"/api/v1/candidates/{toi_id}/transit_pipeline")
+    assert r.status_code == 200
+    body = r.json()
+    if body["dl_input_source"] == "simulated_not_classified":
+        assert body["dl_classification"] == {}
+        assert body["dl_model_status"] == "no_real_lightcurve"
+        assert body["dl_note"]
+    else:
+        assert body["dl_input_source"] == "real_tess_spoc_2min"
+        assert abs(sum(body["dl_classification"].values()) - 1.0) < 1e-6
+
+
+def test_candidate_profile_exposes_real_observations_honestly():
+    r = client.get("/api/v1/candidates?limit=1").json()
+    items = r["items"] if isinstance(r, dict) else r
+    if not items:
+        return
+    body = client.get(f"/api/v1/candidates/{items[0]['toi_id']}").json()
+    obs = body["real_observations"]
+    assert set(obs) == {"centroid", "lightcurve_vetting"}
+    if not obs["centroid"]["measured"]:
+        # An unmeasured centroid must read as unmeasured, never as a clean zero.
+        assert obs["centroid"]["photocentre_shift_arcsec"] is None and obs["centroid"]["is_dip"] is None
+    if obs["lightcurve_vetting"]["status"] != "vetted":
+        assert obs["lightcurve_vetting"]["classification"] is None

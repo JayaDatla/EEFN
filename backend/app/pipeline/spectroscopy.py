@@ -13,6 +13,8 @@ import logging
 from dataclasses import dataclass
 from typing import Optional
 
+from app.pipeline.errors import TransientCatalogError
+
 logger = logging.getLogger(__name__)
 
 APOGEE_DR17_CATALOG = "III/286"
@@ -41,9 +43,9 @@ def fetch_real_spectroscopy(ra_deg: float, dec_deg: float) -> Optional[Spectrosc
         vizier.ROW_LIMIT = 1
         coord = SkyCoord(ra=ra_deg * u.deg, dec=dec_deg * u.deg, frame="icrs")
         result = vizier.query_region(coord, radius=MATCH_RADIUS_ARCSEC * u.arcsec, catalog=APOGEE_DR17_CATALOG)
-    except Exception:
+    except Exception as e:
         logger.exception("APOGEE DR17 VizieR query failed for ra=%s dec=%s", ra_deg, dec_deg)
-        return None
+        raise TransientCatalogError(f"VizieR APOGEE query failed: {e}") from e
 
     if not result or len(result) == 0 or len(result[0]) == 0:
         return None

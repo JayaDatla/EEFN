@@ -37,6 +37,15 @@ class Settings(BaseSettings):
     # pointed directly at a Slack incoming-webhook URL, without a Slack-specific path.
     WEBHOOK_URLS: str = ""
 
+    # Scheduled real-data enrichment (Arq cron, app/worker.py). Each nightly run only
+    # attempts this many never-/long-ago-attempted targets: TPF downloads are the
+    # expensive part, so the whole catalog is covered incrementally, not in one pass.
+    CENTROID_SYNC_BATCH: int = 15
+    SPECTROSCOPY_SYNC_BATCH: int = 100
+    LIGHTCURVE_SYNC_BATCH: int = 10
+    # A target with no TPF / no APOGEE match is not retried until this many days later.
+    SYNC_RETRY_AFTER_DAYS: int = 90
+
     class Config:
         env_file = ".env"
 

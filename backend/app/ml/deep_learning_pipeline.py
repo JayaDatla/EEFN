@@ -476,7 +476,10 @@ class DeepLearningVettingEngine:
         derived_rp = gaia_rad * math.sqrt(max(0.0, trandep) * 1e-6) * 109.2
         is_unphysical_veto = bool(derived_rp > 22.0)
         if is_unphysical_veto:
-            veto_prior = np.array([0.02, 0.90, 0.05, 0.03])
+            # Built from self.classes (not a hardcoded vector) so it can never again fall
+            # out of sync with the output head's width.
+            veto_weights = {"Planet Transit": 0.02, "Eclipsing Binary": 0.93, "Not Transit-Like": 0.05}
+            veto_prior = np.array([veto_weights[c] for c in self.classes])
             probabilities = 0.15 * probabilities + 0.85 * veto_prior
             probabilities = probabilities / probabilities.sum()
 

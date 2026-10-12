@@ -1,0 +1,25 @@
+{
+  "n_vetted": 50,
+  "n_planets": 25,
+  "n_non_planets": 25,
+  "accuracy": 0.76,
+  "roc_auc_planet_vs_not": 0.8096,
+  "planet_recall": 0.88,
+  "non_planet_recall": 0.64,
+  "confusion": {
+    "planet_called_planet": 22,
+    "planet_called_not": 3,
+    "non_planet_called_not": 16,
+    "non_planet_called_planet": 9
+  },
+  "status_counts": {
+    "vetted": 50,
+    "no_lightcurve": 7
+  },
+  "caveats": [
+    "TFOP dispositions were assigned by humans who inspected these same TESS light curves (plus Gaia and centroids): agreement measures reproduction of human vetting, not independent discovery.",
+    "Kepler -> TESS domain shift (noise, number of transits per target) is exactly what this measures.",
+    "Small sample; treat the accuracy as +/- several points."
+  ],
+  "model_version": "lightcurve-vetter-gbm-1.1.0"
+}

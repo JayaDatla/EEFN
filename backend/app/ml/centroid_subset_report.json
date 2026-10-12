@@ -1,49 +1,85 @@
 {
-  "run_at": "2026-08-12T07:03:30.953660+00:00",
+  "run_at": "2026-10-11T16:02:03.697757+00:00",
+  "method": "aperture-restricted centroids, per-event local linear baseline, empirical fake-epoch null, implied source offset = shift/depth (app/pipeline/mast_centroid.py)",
   "attempted_this_run": 5,
   "measured_this_run": 5,
   "results_this_run": [
     {
       "toi_id": 101.01,
-      "tic_id": 231663901,
       "status": "measured",
-      "offset_arcsec": 0.004629437842601855,
-      "significance_sigma": 0.3789234324480726,
-      "sector": 1
+      "offset_arcsec": 0.01366728371914814,
+      "significance_sigma": 5.131402995227791,
+      "sector": 1,
+      "n_events": 34,
+      "n_sectors": 2,
+      "implied_offset_arcsec": 0.8553696366803811,
+      "is_dip": false,
+      "previous_estimator": {
+        "shift_arcsec": 0.004629437842601855,
+        "sigma": 0.3789234324480726
+      }
     },
     {
       "toi_id": 102.01,
-      "tic_id": 149603524,
       "status": "measured",
-      "offset_arcsec": 0.025344726907549586,
-      "significance_sigma": 0.9082897051165189,
-      "sector": 1
+      "offset_arcsec": 0.006533767903236155,
+      "significance_sigma": 1.6100911781115066,
+      "sector": 1,
+      "n_events": 12,
+      "n_sectors": 2,
+      "implied_offset_arcsec": 0.5082352978602876,
+      "is_dip": false,
+      "previous_estimator": {
+        "shift_arcsec": 0.025344726907549586,
+        "sigma": 0.9082897051165189
+      }
     },
     {
       "toi_id": 103.01,
-      "tic_id": 336732616,
       "status": "measured",
-      "offset_arcsec": 0.0133354131791593,
-      "significance_sigma": 0.30863233680416596,
-      "sector": 1
+      "offset_arcsec": 0.002466765308009854,
+      "significance_sigma": 0.48278861284964875,
+      "sector": 1,
+      "n_events": 16,
+      "n_sectors": 2,
+      "implied_offset_arcsec": 0.2460179420807646,
+      "is_dip": false,
+      "previous_estimator": {
+        "shift_arcsec": 0.0133354131791593,
+        "sigma": 0.30863233680416596
+      }
     },
     {
       "toi_id": 104.01,
-      "tic_id": 231670397,
       "status": "measured",
-      "offset_arcsec": 0.11351457206631983,
-      "significance_sigma": 5.427125398827811,
-      "sector": 1
+      "offset_arcsec": 0.015936731225411473,
+      "significance_sigma": 1.9740883911953635,
+      "sector": 1,
+      "n_events": 12,
+      "n_sectors": 2,
+      "implied_offset_arcsec": 4.549911917966673,
+      "is_dip": false,
+      "previous_estimator": {
+        "shift_arcsec": 0.11351457206631983,
+        "sigma": 5.427125398827811
+      }
     },
     {
-      "toi_id": 1000.01,
-      "tic_id": 50365310,
+      "toi_id": 105.01,
       "status": "measured",
-      "offset_arcsec": 0.01862976817041656,
-      "significance_sigma": 0.592207645669073,
-      "sector": 34
+      "offset_arcsec": 0.003873213004263143,
+      "significance_sigma": 0.8815461612619737,
+      "sector": 1,
+      "n_events": 23,
+      "n_sectors": 2,
+      "implied_offset_arcsec": 0.3481410546388073,
+      "is_dip": false,
+      "previous_estimator": {
+        "shift_arcsec": null,
+        "sigma": null
+      }
     }
   ],
-  "total_candidates_with_real_centroid": 5,
-  "note": "This is a small, manually-run verification subset (UPGRADE_PLAN.md F.6), not full-catalog coverage. centroid_is_real=True on a candidate means its centroid_shift_max/has_centroid_dip came from an actual downloaded MAST TPF, not seed_db.py's fabricated demo values."
+  "any_flagged_as_centroid_dip": false,
+  "note": "Re-measured with the corrected estimator after the first one overstated significance. TOI-104.01's earlier 5.43-sigma result did not reproduce (now 1.97 sigma). Raw shifts are milli-arcseconds because a photocentre shift scales with transit depth; has_centroid_dip uses the implied source offset (>= 3 sigma and >= 2 arcsec)."
 }

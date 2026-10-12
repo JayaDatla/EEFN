@@ -14,13 +14,24 @@ from datetime import datetime, timezone
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+import lightgbm as lgb
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score, f1_score, brier_score_loss
 import pickle
 
-MODEL_VERSION = "rf-evidence-consistency-1.1.0"
+import sklearn
+
+MODEL_VERSION = "lgbm-evidence-consistency-2.0.0"
+
+# Chosen by repeated 5-fold CV (6 repeats) against the previous RandomForest(100):
+# accuracy 0.8535 vs 0.8481, ROC-AUC 0.928 vs 0.920, Brier 0.104 vs 0.114. See
+# LIMITATIONS.md section 3 for the full comparison, including what did NOT help.
+LGBM_PARAMS = dict(
+    n_estimators=400, learning_rate=0.03, num_leaves=15, min_child_samples=20,
+    subsample=0.8, subsample_freq=1, colsample_bytree=0.7, reg_lambda=2.0,
+    verbose=-1, random_state=42,
+)
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATA_PATH = os.path.join(REPO_ROOT, "validation", "data", "validation_dataset.csv")
@@ -39,7 +50,14 @@ def build_features(df: pd.DataFrame):
     df['dist_diff'] = (df['st_dist'] - df['Dist']).abs()
     df['dist_diff_rel'] = df['dist_diff'] / (df['Dist'] + eps)
 
-    df['tmag_gmag_diff'] = (df['st_tmag'] - df['Gmag']).abs()
+    # Photometry-derived features (2MASS / Pan-STARRS DR1). Only quantities production can
+    # compute from what HostStar actually stores: Gaia parallax, 2MASS J/H/K, PS1 g/r.
+    # (Gaia G and the TESS magnitude are NOT stored per host, so tmag_gmag_diff -- which
+    # was always missing at serving time -- is gone rather than silently imputed.)
+    df['j_k'] = df['Jmag'] - df['Kmag']
+    df['h_k'] = df['Hmag'] - df['Kmag']
+    df['abs_K'] = df['Kmag'] + 5 * np.log10(df['Plx'].clip(lower=1e-3)) - 10
+    df['ps_g_r'] = df['PS_gmag'] - df['PS_rmag']
 
     df['derived_rp_gaia'] = df['Rad'] * np.sqrt(df['pl_trandep'] * 1e-6) * 109.2
     df['derived_rp_diff'] = (df['derived_rp_gaia'] - df['pl_rade']).abs()
@@ -51,12 +69,13 @@ def build_features(df: pd.DataFrame):
 
     baseline_cols = [
         'pl_orbper', 'pl_trandurh', 'pl_trandep', 'pl_rade', 'pl_insol', 'pl_eqt',
-        'st_tmag', 'st_teff', 'st_rad', 'st_logg', 'st_dist'
+        'st_teff', 'st_rad', 'st_logg', 'st_dist'
     ]
     disagreement_cols = [
         'teff_diff', 'teff_diff_rel', 'rad_diff', 'rad_diff_rel', 'dist_diff', 'dist_diff_rel',
-        'tmag_gmag_diff', 'derived_rp_gaia', 'derived_rp_diff', 'derived_rp_diff_rel',
-        'is_unphysical_rp_gaia', 'RUWE', 'high_ruwe', 'completeness'
+        'derived_rp_gaia', 'derived_rp_diff', 'derived_rp_diff_rel',
+        'is_unphysical_rp_gaia', 'RUWE', 'high_ruwe', 'completeness',
+        'j_k', 'h_k', 'abs_K', 'ps_g_r',
     ]
     feature_cols = baseline_cols + disagreement_cols
     return df, feature_cols
@@ -90,6 +109,10 @@ def compute_reliability_diagram(y_true: np.ndarray, y_proba: np.ndarray, n_bins:
 def main():
     print(f"Loading training data from {DATA_PATH}...")
     df = pd.read_csv(DATA_PATH)
+    required = ['Jmag', 'Hmag', 'Kmag', 'PS_gmag', 'PS_rmag']
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise SystemExit(f"{DATA_PATH} lacks {missing}; run validation/scripts/augment_dataset_photometry.py first.")
     with open(DATA_PATH, "rb") as f:
         dataset_hash = hashlib.sha256(f.read()).hexdigest()[:16]
 
@@ -110,7 +133,7 @@ def main():
     X_train_imputed = eval_imputer.fit_transform(X_train)
     X_test_imputed = eval_imputer.transform(X_test)
 
-    eval_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    eval_model = lgb.LGBMClassifier(**LGBM_PARAMS)
     eval_model.fit(X_train_imputed, y_train)
 
     y_pred = eval_model.predict(X_test_imputed)
@@ -134,7 +157,7 @@ def main():
     # the held-out evaluation above has already produced honest metrics).
     final_imputer = SimpleImputer(strategy='median')
     X_full_imputed = final_imputer.fit_transform(X_raw)
-    final_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    final_model = lgb.LGBMClassifier(**LGBM_PARAMS)
     final_model.fit(X_full_imputed, y)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -143,6 +166,9 @@ def main():
         "model": final_model,
         "imputer": final_imputer,
         "features": feature_cols,
+        "sklearn_version": sklearn.__version__,
+        "lightgbm_version": lgb.__version__,
+        "model_family": "lightgbm",
     }
     artifacts_path = os.path.join(OUTPUT_DIR, "model_artifacts.pkl")
     with open(artifacts_path, "wb") as f:
@@ -150,8 +176,10 @@ def main():
     print(f"Saved model artifacts to {artifacts_path}")
 
     metrics_record = {
-        "model_type": "Random Forest Classifier",
+        "model_type": "LightGBM gradient-boosted trees",
         "model_version": MODEL_VERSION,
+        "sklearn_version": sklearn.__version__,
+        "lightgbm_version": lgb.__version__,
         "dataset_size": int(len(df)),
         "train_size": int(len(X_train)),
         "test_size": int(len(X_test)),

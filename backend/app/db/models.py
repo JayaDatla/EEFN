@@ -52,6 +52,7 @@ class HostStar(Base):
     spectroscopy_is_real = Column(Boolean, default=False, nullable=False)
     spectroscopy_source = Column(String, nullable=True)      # e.g. "APOGEE-2 DR17 (VizieR III/286)"
     spectroscopy_computed_at = Column(DateTime, nullable=True)
+    spectroscopy_attempted_at = Column(DateTime, nullable=True)  # last sync attempt, matched or not
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -91,6 +92,20 @@ class ExoplanetCandidate(Base):
     centroid_significance_sigma = Column(Float, nullable=True)   # in-transit vs out-of-transit offset / its standard error
     centroid_sector = Column(Integer, nullable=True)             # TESS sector the TPF was downloaded from
     centroid_computed_at = Column(DateTime, nullable=True)
+    centroid_attempted_at = Column(DateTime, nullable=True)      # last sync attempt, measured or not
+    # centroid_shift_max is the raw photocentre shift (arcsec) -- tiny by construction, it scales
+    # with transit depth. These two are the interpretable quantity: shift / depth = how far from
+    # the target the dimming source sits (app/pipeline/mast_centroid.py).
+    centroid_implied_offset_arcsec = Column(Float, nullable=True)
+    centroid_implied_offset_err_arcsec = Column(Float, nullable=True)
+    centroid_status = Column(String, nullable=True)              # measured | no_epoch | no_measurement
+    # Real-TESS-light-curve vetting (app/ml/lightcurve_vetter.py, run by the scheduled
+    # sync in app/pipeline/real_sync.py). lc_vetting_json holds class probabilities, the
+    # feature values the model saw, the sectors used and the 2001/201-bin views the UI plots.
+    lc_vetting_json = Column(JSON, nullable=True)
+    lc_vetting_status = Column(String, nullable=True)            # vetted | no_lightcurve | unusable | no_epoch
+    lc_vetting_at = Column(DateTime, nullable=True)
+    lc_vetting_attempted_at = Column(DateTime, nullable=True)
     # Phase-folded, 201-bin (dx, dy) arrays in the same local-view window convention as
     # deep_learning_pipeline.py's CENTROID_BINS/preprocess_lightcurve -- this is what
     # actually lets a real measurement reach CentroidSpatialCNN at inference (F.6's DoD

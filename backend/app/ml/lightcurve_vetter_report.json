@@ -1,0 +1,74 @@
+{
+  "model_version": "lightcurve-vetter-gbm-1.1.0",
+  "trained_at": "2026-10-11T16:28:32.021474+00:00",
+  "n_kois": 205,
+  "n_stars": 169,
+  "class_counts": {
+    "Planet Transit": 100,
+    "Eclipsing Binary": 66,
+    "Not Transit-Like": 39
+  },
+  "protocol": "StratifiedGroupKFold(5) x 10 repeats, grouped by KIC star id",
+  "cv_accuracy_mean": 0.8292241579558651,
+  "cv_accuracy_std": 0.056395284873418564,
+  "cv_macro_f1_mean": 0.8071711997533086,
+  "majority_class_baseline": 0.4878048780487805,
+  "cv_accuracy_with_stellar_inputs_missing": 0.8292357723577236,
+  "missingness_augmentation": "stellar group and photometry group masked in training copies, identical across classes",
+  "multiclass_brier_oof": 0.21710927726152734,
+  "confusion_matrix_oof": {
+    "labels": [
+      "Planet Transit",
+      "Eclipsing Binary",
+      "Not Transit-Like"
+    ],
+    "rows_true_cols_pred": [
+      [
+        89,
+        8,
+        3
+      ],
+      [
+        10,
+        54,
+        2
+      ],
+      [
+        2,
+        9,
+        28
+      ]
+    ]
+  },
+  "per_class_recall": {
+    "Planet Transit": 0.89,
+    "Eclipsing Binary": 0.818,
+    "Not Transit-Like": 0.718
+  },
+  "feature_gain_importance": {
+    "snr": 3911,
+    "flatness": 3304,
+    "catalog_depth_ppm": 1713,
+    "depth": 1550,
+    "duration_h": 1443,
+    "log_period": 1260,
+    "dur_over_period": 1156,
+    "odd_even_sigma": 1114,
+    "secondary_sigma": 975,
+    "secondary_ratio": 538,
+    "rstar": 446,
+    "secondary_depth": 435,
+    "dur_ratio": 278,
+    "teff": 182,
+    "implied_rp_earth": 103,
+    "g_r": 1,
+    "j_k": 0,
+    "g_k": 0
+  },
+  "data_source": "Kepler long-cadence light curves (MAST) + NASA Exoplanet Archive cumulative KOI table dispositions/false-positive flags; 2MASS + Pan-STARRS DR1 colours via CDS X-Match.",
+  "known_gaps": [
+    "Trained on Kepler, served on TESS: SNR-type features scale with the number of observed transits, so outputs are not calibrated the same way on a single 27-day TESS sector. See tess_transfer_check.",
+    "No centroid information: Kepler's 'Eclipsing Binary' label includes its centroid-offset flag, which this model cannot see. Real TESS centroid offsets are reported separately (has_centroid_dip).",
+    "Small sample: the CV spread above is the honest uncertainty on the headline accuracy."
+  ]
+}

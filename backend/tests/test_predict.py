@@ -3,6 +3,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import pandas as pd
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -107,4 +108,26 @@ def test_build_feature_row_leaves_missing_inputs_as_none():
     assert row["st_teff"] == 5500.0
     assert row["teff_diff"] == 0.0  # Teff falls back to st_teff per _extract_raw_inputs -> no discrepancy
     assert row["RUWE"] is None
-    assert row["st_tmag"] is None
+    assert row["j_k"] is None and row["abs_K"] is None and row["ps_g_r"] is None
+
+
+def test_photometry_features_computed_from_host_catalog_values():
+    engine = PredictionEngine.__new__(PredictionEngine)
+    row = engine.build_feature_row({"st_teff": 5500.0, "Jmag": 10.5, "Hmag": 10.2, "Kmag": 10.1,
+                                    "Plx": 10.0, "PS_gmag": 12.0, "PS_rmag": 11.5})
+    assert row["j_k"] == 10.5 - 10.1 and row["h_k"] == 10.2 - 10.1
+    assert row["ps_g_r"] == 0.5
+    # M_K = K + 5*log10(plx_mas) - 10 -> a 10 mas (100 pc) star is K - 5.
+    assert abs(row["abs_K"] - 5.1) < 1e-9
+
+
+def test_feature_contributions_sum_to_probability_shift():
+    from app.ml.predict import predictor
+    if not predictor.loaded:
+        pytest.skip("model artifacts unavailable")
+    raw = {"st_teff": 5600.0, "st_rad": 1.0, "st_dist": 120.0, "pl_orbper": 4.0, "pl_trandurh": 2.5,
+           "pl_trandep": 1500.0, "pl_rade": 2.0, "RUWE": 1.05, "Plx": 8.0, "Jmag": 10.0, "Kmag": 9.6}
+    res = predictor.predict_confirmation(raw)
+    X = pd.DataFrame([predictor.build_feature_row(raw)])[predictor.feature_names]
+    contrib, bias = predictor._contributions(predictor.imputer.transform(X))
+    assert abs((bias + contrib.sum()) - res["evidence_consistency_score"]) < 1e-6

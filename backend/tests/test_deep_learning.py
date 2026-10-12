@@ -182,3 +182,22 @@ def test_metadata_vector_presence_bits_cover_every_optional_field():
     # the presence bit is the honesty signal, not a change to the raw value slots.
     assert none_present[9] == pytest.approx(9.7 / 15.0)  # h_mag default
     assert none_present[10] == pytest.approx(12.0 / 20.0)  # g_mag default
+
+
+def test_unphysical_radius_veto_works_with_three_class_output():
+    """The physics veto blends the network output with a fixed prior. That prior once had 4
+    entries (the old 4-class head) so any candidate with an implausibly large derived radius
+    crashed with a broadcast error against the 3-class output."""
+    import numpy as np
+    from app.ml.deep_learning_pipeline import dl_vetting_engine
+
+    t = np.linspace(0, 40, 4000)
+    flux = np.ones_like(t)
+    res = dl_vetting_engine.vet_candidate(
+        time=t, detrended_flux=flux, period=5.0, duration_hours=3.0,
+        stellar_params={"st_rad": 5.0, "trandep": 150000.0},   # derived Rp ~ 130 R_Earth
+    )
+    assert res["is_unphysical_veto"] is True
+    probs = res["classification"]
+    assert len(probs) == 3 and abs(sum(probs.values()) - 1.0) < 1e-6
+    assert res["best_class"] == "Eclipsing Binary"

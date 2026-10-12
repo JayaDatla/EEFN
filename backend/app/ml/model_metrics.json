@@ -1,11 +1,13 @@
 {
-  "model_type": "Random Forest Classifier",
-  "model_version": "rf-evidence-consistency-1.1.0",
+  "model_type": "LightGBM gradient-boosted trees",
+  "model_version": "lgbm-evidence-consistency-2.0.0",
+  "sklearn_version": "1.9.1",
+  "lightgbm_version": "4.7.0",
   "dataset_size": 2667,
   "train_size": 2133,
   "test_size": 534,
   "dataset_path": "validation/data/validation_dataset.csv",
-  "dataset_sha256_16": "5aa7ff46a37c7000",
+  "dataset_sha256_16": "3e7095155f8385df",
   "features": [
     "pl_orbper",
     "pl_trandurh",
@@ -13,7 +15,6 @@
     "pl_rade",
     "pl_insol",
     "pl_eqt",
-    "st_tmag",
     "st_teff",
     "st_rad",
     "st_logg",
@@ -24,20 +25,23 @@
     "rad_diff_rel",
     "dist_diff",
     "dist_diff_rel",
-    "tmag_gmag_diff",
     "derived_rp_gaia",
     "derived_rp_diff",
     "derived_rp_diff_rel",
     "is_unphysical_rp_gaia",
     "RUWE",
     "high_ruwe",
-    "completeness"
+    "completeness",
+    "j_k",
+    "h_k",
+    "abs_K",
+    "ps_g_r"
   ],
   "metrics": {
-    "accuracy": 0.8502,
-    "roc_auc": 0.9237,
-    "f1_score": 0.8519
+    "accuracy": 0.8539,
+    "roc_auc": 0.9267,
+    "f1_score": 0.8561
   },
-  "evaluated_at": "2026-08-11T11:08:18.186881+00:00",
+  "evaluated_at": "2026-10-11T13:56:13.910789+00:00",
   "note": "metrics computed on a stratified 80/20 held-out split never seen during training; the serialized model_artifacts.pkl is refit on the full dataset afterward, which is why these metrics are a lower bound on the production model's actual accuracy, not an exact measurement of it."
 }
