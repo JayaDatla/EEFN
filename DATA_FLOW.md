@@ -260,6 +260,13 @@ Detrended & Cleaned:   1.0  -----------   ------------- (Flat baseline)
 We run two models in parallel to vet the candidates:
 
 ### Model A: Tabular Model (Random Forest Classifier)
+
+> **Update 2026-10-11 -- superseded.** The tabular model is now a **LightGBM** gradient-boosted
+> classifier (not a Random Forest), trained on 27 features that include 2MASS / Pan-STARRS
+> photometry; the TESS-magnitude features this section describes were removed because production
+> could never supply them. Held-out: accuracy 0.854, ROC-AUC 0.927, Brier 0.100. The photometry
+> features measured no accuracy gain. Details and the full comparison: `LIMITATIONS.md` section 3.
+
 This model evaluates catalog discrepancies. It does not look at time-series graphs; it looks at tables.
 
 #### Step-by-Step Vetting Example:
@@ -311,6 +318,14 @@ Candidate Input Row:
 ---
 
 ### Model B: Deep Learning Model (DeepExoFusionNet)
+
+> **Update 2026-10-11 -- superseded.** `DeepExoFusionNet` is no longer used for any served output.
+> Under star-grouped cross-validation on real Kepler data it scored 63.9%, versus 83.9% for gradient
+> boosting on physics-motivated light-curve features, which is what now vets each candidate's
+> **real** SPOC TESS light curve (`app/ml/lightcurve_features.py`, `lightcurve_vetter.py`). The model
+> below is kept as the documented baseline. See `LIMITATIONS.md` section 7 and
+> `backend/app/ml/dl_architecture_study.json`.
+
 This model uses a multi-branch neural network to fuse time-series shapes with metadata.
 
 ```
@@ -374,6 +389,12 @@ Astronomers viewing the dashboard see a **Grade D** candidate with active alerts
 ---
 
 ## 8. Proposed Unified ML Architecture (ExoFusion-Net v2)
+
+> **Update 2026-10-11 -- this proposal was tested and not borne out.** The unified multi-modal
+> network below is the architecture family the study compared against; with ~170 labelled stars the
+> deep models lost to gradient boosting on physics features by 12-20 points (`LIMITATIONS.md` section 7).
+> Revisit only with an order of magnitude more labelled light curves.
+
 
 To secure **academic approval from the faculty**, this section outlines our proposed transition from two separate models (Random Forest + 3-Branch CNN) into a **single, unified Multi-Modal Deep Learning Vetting Model (ExoFusion-Net v2)**. 
 

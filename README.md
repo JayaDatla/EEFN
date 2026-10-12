@@ -20,12 +20,17 @@ For each candidate, EEFN:
 - Computes catalog-disagreement metrics (temperature, radius, distance mismatches; RUWE
   astrometric-binary signal; a transit-depth-derived planet radius checked against the
   catalog value).
-- Runs a trained Random Forest evidence-consistency classifier over the real feature
-  vector — see `backend/app/ml/predict.py` and `backend/app/ml/model_metrics.json` for
-  the actual held-out evaluation metrics.
-- Runs a 4-branch deep learning model (`DeepExoFusionNet`) as a demonstration pathway
-  over simulated light curves — see [`LIMITATIONS.md`](LIMITATIONS.md) §1.5, §1.7 for what
-  this model has and hasn't actually been trained/validated on before you rely on it.
+- Runs a trained LightGBM evidence-consistency classifier over the real catalog feature
+  vector (incl. 2MASS/Pan-STARRS photometry) — see `backend/app/ml/predict.py` and
+  `backend/app/ml/model_metrics.json` for the actual held-out evaluation metrics.
+- Vets each candidate's **real** SPOC TESS light curve with a gradient-boosted model over
+  physics features (odd/even depth, secondary eclipse, transit shape, implied radius, …),
+  run nightly by the Arq worker. Star-grouped CV on Kepler: ~83%; measured transfer to 50
+  real TESS TOIs: 76% agreement with the TFOP label (ROC-AUC 0.81; it catches 88% of planets but also calls 36% of false positives planets). It replaced a 3.9M-parameter
+  CNN that scored 64% under the same protocol — see [`LIMITATIONS.md`](LIMITATIONS.md) §1.7.
+- Measures real TESS target-pixel-file centroid offsets (in-transit vs out-of-transit
+  photocentre, with an empirical red-noise-aware significance) and real APOGEE-2
+  spectroscopy, also on a nightly schedule — [`LIMITATIONS.md`](LIMITATIONS.md) §1.8.
 - Computes one unified evidence health score (0-100, letter grade A-F) — see
   `backend/app/science/health.py` for the single formula every code path uses.
 - Surfaces everything through a FastAPI backend and a Next.js frontend, with alerts that
@@ -55,8 +60,8 @@ database schema, and feature-engineering formulas, with diagrams.
 
 Short version: FastAPI + SQLAlchemy backend (SQLite or Postgres, Alembic-migrated) in
 `backend/`, Arq/Redis job queue for ingestion runs, Next.js 14 + React 18 + TypeScript
-frontend in `frontend/`, scikit-learn Random Forest + PyTorch deep learning models in
-`backend/app/ml/`. See [`docs/TOOL_COMPARISON.md`](docs/TOOL_COMPARISON.md) for how
+frontend in `frontend/`, LightGBM models (catalog evidence + light-curve vetting) in
+`backend/app/ml/` (PyTorch retained for the CNN baseline). See [`docs/TOOL_COMPARISON.md`](docs/TOOL_COMPARISON.md) for how
 EEFN's catalog-disagreement approach relates to published vetting tools
 (TRICERATOPS, AstroNet, ExoMiner, Robovetter).
 
@@ -121,8 +126,9 @@ cd backend
 pytest tests/
 ```
 
-To (re)train the Random Forest and write real evaluation-metrics/calibration
-artifacts (accuracy/ROC-AUC/F1, reliability diagram, Brier score):
+To (re)train the catalog evidence-consistency model and write real evaluation-metrics/calibration
+artifacts (accuracy/ROC-AUC/F1, reliability diagram, Brier score). The photometry columns come
+from `augment_dataset_photometry.py` (a one-off CDS cross-match, already applied to the CSV):
 ```bash
 python validation/scripts/train_and_serialize_model.py
 ```
@@ -133,10 +139,20 @@ python validation/scripts/leakage_ablation.py
 python validation/scripts/leakage_rv_confirmed_holdout.py
 ```
 
-To (re)train the deep learning model against the current 4-branch architecture:
+To (re)train the light-curve vetter and write its cross-validated report, then re-run the
+architecture comparison and the TESS transfer check (all need MAST network access):
 ```bash
 cd backend
-python -m app.ml.train_deep_learning
+python validation/scripts/train_lightcurve_vetter.py
+python validation/scripts/dl_architecture_study.py
+python validation/scripts/tess_transfer_check.py --n-per-class 25
+```
+
+The nightly enrichment jobs (centroids 03:00, spectroscopy 02:00, light-curve vetting 05:00)
+run inside the Arq worker (`arq app.worker.WorkerSettings`); to run a batch by hand:
+```bash
+python validation/scripts/run_real_centroid_subset.py --limit 5
+python validation/scripts/run_real_spectroscopy_subset.py --limit 20
 ```
 
 ### Frontend

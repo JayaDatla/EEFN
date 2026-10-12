@@ -312,12 +312,12 @@ The database layout is built using SQLite with SQLAlchemy mappings:
 
 EEFN incorporates two machine learning pathways to analyze exoplanet candidates:
 
-### 1. Tabular Random Forest Classifier
+### 1. Tabular Evidence-Consistency Classifier (LightGBM; was a Random Forest until 2026-10-11 -- see `LIMITATIONS.md` section 3)
 *   **Features Used:** 15 variables including `pl_insol`, `pl_eqt`, `pl_trandep`, `pl_rade`, `st_logg`, `st_rad`, `pl_trandurh`, `RUWE`, `st_dist`, `pl_orbper`, and catalog delta offsets.
 *   **Model Storage:** Saved as a serialized pipeline in `model_artifacts.pkl`.
 *   **Physics Override Veto:** Before returning the Random Forest score, `predict.py` calculates the physical planet radius using the Gaia stellar radius. If $R_p > 22.0 R_\oplus$, the score is overridden and capped at $3.5\%$ probability of confirmation.
 
-### 2. Multi-Modal Late-Fusion Neural Network (`DeepExoFusionNet`)
+### 2. Multi-Modal Late-Fusion Neural Network (`DeepExoFusionNet`) -- baseline only; light-curve vetting is now a gradient-boosted model on physics features, see `LIMITATIONS.md` section 7
 Implements a 4-branch architecture in PyTorch:
 *   **Global View CNN:** Extracts global phase-folded light curve features (2001 bins) to detect secondary eclipses.
 *   **Local View CNN:** Ingests centered transit phase-folded light curves (201 bins) to analyze ingress/egress transit geometry.
