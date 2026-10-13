@@ -27,16 +27,31 @@ def test_transit_density_uses_period_and_resolves_to_gcm3():
     assert 0.01 < density_short_period < 200.0
 
 
-def test_transit_density_matches_trappist1b_within_known_b0_bias():
-    """Validated against a real, well-characterized system (Gillon et al. 2017,
-    Van Grootel et al. 2018): TRAPPIST-1b, P=1.51087081 d, T14=36.40 min. The star's
-    actual density (from M=0.0898 Msun, R=0.1192 Rsun) is ~74.6 g/cm^3. The formula
-    assumes a central (b=0) transit; TRAPPIST-1b's real b~0.13 means this is expected to
-    read low by roughly 20-30%, not by orders of magnitude."""
-    density = compute_transit_density_cgs(period_days=1.51087081, duration_hours=36.40 / 60.0)
-    actual_stellar_density = 74.6
-    assert density is not None
-    assert 0.5 * actual_stellar_density < density < actual_stellar_density
+def test_transit_density_matches_trappist1b_once_the_radius_ratio_is_included():
+    """TRAPPIST-1b: P=1.51087081 d, T14=36.40 min, depth ~0.727% (k ~ 0.085). Actual stellar
+    density from M=0.0898 Msun, R=0.1192 Rsun is ~74.6 g/cm^3. Without k the formula read ~23% low,
+    which an earlier version blamed on the impact parameter; the omitted (1+k)^3 factor accounts
+    for essentially all of it."""
+    from app.science.density import radius_ratio_from_depth_ppm
+    actual = 74.6
+    k = radius_ratio_from_depth_ppm(7270.0)
+    with_k = compute_transit_density_cgs(1.51087081, 36.40 / 60.0, radius_ratio=k)
+    without_k = compute_transit_density_cgs(1.51087081, 36.40 / 60.0)
+    assert abs(with_k - actual) / actual < 0.05
+    assert 0.20 < (actual - without_k) / actual < 0.26          # the old, biased-low behaviour
+    assert with_k / without_k == pytest.approx((1 + k) ** 3, rel=0.02)
+
+
+def test_larger_planets_need_the_radius_ratio_more():
+    small = compute_transit_density_cgs(4.0, 3.0, radius_ratio=0.02)
+    large = compute_transit_density_cgs(4.0, 3.0, radius_ratio=0.15)
+    base = compute_transit_density_cgs(4.0, 3.0)
+    assert small / base == pytest.approx(1.02 ** 3, rel=0.01)
+    assert large / base == pytest.approx(1.15 ** 3, rel=0.01)
+
+
+def test_unphysical_duration_returns_none():
+    assert compute_transit_density_cgs(1.0, 14.0, radius_ratio=0.1) is None   # T14 > P/2
 
 
 def test_transit_density_none_when_inputs_missing():

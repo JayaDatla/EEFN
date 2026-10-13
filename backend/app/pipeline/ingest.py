@@ -1,5 +1,6 @@
 import requests
 import io
+import math
 import logging
 import pandas as pd
 import numpy as np
@@ -11,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.db.models import HostStar, ExoplanetCandidate, CatalogSource, MeasurementHistory, AgreementMetrics, MLPrediction, PipelineRun, DispositionChangeEvent
 from app.ml.predict import predictor
 from app.science.health import compute_health_score_from_values, HEALTH_SCORE_VERSION
-from app.science.density import compute_transit_density_cgs, compute_gaia_density_cgs, compute_density_discrepancy_sigma
+from app.science.density import radius_ratio_from_depth_ppm, compute_transit_density_cgs, compute_gaia_density_cgs, compute_density_discrepancy_sigma
 from app.science.radius import compute_derived_planet_radius_earth, compute_derived_planet_radius_uncertainty
 from app.pipeline import catalog_registry as catalog
 from app.pipeline.rate_limiter import NullRateLimiter
@@ -110,17 +111,41 @@ def record_measurement(db: Session, candidate: ExoplanetCandidate, source: Catal
     ))
 
 
-def propagate_proper_motion(ra_deg: float, dec_deg: float, pm_ra_mas: float = 0.0, pm_dec_mas: float = 0.0, dt_years: float = 16.0) -> tuple:
+GAIA_EPOCH_OFFSET_YEARS = 16.0   # catalog positions are J2000; Gaia DR3 is J2016.0
+
+
+def propagate_proper_motion(ra_deg: float, dec_deg: float, pm_ra_mas: float = 0.0, pm_dec_mas: float = 0.0,
+                            dt_years: float = GAIA_EPOCH_OFFSET_YEARS) -> tuple:
     """
-    Propagate J2000 coordinates to target catalog epoch (Gaia DR3 J2016.0).
+    Propagate J2000 coordinates to the Gaia DR3 epoch (J2016.0).
+
+    `pm_ra_mas` is mu_alpha* = mu_alpha * cos(dec) -- the convention both Gaia (pmRA) and the TIC
+    (st_pmra) use -- so the change in the RA COORDINATE is mu_alpha* * dt / cos(dec). An earlier
+    version added mu_alpha* * dt directly, understating the RA shift by 1/cos(dec) (a factor 2 at
+    dec = 60 deg).
     """
-    if pm_ra_mas is None: pm_ra_mas = 0.0
-    if pm_dec_mas is None: pm_dec_mas = 0.0
-    
-    d_ra_deg = (pm_ra_mas * dt_years) / (3600.0 * 1000.0)
+    pm_ra_mas = 0.0 if pm_ra_mas is None or pm_ra_mas != pm_ra_mas else pm_ra_mas      # None / NaN -> 0
+    pm_dec_mas = 0.0 if pm_dec_mas is None or pm_dec_mas != pm_dec_mas else pm_dec_mas
+    cos_dec = max(math.cos(math.radians(dec_deg)), 1e-6)       # guard the poles
+
+    d_ra_deg = (pm_ra_mas * dt_years) / (3600.0 * 1000.0) / cos_dec
     d_dec_deg = (pm_dec_mas * dt_years) / (3600.0 * 1000.0)
-    
-    return ra_deg + d_ra_deg, dec_deg + d_dec_deg
+    return (ra_deg + d_ra_deg) % 360.0, dec_deg + d_dec_deg
+
+
+def positions_at_gaia_epoch(df: pd.DataFrame) -> pd.DataFrame:
+    """Copy of `df` with ra/dec moved to the Gaia epoch using the TIC proper motions (st_pmra,
+    st_pmdec), for uploading to the cross-match. Without this, a star moving >~300 mas/yr drifts
+    more than the 5" match radius over the 16 years between the TOI epoch and Gaia's (59 TOIs have
+    |pmRA| > 300 mas/yr) and is silently unmatched or matched to the wrong source. Missing proper
+    motions leave the position unchanged."""
+    out = df.copy()
+    pmra = out["st_pmra"] if "st_pmra" in out else pd.Series([None] * len(out), index=out.index)
+    pmde = out["st_pmdec"] if "st_pmdec" in out else pd.Series([None] * len(out), index=out.index)
+    moved = [propagate_proper_motion(r, d, a, b) for r, d, a, b in zip(out["ra"], out["dec"], pmra, pmde)]
+    out["ra"], out["dec"] = [m[0] for m in moved], [m[1] for m in moved]
+    return out
+
 
 def _finalize_pipeline_run(db: Session, run: Optional[PipelineRun], status: str, started: float,
                             targets_processed: int = 0, failures: Optional[list] = None,
@@ -174,7 +199,8 @@ def ingest_and_fuse_data(db: Session, limit: int = 100, rate_limiter=None,
         st_rad, st_raderr1, st_raderr2,
         st_logg, st_dist, st_disterr1, st_disterr2,
         pl_orbper, pl_trandurh, pl_trandep, pl_trandeperr1, pl_trandeperr2,
-        pl_rade, pl_radeerr1, pl_radeerr2, pl_insol, pl_eqt, pl_tranmid
+        pl_rade, pl_radeerr1, pl_radeerr2, pl_insol, pl_eqt, pl_tranmid,
+        st_pmra, st_pmdec
     FROM toi
     WHERE tfopwg_disp IN ('CP', 'KP', 'FP', 'FA', 'PC')
     ORDER BY toi+0 ASC
@@ -211,8 +237,10 @@ def ingest_and_fuse_data(db: Session, limit: int = 100, rate_limiter=None,
         return {"status": "error", "detail": detail}
 
     # Convert dataframe to CSV string for upload to CDS X-Match
+    # Match positions are moved to Gaia's epoch first (TIC proper motions); df_resolved keeps the
+    # catalog positions, and the stored host position is propagated below with the Gaia motion.
     csv_buf = io.StringIO()
-    df_resolved.to_csv(csv_buf, index=False)
+    positions_at_gaia_epoch(df_resolved).to_csv(csv_buf, index=False)
     csv_data = csv_buf.getvalue()
 
     # 2. Cross-match with Gaia DR3 Source Catalog
@@ -394,7 +422,8 @@ def ingest_and_fuse_data(db: Session, limit: int = 100, rate_limiter=None,
         # Transit-derived vs Gaia-evolutionary stellar density -- see app.science.density
         # for the full Seager & Mallen-Ornelas (2003) derivation (C.4: the previous
         # formula never used the orbital period and did not resolve to g/cm^3).
-        density_transit = compute_transit_density_cgs(period_days=orbper, duration_hours=trandurh)
+        density_transit = compute_transit_density_cgs(
+            period_days=orbper, duration_hours=trandurh, radius_ratio=radius_ratio_from_depth_ppm(trandep))
         if density_transit is not None:
             density_transit = round(density_transit, 3)
 
