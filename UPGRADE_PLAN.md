@@ -969,8 +969,10 @@ is true and verified (tested/run, not assumed).
       (`LIMITATIONS.md` §1.3) form of default substitution, not presence-bit masking.
 - [x] 2MASS + Pan-STARRS are live in `ingest.py` with provenance.
 - [x] Real MAST/TPF centroid extraction exists and feeds `CentroidSpatialCNN` for at least a subset
-      of targets. Verified live: TOI-104.01 (a real, 5.43-sigma measured offset) returns
-      `dl_centroid_available: true` from `/transit_pipeline`.
+      of targets. **Correction (2026-10-13)**: the "TOI-104.01, 5.43-sigma" result originally recorded
+      here was an artifact of the first (white-noise, single-baseline) estimator and is retracted -- re-measured
+      with the corrected estimator it is 1.97 sigma. The legacy CNN no longer consumes the centroid
+      (see `LIMITATIONS.md` section 1.8).
 - [x] Real spectroscopy ingestion exists (or is explicitly deferred with a documented reason).
       Real APOGEE-2 DR17 cross-match built and run (2/25 matched, honest given APOGEE's limited
       sky coverage) — see `LIMITATIONS.md` §1.8.

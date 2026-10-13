@@ -14,9 +14,9 @@
 | `pl_insol` | TOI Ingestion | Discovery epoch | Calculated from orbital period and star properties. | **1 (LOW)** |
 | `pl_eqt` | TOI Ingestion | Discovery epoch | Planet equilibrium temperature model. | **1 (LOW)** |
 | `st_tmag` | TIC Catalog | Pre-discovery | Baseline stellar catalog magnitude (fixed). | **1 (LOW)** |
-| `st_teff` | TIC Catalog | Pre-discovery | Stellar Effective Temp from pre-TESS archives. | **1 (LOW)** |
-| `st_rad` | TIC Catalog | Pre-discovery | Stellar Radius from pre-TESS archives. | **1 (LOW)** |
-| `st_dist` | TIC Catalog | Pre-discovery | Stellar Distance from pre-TESS archives. | **1 (LOW)** |
+| `st_teff` | TIC Catalog | Pre-discovery | Teff derived by TIC-8 from Gaia DR2 colours (Stassun+2019) -- not independent of Gaia. | **1 (LOW)** |
+| `st_rad` | TIC Catalog | Pre-discovery | Radius derived by TIC-8 from Gaia DR2 parallax + photometry (Stassun+2019) -- not independent of Gaia. | **1 (LOW)** |
+| `st_dist` | TIC Catalog | Pre-discovery | Distance from Gaia DR2 parallax (Bailer-Jones+2018) in TIC-8 -- not independent of Gaia. | **1 (LOW)** |
 | `Teff` | Gaia DR3 | June 2022 | Astrophysical temperature from spectrophotometry. | **2 (LOW)** |
 | `Rad` | Gaia DR3 | June 2022 | Stellar radius from FLAME / GSP-Phot. | **2 (LOW)** |
 | `Dist` | Gaia DR3 | June 2022 | Geometric parallax inversion. | **2 (LOW)** |
@@ -28,8 +28,10 @@
 | `is_unphysical_rp` | Engineered | Calculated | Binary flag for derived size > 2.0 Jupiters. | **2 (LOW)** |
 
 ## Findings and Recommendations
-*   **No Hidden Labels:** The audit shows no features that directly encode or leak target exoplanet dispositions (`tfopwg_disp`).
-*   **Temporal Offset:** For candidates discovered *before* June 2022, Gaia DR3 features represent a minor temporal offset, since Gaia DR3 was not yet published. However, using Gaia DR3 is scientifically legitimate for exoplanet validation, as Gaia is an independent stellar-only survey with no feedback loop from exoplanet candidate outcomes.
-*   **Outcome Leakage Check:** Checked `pl_controv_flag` and candidate date values. These were excluded from training to ensure no timeline violation.
+*   **This is NOT a clean pass.** The earlier version of this report certified the feature space as "clean" and concluded PASS. That conclusion was not supported:
+*   **Label circularity is untested here.** `tfopwg_disp` dispositions were assigned by human reviewers who used the same kinds of signals the features encode (Gaia RUWE/parallax/radius, the SPOC transit depth and radius). The two ablations in LIMITATIONS.md section 1.1 are weak proxies (pre/post-EDR3 re-splits; an RV-confirmed holdout of positives only). A negative-side clean-label test does not exist.
+*   **The TOI-table stellar values are derived from Gaia** (TIC-8 uses Gaia DR2), so TOI-minus-Gaia differences are not independent evidence. See `backend/app/ml/honest_evaluation_report.json`: the cross-catalog features add only ~+0.008 AUC over the TOI-table columns alone under star-grouped CV, and nothing under time-forward splits.
+*   **No target columns are used as features** (`tfopwg_disp` and `pl_controv_flag` are excluded), which rules out direct label leakage only.
+*   **Temporal offset:** Gaia DR3 (June 2022) postdates most TOI dispositions; it is a feature at serving time, not at the time most labels were assigned.
 
-**Data Leakage Audit Conclusion: PASS.** The feature space is clean and legally available at the time of exoplanet validation.
+**Data Leakage Audit Conclusion: NOT ESTABLISHED.** Direct label leakage was excluded; circularity through shared signals was not, and cannot be with the available labels.

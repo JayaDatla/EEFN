@@ -1,56 +1,95 @@
-import subprocess
+"""
+Reproduce the tabular model's published held-out metrics and FAIL if they do not match.
+
+Earlier versions of this script printed a fixed "PASS" report with hardcoded numbers regardless
+of what the code produced, which is the opposite of reproducibility. This one recomputes:
+
+  1. the SHA-256 prefix of validation/data/validation_dataset.csv  vs  model_metrics.json,
+  2. the held-out accuracy / ROC-AUC / F1 / Brier of the shipped configuration (same split,
+     same seed, same LightGBM parameters)  vs  model_metrics.json and calibration_report.json,
+  3. the library versions recorded in model_metrics.json  vs  the installed ones (warning only:
+     a different version can legitimately change a metric in the 4th decimal),
+
+and exits non-zero on any mismatch beyond TOLERANCE. It writes nothing.
+
+    python reproduce_results.py
+
+What it does NOT do: re-download any catalog or re-run the light-curve vetter (those need hours of
+MAST access; see backend/validation/scripts/). The dataset CSV is the frozen input.
+"""
+import hashlib
+import json
 import os
 import sys
+import warnings
 
-print("=== EEFN Scientific Reproducibility Runner ===")
+warnings.filterwarnings("ignore")
+ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(ROOT, "validation", "scripts"))
 
-# 1. Verification of data preparation
-print("\nStep 1: Verifying static validation dataset presence...")
-dataset_path = "validation/data/validation_dataset.csv"
-if os.path.exists(dataset_path):
-    print(f"  Verified: {dataset_path} found ({os.path.getsize(dataset_path)} bytes).")
-else:
-    print(f"  Error: {dataset_path} not found!")
-    sys.exit(1)
+import lightgbm as lgb
+import pandas as pd
+import sklearn
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import accuracy_score, brier_score_loss, f1_score, roc_auc_score
+from sklearn.model_selection import train_test_split
 
-# 2. Run Ingestion and Modeling Suite
-print("\nStep 2: Re-running Models, Evaluation, and Reports...")
-res_val = subprocess.run(
-    [sys.executable, "validation/scripts/run_validation_suite.py"],
-    capture_output=True,
-    text=True
-)
-if res_val.returncode != 0:
-    print("Error in validation suite run:")
-    print(res_val.stderr)
-    sys.exit(1)
-print(res_val.stdout)
+from train_and_serialize_model import DATA_PATH, LGBM_PARAMS, build_features
 
-# 3. Generate reproducibility report in validation/reports/
-print("\nStep 3: Creating validation/reports/reproducibility_report.md...")
-os.makedirs("validation/reports", exist_ok=True)
+TOLERANCE = 0.002
+ML_DIR = os.path.join(ROOT, "backend", "app", "ml")
 
-rep_content = """# Phase G: Scientific Reproducibility Report
-This report certifies that the Exoplanet Evidence Fusion Network (EEFN) dataset, features, models, and evaluation summaries have been fully reproduced via a single automated workflow command.
 
-## Verification of Execution Flow
-1.  **Data Ingestion:** Merged features verified statically in `validation/data/validation_dataset.csv`.
-2.  **Feature Ingestion:** Re-evaluated 25 astronomical baseline and disagreement features.
-3.  **Training & Evaluation:** Re-ran the Random Forest Classifier across 5-Fold Stratified Cross-Validation and time-based temporal splits.
-4.  **Statistical Inference:** Verified statistical significance of the combined model via bootstrap resampling and permutation testing.
-5.  **Failure Analysis:** Generated False Positive and False Negative metrics, and outputted the failure diagnostic files.
+def main() -> int:
+    with open(os.path.join(ML_DIR, "model_metrics.json")) as f:
+        published = json.load(f)
+    with open(os.path.join(ML_DIR, "calibration_report.json")) as f:
+        calib = json.load(f)
 
-## Reproduced Performance Telemetry
-*   **Mean Combined Model ROC-AUC (5-Fold CV):** 0.9154
-*   **Mean Baseline Model ROC-AUC (5-Fold CV):** 0.9137
-*   **Bootstrap 95% Confidence Interval of Improvement:** [0.0001, 0.0035] (significant, non-zero)
-*   **Permutation p-value:** 0.0000 (highly significant)
+    failures = []
 
-**Scientific Reproducibility Audit Conclusion: PASS.** The pipeline runs successfully, is fully deterministic given seed=42, and reproduces all reported scientific figures and tables.
-"""
+    with open(DATA_PATH, "rb") as f:
+        digest = hashlib.sha256(f.read()).hexdigest()[:16]
+    if digest != published["dataset_sha256_16"]:
+        failures.append(f"dataset hash {digest} != published {published['dataset_sha256_16']} "
+                        "(the CSV changed since the model was trained; retrain and republish)")
 
-with open("validation/reports/reproducibility_report.md", "w") as f:
-    f.write(rep_content)
+    for lib, key in ((sklearn, "sklearn_version"), (lgb, "lightgbm_version")):
+        if published.get(key) and published[key] != lib.__version__:
+            print(f"WARNING: {key} published {published[key]}, installed {lib.__version__} "
+                  "(metrics may move in the 4th decimal)")
 
-print("validation/reports/reproducibility_report.md generated successfully.")
-print("\n=== Reproducibility Suite Completed Successfully ===")
+    df = pd.read_csv(DATA_PATH)
+    df = df[df["tfopwg_disp"].isin(["CP", "KP", "FP", "FA"])].copy()
+    df["label"] = df["tfopwg_disp"].map({"CP": 1, "KP": 1, "FP": 0, "FA": 0})
+    df, feature_cols = build_features(df)
+    y = df["label"].values
+    X_tr, X_te, y_tr, y_te = train_test_split(df[feature_cols], y, test_size=0.2, random_state=42, stratify=y)
+
+    imputer = SimpleImputer(strategy="median")
+    model = lgb.LGBMClassifier(**LGBM_PARAMS).fit(imputer.fit_transform(X_tr), y_tr)
+    proba = model.predict_proba(imputer.transform(X_te))[:, 1]
+    got = {
+        "accuracy": accuracy_score(y_te, proba >= 0.5), "roc_auc": roc_auc_score(y_te, proba),
+        "f1_score": f1_score(y_te, proba >= 0.5), "brier": brier_score_loss(y_te, proba),
+    }
+    want = {**published["metrics"], "brier": calib["brier_score"]}
+
+    print(f"{'metric':10s} {'recomputed':>11s} {'published':>10s}")
+    for k in ("accuracy", "roc_auc", "f1_score", "brier"):
+        ok = abs(got[k] - want[k]) <= TOLERANCE
+        print(f"{k:10s} {got[k]:11.4f} {want[k]:10.4f}  {'ok' if ok else 'MISMATCH'}")
+        if not ok:
+            failures.append(f"{k}: recomputed {got[k]:.4f} vs published {want[k]:.4f}")
+
+    if failures:
+        print("\nREPRODUCTION FAILED:")
+        for line in failures:
+            print("  -", line)
+        return 1
+    print(f"\nReproduced within +/-{TOLERANCE} (dataset {digest}).")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

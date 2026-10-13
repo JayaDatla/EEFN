@@ -1,6 +1,6 @@
 # EEFN vs. Published Vetting Tools
 
-**Status**: Methodology-level comparison, not an empirical benchmark.
+**Status**: Methodology-level comparison, not an empirical benchmark. Revised 2026-10-13 after a literature review; the earlier version overstated EEFN's novelty and described a CNN branch that has since been retired.
 **Scope**: UPGRADE_PLAN.md E.4 — "Compare against published vetting tools on a common
 target set... determine honestly whether EEFN adds signal on top of these... and say
 so explicitly rather than implying novelty without checking."
@@ -29,43 +29,38 @@ whether that evidence overlaps with what EEFN uses.
 | **Robovetter** (Coughlin et al., Kepler pipeline) | Rule-based diagnostic tests on Kepler TCEs: odd-even depth mismatch, secondary eclipse test, centroid offset test, etc. | Binary disposition (PC/FP) + which specific test(s) failed | Built specifically for Kepler; not actively used for TESS in its original form (TESS uses SPOC/QLP + human TFOP review instead) |
 | **AstroNet / AstroNet-Vetting** (Shallue & Vanderburg 2018; Yu et al. 2019 TESS variant) | CNN over folded global+local light-curve views | Binary/multi-class transit classification probability | Established; methodologically the closest thing to EEFN's own DL branch (see below) |
 | **ExoMiner** (Valizadegan et al. 2022, NASA Ames) | Ensemble CNN over multiple diagnostic branches: global/local light-curve views, secondary eclipse, odd-even, centroid, difference-image | Per-branch + fused classification probability | Currently among the most capable automated vetters; used by NASA to vet/confirm large batches of new TESS candidates |
-| **EEFN** (this project) | Cross-catalog stellar-parameter disagreement (TOI/TIC vs. Gaia DR3: T_eff, radius, distance), Gaia RUWE astrometric-binarity signal, transit-derived vs. Gaia-evolutionary stellar density self-consistency, plus a light-curve-shape DL branch | Evidence-consistency score (RF, real/trained) + health grade + alerts; DL classification (**synthetic-data-trained only** — see LIMITATIONS.md §1.7) | RF path is real and validated (E.1/E.2 above); DL path is a demonstrated architecture, not yet a validated classifier |
+| **EEFN** (this project) | TOI-table values, TOI-vs-Gaia DR3 disagreement (Teff, radius, distance), Gaia RUWE, 2MASS / Pan-STARRS colours, a stellar-density/duration check; plus a gradient-boosted vetter over physics features of the real light curve (odd/even, secondary eclipse, shape, implied radius) and a real-TPF centroid check | Evidence-consistency score (a TOI-table disposition prior), light-curve class probabilities (uncalibrated), centroid offset | Early. Tabular score: AUC 0.927 star-grouped, ~0.85 time-forward, cross-catalog features add ~+0.008 AUC over TOI columns. Vetter: 83% Kepler CV, 76% (n=50, 95% CI ~0.63-0.86) agreement with TFOP labels on TESS |
 
 ## Where EEFN's evidence overlaps with these tools, and where it doesn't
 
-**Overlap**: EEFN's DL branch (global+local CNN views) is architecturally the same
-concept as AstroNet's core approach — folded light-curve morphology classification.
-This is the one place EEFN and the field's established light-curve vetters compete on
-the same evidence. Here, EEFN currently loses that comparison outright: AstroNet and
-ExoMiner are trained on tens of thousands of real, human-vetted Kepler/TESS light
-curves; EEFN's DL branch is trained entirely on synthetic injected transits
-(LIMITATIONS.md §1.7) and should not be treated as validated until it's retrained on
-real MAST data (UPGRADE_PLAN.md F.6).
+**Overlap**: EEFN's light-curve vetter competes with these tools on the same evidence (folded
+light-curve morphology), and loses clearly: ExoMiner/ExoMiner++ train on tens of thousands of real
+light curves and add centroid and difference-image evidence (ExoMiner++ reports PR-AUC ~0.97 on its own
+TESS task -- not comparable to EEFN's numbers, which are on different labels and a far smaller set).
+EEFN's vetter is a small gradient-boosted model over a few physics features, trained on 205 Kepler KOIs;
+its value is that it is simple and inspectable, not that it is competitive.
 
-**No overlap — EEFN's distinguishing angle**: None of TRICERATOPS, Robovetter,
-AstroNet, or ExoMiner check whether a TOI's *catalog record itself* is internally
-consistent — whether the TESS pipeline's stellar parameters agree with Gaia DR3's,
-whether Gaia flags the host as an unresolved binary (RUWE), or whether the
-transit-implied stellar density matches the star's independently known evolutionary
-density. TRICERATOPS gets close via its pixel-level "which star is this signal
-actually on" analysis, but that's a photometric-blend question, not a
-catalog-cross-match question — a real, isolated, well-behaved star with just an
-implausible transit-depth-to-radius relationship (this pipeline's `is_unphysical_rp`
-flag) wouldn't be caught by any of the four tools above, but is exactly what EEFN's
-`density_discrepancy_sigma` and `derived_rp_diff` metrics are built to catch.
+**Where the catalog-consistency idea actually stands**: no published tool was found that scores
+TOI-vs-Gaia stellar-parameter disagreement and trains it against TFOP dispositions (absence of search
+hits -- weak evidence). But the pieces are not unaddressed elsewhere: ExoMiner++ takes Gaia RUWE and
+TESS magnitude as inputs; LEO-vetter uses stellar radius for a size cut and catalog positions for its
+centroid test; TRICERATOPS uses the TIC neighbours as blend scenarios; and TFOP reviewers already apply
+Gaia RUWE and neighbour checks. Two further caveats from measurement and the literature: TIC-8 stellar
+parameters are themselves computed from Gaia DR2, so TOI-minus-Gaia differences are largely method noise
+rather than independent evidence; and in EEFN's own evaluation the cross-catalog features add only about
++0.008 AUC over the TOI table's columns under star-grouped CV and nothing under time-forward splits
+(`backend/app/ml/honest_evaluation_report.json`). What is genuinely useful is the transparent flags
+(RUWE, an implausible derived radius, a duration/density inconsistency) with their provenance, as a
+pre-screen for TOI reviewers.
 
 ## Honest conclusion
 
-EEFN's catalog-disagreement evidence is a **complement**, not a competitor, to
-TRICERATOPS/AstroNet/ExoMiner. A working vetting pipeline gets the most value running
-EEFN's catalog checks *alongside* light-curve-based statistical validation (TRICERATOPS
-in particular, given its current TFOP adoption), not as a replacement for it. Claiming
-EEFN's RF-based evidence-consistency score is a substitute for TRICERATOPS' FPP would
-be overselling — they answer different questions (is this candidate's catalog record
-self-consistent? vs. is this transit signal astrophysically real and on the target
-star?). The honest, defensible claim is narrower and still real: EEFN surfaces a
-specific, currently-unaddressed false-positive/false-confidence mode (catalog
-disagreement) that the field's most-used vetting tools don't check.
+EEFN is a **complement and pre-screen**, not a substitute for TRICERATOPS, ExoMiner, SPOC DV or TFOP
+imaging, and it should not be described as detecting a failure mode the field misses. The defensible
+claim is narrower: a cheap, transparent, light-curve-free audit of whether a TOI's host-star inputs look
+trustworthy, with sourced flags and a full provenance trail. Whether that saves any follow-up effort has
+not been measured; the test that would measure it (flag unresolved candidates now, compare with eventual
+dispositions) is described in `docs/prospective_evaluation.md`.
 
 ## What a real empirical comparison would require (future work)
 

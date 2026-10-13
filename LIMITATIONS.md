@@ -1,7 +1,6 @@
 # System and Scientific Limitations: EEFN
 
-**Author**: Senior Research Team  
-**Status**: For Journal Submission and Review  
+**Status**: Working document, updated as measurements change. Not peer reviewed. Where a number appears here it points to the artifact that produced it; where a claim is inference, it says so.  
 **Objective**: Intellectual honesty regarding the limitations, boundaries, and assumptions of the Exoplanet Evidence Fusion Network (EEFN).
 
 ---
@@ -31,9 +30,10 @@
 *   **Pinned versions**: pickled models are only safe across identical library versions, so `scikit-learn==1.9.1` and `lightgbm==4.7.0` are pinned exactly; both versions are recorded in the artifact and `model_metrics.json`, and the loader warns on a mismatch.
 *   **Future Work**: store Gaia G per host to recover the colour features; a physics-informed imputer.
 
-### 4. Transit-Derived Stellar Density Assumes a Central Transit (b=0)
+### 4. Transit-Derived Stellar Density Assumes a Central Transit (b=0); Formula Corrected 2026-10-13
 *   **Description**: `app/science/density.py::compute_transit_density_cgs` derives stellar density from transit period and duration alone (Seager & Mallen-Ornelas 2003), which requires assuming a central transit (impact parameter b=0) since the pipeline does not fit for b.
-*   **Impact**: A nonzero impact parameter inflates the observed transit duration relative to the central-transit case, biasing the derived density low. Validated against TRAPPIST-1b (real b~0.13): the formula reads ~24% low against the star's actual density. `density_discrepancy_sigma`'s radius-uncertainty term is real (propagated from Gaia DR3 FLAME `b_Rad`/`B_Rad` when available), but stellar mass error and transit-timing error are not yet propagated per-target (the NASA TAP query does not currently fetch `pl_orbpererr*`/`pl_trandurherr*`) and are instead covered by a disclosed fixed floor (`UNMODELED_SYSTEMATIC_FRACTIONAL_FLOOR = 0.10`).
+*   **Correction (2026-10-13)**: the density formula omitted the radius-ratio term. For a central transit a/R* = (1+k)/sin(pi*T14/P), k = Rp/R*; the code used a/R* = P/(pi*T14), which biases the density low by (1+k)^3 (23% for TRAPPIST-1b, k=0.085) and more for giant planets. The earlier documentation attributed that whole 24% offset to the impact parameter; that was wrong -- a nonzero b shortens T14 and biases density *high*, the opposite direction. The function now takes `radius_ratio` (from sqrt(depth), supplied by ingestion) and uses the exact sine form: TRAPPIST-1b is reproduced to 2.1% (73.1 vs 74.6 g/cm^3), regression-tested. Candidates ingested before this fix keep the old (low) `density_transit` / `density_discrepancy_sigma` until they are re-ingested.
+*   **Remaining assumptions (disclosed)**: b = 0, circular orbit, k from sqrt(depth) ignoring limb darkening. Real density from a transit alone is degenerate with b and eccentricity, so this is a screening quantity, not a measurement. `density_discrepancy_sigma`'s radius-uncertainty term is real (Gaia DR3 FLAME `b_Rad`/`B_Rad` when available); stellar-mass error and transit-timing error are still covered by a disclosed fixed floor (`UNMODELED_SYSTEMATIC_FRACTIONAL_FLOOR = 0.10`), not per-target propagation.
 *   **Mitigation**: Both simplifications are named constants with docstrings pointing here, not silent assumptions; `density_discrepancy_sigma` is a real per-target value that varies with measurement quality, not a fixed divisor.
 *   **Future Work**: Fetch impact-parameter/inclination and its error columns to remove the b=0 assumption; fetch `pl_orbpererr*`/`pl_trandurherr*`/Gaia FLAME mass error columns to fully propagate `density_transit`'s and `density_gaia`'s uncertainty instead of relying on the systematic floor.
 
