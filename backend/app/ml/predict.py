@@ -27,6 +27,7 @@ class PredictionEngine:
         self.imputer = None
         self.feature_names = []
         self.loaded = False
+        self.model_version = None
 
         if os.path.exists(model_path):
             try:
@@ -35,6 +36,7 @@ class PredictionEngine:
                 self.model = artifacts["model"]
                 self.imputer = artifacts["imputer"]
                 self.feature_names = artifacts["features"]
+                self.model_version = self._read_model_version(model_path)
                 trained_with = artifacts.get("sklearn_version")
                 if trained_with and trained_with != sklearn.__version__:
                     logger.warning("model_artifacts.pkl was trained with scikit-learn %s but %s is "
@@ -49,17 +51,27 @@ class PredictionEngine:
             logger.warning("Running PredictionEngine in fallback mode (no model_artifacts.pkl found) -- "
                             "every prediction will report model_status=unavailable.")
 
+    @staticmethod
+    def _read_model_version(model_path: str) -> Optional[str]:
+        """Version of the artifact, from the metrics file written by the same training run."""
+        import json
+        try:
+            with open(os.path.join(os.path.dirname(model_path), "model_metrics.json")) as f:
+                return json.load(f).get("model_version")
+        except Exception:
+            return None
+
     def _extract_raw_inputs(self, data: Dict[str, Any]) -> Dict[str, Optional[float]]:
         """Pulls the raw catalog values needed to build the feature row, from either a
         DB-sourced dict (see predict_confirmation) or a caller-supplied raw dict. Values
         that aren't available are left as None -- callers must not invent defaults here,
         the SimpleImputer trained alongside the model is what handles missingness."""
         st_teff = data.get("st_teff")
-        Teff = data.get("Teff", st_teff)
+        Teff = data.get("Teff")
         st_rad = data.get("st_rad")
-        Rad = data.get("Rad", st_rad)
+        Rad = data.get("Rad")
         st_dist = data.get("st_dist")
-        Dist = data.get("Dist", st_dist)
+        Dist = data.get("Dist")
 
         return {
             "st_teff": st_teff, "Teff": Teff,
@@ -201,6 +213,39 @@ class PredictionEngine:
         n_trees = len(self.model.estimators_)
         return contributions / n_trees, float(np.mean(biases))
 
+    @staticmethod
+    def inputs_from_records(candidate_obj, host_obj) -> Dict[str, Any]:
+        """DB rows -> the raw-input dict `build_feature_row` expects, using the same source for
+        each quantity that training used: `st_*` are the TOI table's (TIC-derived) host values,
+        `Teff`/`Rad`/`Dist` the Gaia DR3 ones. Feeding Gaia values into both slots (as an earlier
+        version did) made every disagreement feature 0 at serving time. The model is trained on
+        TIC/Gaia values, so spectroscopy is never substituted here (it is reported as evidence)."""
+        h = host_obj
+        return {
+            "st_teff": h.toi_teff if h else None,
+            "Teff": h.teff if h else None,
+            "st_rad": h.toi_rad if h else None,
+            "Rad": h.rad if h else None,
+            "st_dist": h.toi_dist if h else None,
+            "Dist": h.distance if h else None,
+            "st_logg": h.toi_logg if h else None,
+            "Plx": h.parallax if h else None,
+            "Jmag": h.j_mag if h else None,
+            "Hmag": h.h_mag if h else None,
+            "Kmag": h.k_mag if h else None,
+            # HostStar.g_mag/r_mag are Pan-STARRS DR1 bands (not Gaia G) -- matches the
+            # PS_gmag/PS_rmag columns the model was trained on.
+            "PS_gmag": h.g_mag if h else None,
+            "PS_rmag": h.r_mag if h else None,
+            "pl_trandep": candidate_obj.trandep,
+            "pl_rade": candidate_obj.rade,
+            "RUWE": h.ruwe if h else None,
+            "pl_orbper": candidate_obj.orbper,
+            "pl_trandurh": candidate_obj.trandurh,
+            "pl_insol": candidate_obj.insol,
+            "pl_eqt": candidate_obj.eqt,
+        }
+
     def predict_confirmation(self, candidate_input: Union[str, uuid.UUID, Dict[str, Any]], db: Session = None) -> Dict[str, Any]:
         """
         Runs the trained Random Forest evidence-consistency classifier on a candidate's
@@ -217,37 +262,7 @@ class PredictionEngine:
             if not candidate_obj:
                 return {"status": "error", "detail": f"Candidate ID {candidate_input} not found."}
 
-            host_obj = candidate_obj.host
-
-            # The model is trained on TIC/Gaia Teff and radius, so serving must feed it the same
-            # quantities. An earlier version substituted APOGEE spectroscopic Teff/radius for hosts
-            # with spectroscopy_is_real, which silently changed the distribution of teff_diff/
-            # rad_diff relative to training (and, before real_sync nulled seed values, could even
-            # pass fabricated numbers). Spectroscopy is reported as evidence, not model input.
-            data = {
-                "st_teff": host_obj.teff if host_obj else None,
-                "Teff": host_obj.teff if host_obj else None,
-                "st_rad": host_obj.rad if host_obj else None,
-                "Rad": host_obj.rad if host_obj else None,
-                "st_dist": host_obj.distance if host_obj else None,
-                "Dist": host_obj.distance if host_obj else None,
-                "Plx": host_obj.parallax if host_obj else None,
-                "Jmag": host_obj.j_mag if host_obj else None,
-                "Hmag": host_obj.h_mag if host_obj else None,
-                "Kmag": host_obj.k_mag if host_obj else None,
-                # HostStar.g_mag/r_mag are Pan-STARRS DR1 bands (not Gaia G) -- matches the
-                # PS_gmag/PS_rmag columns the model was trained on.
-                "PS_gmag": host_obj.g_mag if host_obj else None,
-                "PS_rmag": host_obj.r_mag if host_obj else None,
-                "pl_trandep": candidate_obj.trandep,
-                "pl_rade": candidate_obj.rade,
-                "RUWE": host_obj.ruwe if host_obj else None,
-                "pl_orbper": candidate_obj.orbper,
-                "pl_trandurh": candidate_obj.trandurh,
-                "pl_insol": candidate_obj.insol,
-                "pl_eqt": candidate_obj.eqt,
-                "st_logg": host_obj.logg if host_obj else None,
-            }
+            data = self.inputs_from_records(candidate_obj, candidate_obj.host)
         elif isinstance(candidate_input, dict):
             data = candidate_input
 
@@ -292,6 +307,7 @@ class PredictionEngine:
                     followup_priority_score=priority_score,
                     prob_planet=evidence_score,
                     feature_importance=top_contrib,
+                    model_version=self.model_version,
                 )
                 db.add(pred_rec)
             else:
@@ -299,6 +315,7 @@ class PredictionEngine:
                 pred_rec.followup_priority_score = priority_score
                 pred_rec.prob_planet = evidence_score
                 pred_rec.feature_importance = top_contrib
+                pred_rec.model_version = self.model_version
 
             db.commit()
 

@@ -106,7 +106,7 @@ def test_build_feature_row_leaves_missing_inputs_as_none():
     engine = PredictionEngine.__new__(PredictionEngine)  # skip __init__'s file I/O
     row = engine.build_feature_row({"st_teff": 5500.0})
     assert row["st_teff"] == 5500.0
-    assert row["teff_diff"] == 0.0  # Teff falls back to st_teff per _extract_raw_inputs -> no discrepancy
+    assert row["teff_diff"] is None  # no Gaia Teff -> no disagreement can be computed (never a fake 0)
     assert row["RUWE"] is None
     assert row["j_k"] is None and row["abs_K"] is None and row["ps_g_r"] is None
 

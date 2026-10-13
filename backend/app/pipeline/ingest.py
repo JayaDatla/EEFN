@@ -350,6 +350,12 @@ def ingest_and_fuse_data(db: Session, limit: int = 100, rate_limiter=None,
         star.logg = row['logg']
         star.rad = row['Rad']
         star.mass = row['Mass-Flame']
+        # TOI-table (TIC-derived) values, kept beside the Gaia ones so the disagreement features
+        # can be recomputed at serving time from the same two sources used in training.
+        star.toi_teff = row.get('st_teff')
+        star.toi_rad = row.get('st_rad')
+        star.toi_dist = row.get('st_dist')
+        star.toi_logg = row.get('st_logg')
         star.pm_ra = pm_ra_val
         star.pm_dec = pm_dec_val
         star.ruwe = row['RUWE']
@@ -409,9 +415,11 @@ def ingest_and_fuse_data(db: Session, limit: int = 100, rate_limiter=None,
         # Recalculated planet size & unphysical check -- shared with predict.py via
         # app.science.radius so the two can never compute a different derived radius
         # for the same inputs (UPGRADE_PLAN.md E.3).
+        # None when there is no Gaia radius. The previous `pl_rade or 1.0` fallback stored the
+        # catalog's own radius (or an invented 1.0) as the "Gaia-derived" one, so a star Gaia never
+        # characterised read as "perfect agreement" (derived_rp_diff = 0) and could never trip the
+        # unphysical-radius check. Missing stays missing.
         calc_rp_gaia = compute_derived_planet_radius_earth(gaia_rad, trandep)
-        if calc_rp_gaia is None:
-            calc_rp_gaia = pl_rade if pl_rade else 1.0
 
         trandep_err1, trandep_err2 = row.get('pl_trandeperr1'), row.get('pl_trandeperr2')
         trandep_err = (abs(trandep_err1) + abs(trandep_err2)) / 2.0 if trandep_err1 is not None and trandep_err2 is not None else None
@@ -437,7 +445,7 @@ def ingest_and_fuse_data(db: Session, limit: int = 100, rate_limiter=None,
             return abs(a - b) if a is not None and b is not None else None
 
         derived_rp_diff = diff(pl_rade, calc_rp_gaia)
-        is_unphysical = bool(calc_rp_gaia > 22.0)
+        is_unphysical = bool(calc_rp_gaia is not None and calc_rp_gaia > 22.0)
 
         # Real catalog disagreements (also reused below for AgreementMetrics -- computed
         # once here so ingest.py and the health score can never see different numbers).

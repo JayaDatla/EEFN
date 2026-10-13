@@ -287,3 +287,32 @@ def test_ingestion_computes_real_completeness_score(isolated_db, requests_mock):
     # ruwe) are populated in this fixture, so completeness should be a real 1.0 -- but
     # computed from actual coverage, not hardcoded regardless of what's present.
     assert metrics.completeness_score == pytest.approx(1.0)
+
+
+def test_ingestion_stores_toi_side_host_values_next_to_the_gaia_ones(isolated_db, requests_mock):
+    """The catalog-disagreement features compare the TOI table's host values with Gaia's, so both
+    must survive ingestion; storing only Gaia's made the served features compare Gaia with itself."""
+    _mock_endpoints(requests_mock, [NASA_ROW_V1])
+    ingest_module.ingest_and_fuse_data(isolated_db, limit=10)
+    star = isolated_db.query(HostStar).first()
+    assert (star.toi_teff, star.toi_rad, star.toi_dist, star.toi_logg) == (5500.0, 1.0, 100.0, 4.4)
+    assert (star.teff, star.rad, star.distance) == (5480.0, 1.02, 98.0)      # Gaia values, distinct
+
+
+def test_no_gaia_radius_means_no_derived_radius_not_an_invented_one(isolated_db, requests_mock):
+    """`pl_rade or 1.0` used to stand in for a missing Gaia-derived radius, so a star Gaia never
+    characterised read as 'perfect agreement' and could never trip the unphysical-radius check."""
+    def no_astroparams_csv():
+        return ("toi,Source,Teff,b_Teff,B_Teff,logg,b_logg,B_logg,Dist,b_Dist,B_Dist,Rad,b_Rad,B_Rad,"
+                "Rad-Flame,Mass-Flame,Lum-Flame,Age-Flame,angDist\n")
+
+    _mock_endpoints(requests_mock, [NASA_ROW_V1])
+    requests_mock.post(
+        ingest_module.CDS_XMATCH_URL,
+        additional_matcher=lambda request: b"paramp" in request.body,
+        text=no_astroparams_csv(),
+    )
+    ingest_module.ingest_and_fuse_data(isolated_db, limit=10)
+    metrics = isolated_db.query(AgreementMetrics).first()
+    assert metrics.derived_rp_gaia is None and metrics.derived_rp_diff is None
+    assert metrics.is_unphysical_rp is False

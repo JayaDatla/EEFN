@@ -21,6 +21,14 @@ class HostStar(Base):
     rad = Column(Float, nullable=True)
     mass = Column(Float, nullable=True)
 
+    # The TOI table's own host-star values (TIC-derived). teff/logg/rad/distance above are the
+    # Gaia DR3 values; the catalog-disagreement features compare the two, so serving must be able
+    # to see both. Without these columns the served model compared Gaia against itself (diffs 0).
+    toi_teff = Column(Float, nullable=True)
+    toi_rad = Column(Float, nullable=True)
+    toi_dist = Column(Float, nullable=True)
+    toi_logg = Column(Float, nullable=True)
+
     pm_ra = Column(Float, nullable=True)       # Gaia proper motion RA (mas/yr)
     pm_dec = Column(Float, nullable=True)      # Gaia proper motion Dec (mas/yr)
     ruwe = Column(Float, nullable=True)        # Gaia DR3 astrometric fit quality (>1.4 = binary wobble)
@@ -188,6 +196,7 @@ class MLPrediction(Base):
     prob_noise = Column(Float, nullable=True)
     integrated_gradients = Column(JSON, nullable=True)
     feature_importance = Column(JSON, nullable=True)
+    model_version = Column(String, nullable=True)   # which artifact produced this score
     calculated_at = Column(DateTime, default=datetime.utcnow)
 
     candidate = relationship("ExoplanetCandidate", back_populates="prediction")
