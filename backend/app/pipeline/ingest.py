@@ -306,9 +306,9 @@ def ingest_and_fuse_data(db: Session, limit: int = 100, rate_limiter=None,
                                    'zmag', 'e_zmag', 'ymag', 'e_ymag'])
 
     # 4. Merge catalogs in Pandas
-    cols_gaia = ['toi', 'Source', 'Plx', 'e_Plx', 'RUWE', 'Gmag', 'BPmag', 'RPmag', 'PM', 'pmRA', 'pmDE']
+    cols_gaia = ['toi', 'Source', 'Plx', 'e_Plx', 'RUWE', 'Gmag', 'BPmag', 'RPmag', 'PM', 'pmRA', 'pmDE', 'angDist']
     df_gaia_sub = df_gaia_clean[[c for c in cols_gaia if c in df_gaia_clean.columns]].copy()
-    df_gaia_sub.rename(columns={'Source': 'source_id'}, inplace=True)
+    df_gaia_sub.rename(columns={'Source': 'source_id', 'angDist': 'gaia_match_sep'}, inplace=True)
 
     cols_param = ['toi', 'Source', 'Teff', 'b_Teff', 'B_Teff', 'logg', 'b_logg', 'B_logg', 'Dist', 'b_Dist', 'B_Dist', 'Rad', 'b_Rad', 'B_Rad', 'Rad-Flame', 'Mass-Flame', 'Lum-Flame', 'Age-Flame']
     df_param_sub = df_param_clean[[c for c in cols_param if c in df_param_clean.columns]].copy()
@@ -384,6 +384,13 @@ def ingest_and_fuse_data(db: Session, limit: int = 100, rate_limiter=None,
         star.toi_rad = row.get('st_rad')
         star.toi_dist = row.get('st_dist')
         star.toi_logg = row.get('st_logg')
+        star.toi_tmag = row.get('st_tmag')
+        # Match diagnostics: Gaia G and BP-RP of the matched source and its separation from the (proper-
+        # motion-propagated) TOI position, so a wrong-star match can be detected later.
+        gmag, bpmag, rpmag = row.get('Gmag'), row.get('BPmag'), row.get('RPmag')
+        star.gaia_g_mag = gmag
+        star.gaia_bp_rp = (bpmag - rpmag) if bpmag is not None and rpmag is not None else None
+        star.gaia_match_sep_arcsec = row.get('gaia_match_sep')
         star.pm_ra = pm_ra_val
         star.pm_dec = pm_dec_val
         star.ruwe = row['RUWE']

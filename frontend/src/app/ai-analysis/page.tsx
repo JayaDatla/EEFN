@@ -463,6 +463,9 @@ export default function AIAnalysisPage() {
                     <>
                       <div className="flex justify-between"><span className="text-muted">Photocentre shift</span><span className="text-ink font-mono">{(centroid.photocentre_shift_arcsec * 1000).toFixed(1)} mas</span></div>
                       <div className="flex justify-between"><span className="text-muted">Implied source offset</span><span className="text-ink font-mono">{centroid.implied_source_offset_arcsec != null ? `${centroid.implied_source_offset_arcsec.toFixed(2)}″ ± ${centroid.implied_source_offset_err_arcsec?.toFixed(2)}` : '--'}</span></div>
+                      {centroid.min_detectable_offset_arcsec != null && (
+                        <div className="flex justify-between"><span className="text-muted">Detectable at 3&sigma;</span><span className="text-ink font-mono">&ge; {centroid.min_detectable_offset_arcsec.toFixed(1)}&Prime;</span></div>
+                      )}
                       <div className="flex justify-between"><span className="text-muted">Verdict</span><span className={centroid.is_dip ? 'text-severity-critical font-bold' : 'text-status-pass font-bold'}>{centroid.is_dip ? 'OFF-TARGET SIGNAL' : 'No significant offset'}</span></div>
                     </>
                   ) : (

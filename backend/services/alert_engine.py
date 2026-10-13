@@ -41,18 +41,34 @@ class AlertEngine:
                     "remediation": "Flag target as False Positive (Eclipsing Binary). Perform high-resolution imaging or radial velocity observations to identify stellar companion."
                 })
 
-        # Rule 2: High RUWE Anomaly
+        # Rule 2: Gaia RUWE, in two tiers (app/science/flags.py THRESHOLDS). 1.4 is the long-standing
+        # single-star cut; 1.25 is the stricter Gaia DR3-calibrated one. RUWE only senses photocentre
+        # wobble: it misses companions closer than ~0.1 arcsec at short periods and very wide pairs, so a
+        # clean RUWE means "no astrometric evidence of a companion", NOT "no companion" (e.g. TOI 864.01:
+        # RUWE 1.18, yet a 0.04 arcsec companion was found by imaging).
         if metrics and metrics.ruwe and metrics.ruwe > 1.4:
             alerts.append({
                 "id": f"ALERT_HIGH_RUWE_{cand.pl_name}",
                 "category": "HIGH_RUWE_ANOMALY",
                 "severity": "HIGH",
-                "explanation": f"Gaia DR3 Renormalised Unit Weight Error (RUWE) is {metrics.ruwe:.3f}, which exceeds the single-star astrometric standard threshold of 1.4.",
+                "explanation": f"Gaia DR3 Renormalised Unit Weight Error (RUWE) is {metrics.ruwe:.3f}, above the conventional single-star threshold of 1.4.",
                 "affected_measurements": ["RUWE"],
                 "source_catalogs": ["Gaia DR3"],
                 "timestamp": now,
-                "likely_cause": "Astrometric wobble indicating a non-single star (unresolved stellar binary companion).",
-                "remediation": "Conduct speckle interferometry or adaptive optics imaging to resolve the close stellar companion."
+                "likely_cause": "Astrometric wobble that can indicate an unresolved stellar companion (it can also reflect crowding or a poor fit).",
+                "remediation": "Conduct speckle interferometry or adaptive-optics imaging to look for a close stellar companion."
+            })
+        elif metrics and metrics.ruwe and metrics.ruwe > 1.25:
+            alerts.append({
+                "id": f"ALERT_ELEVATED_RUWE_{cand.pl_name}",
+                "category": "ELEVATED_RUWE",
+                "severity": "LOW",
+                "explanation": f"Gaia DR3 RUWE is {metrics.ruwe:.3f}: above the stricter DR3-calibrated cut of 1.25 but below the conventional 1.4. Weak, possible-binary evidence only.",
+                "affected_measurements": ["RUWE"],
+                "source_catalogs": ["Gaia DR3"],
+                "timestamp": now,
+                "likely_cause": "Possible unresolved companion, or an ordinary fit-quality fluctuation near the threshold.",
+                "remediation": "Low priority: consider high-resolution imaging if the target is otherwise promising."
             })
 
         # Rule 3: Stellar Parameter Mismatch (Temperature)

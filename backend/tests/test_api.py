@@ -372,3 +372,17 @@ def test_vetter_report_includes_the_catalog_input_ablation():
     lc_only = abl["light-curve features only (no stellar/catalog inputs)"]["accuracy"]
     assert abs(full - lc_only) < 0.05       # the vetter must not be mostly a catalog prior
     assert data["ablation"]["calibration"]["ece_before"] < 0.10
+
+
+def test_centroid_block_reports_how_small_an_offset_could_have_been_seen():
+    from app.audit import _real_observations
+    from types import SimpleNamespace
+    c = SimpleNamespace(centroid_is_real=True, centroid_status="measured", centroid_shift_max=0.01,
+                        centroid_significance_sigma=1.0, centroid_implied_offset_arcsec=1.0,
+                        centroid_implied_offset_err_arcsec=4.0, has_centroid_dip=False, centroid_sector=1,
+                        centroid_computed_at=None, lc_vetting_status=None, lc_vetting_json=None, lc_vetting_at=None)
+    cen = _real_observations(c)["centroid"]
+    assert cen["min_detectable_offset_arcsec"] == 12.0 and cen["is_dip"] is False
+    c.centroid_is_real = False
+    assert _real_observations(c)["centroid"]["min_detectable_offset_arcsec"] is None   # unmeasured -> unknown, not zero
+

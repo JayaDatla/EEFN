@@ -19,6 +19,7 @@ Provenance of the thresholds (see reports/Cross catalog exoplanet vetting review
 import math
 from typing import Any, Dict, Optional
 
+from app.science.crossmatch import crossmatch_quality
 from app.science.density import compute_gaia_density_cgs, compute_transit_density_cgs, radius_ratio_from_depth_ppm
 from app.science.radius import compute_derived_planet_radius_earth
 
@@ -75,6 +76,7 @@ def compute_flags(cand: Any, host: Any, prediction: Any = None) -> Dict[str, Opt
             log_ratio < THRESHOLDS["density_log_ratio_low"] or log_ratio > THRESHOLDS["density_log_ratio_high"])),
         "teff_outlier": _gt(teff_diff, THRESHOLDS["teff_difference_kelvin"]),
         "radius_outlier": _gt(rad_diff_frac, THRESHOLDS["radius_difference_fraction"]),
+        "crossmatch_suspect": crossmatch_quality(host)["suspect"] if host is not None else None,
         "gaia_parameters_missing": None if host is None else bool(gaia_teff is None and gaia_rad is None),
         "evidence_score_low": None if score is None else bool(score < THRESHOLDS["evidence_score_low"]),
     }

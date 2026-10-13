@@ -117,6 +117,7 @@ class CandidateProfileResponse(BaseModel):
     model_tier: ModelTierResponse
     health: HealthBreakdownResponse
     real_observations: Dict[str, Any] = {}
+    data_quality: Dict[str, Any] = {}
 
 _CANDIDATE_SORT_FIELDS = {
     "toi_id": ExoplanetCandidate.toi_id,
@@ -485,6 +486,7 @@ def get_candidate_detail(toi_id: float, db: Session = Depends(get_db)):
         model_tier=ModelTierResponse(**profile["model_tier"]),
         health=HealthBreakdownResponse(**profile["health"]),
         real_observations=profile.get("real_observations", {}),
+        data_quality=profile.get("data_quality", {}),
     )
 
 class PipelineRunResponse(BaseModel):

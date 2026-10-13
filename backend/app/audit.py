@@ -10,6 +10,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from app.pipeline import sync_status as S
+from app.science.crossmatch import crossmatch_quality
 from app.db.models import ExoplanetCandidate, HostStar, AgreementMetrics, MLPrediction, MeasurementHistory
 from app.science.tiers import compute_model_tier
 from app.science.health import compute_health_score
@@ -119,6 +120,7 @@ def build_candidate_profile(db: Session, toi_id: float) -> Optional[Dict[str, An
         # Measurements from the nightly real-data syncs (app/pipeline/real_sync.py). Absent
         # data is reported as such (status + None), never as a clean/zero result.
         "real_observations": _real_observations(cand),
+        "data_quality": {"crossmatch": crossmatch_quality(star)} if star is not None else {},
         "health": {
             "score": cand.health_score if cand.health_score is not None else health_result.score,
             "grade": cand.health_grade if cand.health_grade else health_result.grade,
@@ -149,6 +151,11 @@ def _real_observations(cand) -> dict:
             "significance_sigma": if_measured(cand.centroid_significance_sigma),
             "implied_source_offset_arcsec": if_measured(cand.centroid_implied_offset_arcsec),
             "implied_source_offset_err_arcsec": if_measured(cand.centroid_implied_offset_err_arcsec),
+            # Smallest implied source offset this measurement could have detected at 3 sigma. "No
+            # significant offset" is only informative relative to this: a target whose limit is 25 arcsec
+            # cannot rule out a source 10 arcsec away.
+            "min_detectable_offset_arcsec": if_measured(
+                None if cand.centroid_implied_offset_err_arcsec is None else round(3.0 * cand.centroid_implied_offset_err_arcsec, 2)),
             # None = the dip test could not run (no measurable depth); distinct from False (clean).
             "is_dip": if_measured(None if cand.has_centroid_dip is None else bool(cand.has_centroid_dip)),
             "sector": if_measured(cand.centroid_sector),

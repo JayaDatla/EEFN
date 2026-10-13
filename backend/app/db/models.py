@@ -28,6 +28,12 @@ class HostStar(Base):
     toi_rad = Column(Float, nullable=True)
     toi_dist = Column(Float, nullable=True)
     toi_logg = Column(Float, nullable=True)
+    toi_tmag = Column(Float, nullable=True)
+
+    # Cross-match diagnostics (app/science/crossmatch.py): was the Gaia source we matched really this star?
+    gaia_g_mag = Column(Float, nullable=True)
+    gaia_bp_rp = Column(Float, nullable=True)
+    gaia_match_sep_arcsec = Column(Float, nullable=True)
 
     pm_ra = Column(Float, nullable=True)       # Gaia proper motion RA (mas/yr)
     pm_dec = Column(Float, nullable=True)      # Gaia proper motion Dec (mas/yr)
