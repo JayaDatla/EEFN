@@ -130,9 +130,6 @@ class PredictionEngine:
             1 if (derived_rp_gaia is not None and derived_rp_gaia > UNPHYSICAL_RP_THRESHOLD_EARTH_RADII) else 0
         )
         high_ruwe = 1 if (RUWE is not None and RUWE > 1.4) else 0
-        completeness = sum(
-            1 for v in [st_teff, st_rad, st_dist, Teff, Rad, Dist, RUWE] if v is not None
-        )
 
         return {
             "pl_orbper": raw["pl_orbper"],
@@ -157,7 +154,6 @@ class PredictionEngine:
             "is_unphysical_rp_gaia": is_unphysical_rp_gaia,
             "RUWE": RUWE,
             "high_ruwe": high_ruwe,
-            "completeness": completeness,
             "j_k": colour(raw["Jmag"], Kmag),
             "h_k": colour(raw["Hmag"], Kmag),
             "abs_K": abs_K,

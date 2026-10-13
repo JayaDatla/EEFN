@@ -535,12 +535,12 @@ export default function ShowcasePage() {
                   <div className="glass-panel p-4 rounded-xl shadow flex flex-col gap-2">
                     <h4 className="font-bold text-ink border-b border-border pb-1">HELD-OUT PERFORMANCE</h4>
                     <p className="leading-relaxed font-sans text-[11px]">
-                      LightGBM evidence-consistency model, 27 real features, evaluated on a stratified
-                      80/20 split (n=2,667; held out 534, never trained on): <strong>85.39% accuracy, 0.9267
-                      ROC-AUC, 0.8561 F1</strong>. That is the easiest protocol: scored by star-grouped
-                      cross-validation it is AUC 0.927 (95% CI 0.917&ndash;0.936), and scored time-forward
+                      LightGBM evidence-consistency model, 26 real features, evaluated on a stratified
+                      80/20 split (n=2,667; held out 534, never trained on): <strong>86.14% accuracy, 0.9272
+                      ROC-AUC, 0.865 F1</strong>. That is the easiest protocol: scored by star-grouped
+                      cross-validation it is AUC 0.926 (95% CI 0.916&ndash;0.935), and scored time-forward
                       (train to 2020, test on later TOIs) it falls to about 0.84&ndash;0.88. The Gaia / 2MASS /
-                      Pan-STARRS features add only about +0.008 AUC over the TOI table alone, and nothing
+                      Pan-STARRS features add only about +0.007 AUC over the TOI table alone, and nothing
                       time-forward.
                     </p>
                     <span className="text-status-pass font-bold block mt-1">SOURCE: model_metrics.json</span>

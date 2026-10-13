@@ -29,7 +29,7 @@ whether that evidence overlaps with what EEFN uses.
 | **Robovetter** (Coughlin et al., Kepler pipeline) | Rule-based diagnostic tests on Kepler TCEs: odd-even depth mismatch, secondary eclipse test, centroid offset test, etc. | Binary disposition (PC/FP) + which specific test(s) failed | Built specifically for Kepler; not actively used for TESS in its original form (TESS uses SPOC/QLP + human TFOP review instead) |
 | **AstroNet / AstroNet-Vetting** (Shallue & Vanderburg 2018; Yu et al. 2019 TESS variant) | CNN over folded global+local light-curve views | Binary/multi-class transit classification probability | Established; methodologically the closest thing to EEFN's own DL branch (see below) |
 | **ExoMiner** (Valizadegan et al. 2022, NASA Ames) | Ensemble CNN over multiple diagnostic branches: global/local light-curve views, secondary eclipse, odd-even, centroid, difference-image | Per-branch + fused classification probability | Currently among the most capable automated vetters; used by NASA to vet/confirm large batches of new TESS candidates |
-| **EEFN** (this project) | TOI-table values, TOI-vs-Gaia DR3 disagreement (Teff, radius, distance), Gaia RUWE, 2MASS / Pan-STARRS colours, a stellar-density/duration check; plus a gradient-boosted vetter over physics features of the real light curve (odd/even, secondary eclipse, shape, implied radius) and a real-TPF centroid check | Evidence-consistency score (a TOI-table disposition prior), light-curve class probabilities (uncalibrated), centroid offset | Early. Tabular score: AUC 0.927 star-grouped, ~0.85 time-forward, cross-catalog features add ~+0.008 AUC over TOI columns. Vetter: 83% Kepler CV, 76% (n=50, 95% CI ~0.63-0.86) agreement with TFOP labels on TESS |
+| **EEFN** (this project) | TOI-table values, TOI-vs-Gaia DR3 disagreement (Teff, radius, distance), Gaia RUWE, 2MASS / Pan-STARRS colours, a stellar-density/duration check; plus a gradient-boosted vetter over physics features of the real light curve (odd/even, secondary eclipse, shape, implied radius) and a real-TPF centroid check | Evidence-consistency score (a TOI-table disposition prior), light-curve class probabilities (uncalibrated), centroid offset | Early. Tabular score: AUC 0.927 star-grouped, ~0.85 time-forward, cross-catalog features add ~+0.007 AUC over TOI columns. Vetter: 83% Kepler CV, 76% (n=50, 95% CI ~0.63-0.86) agreement with TFOP labels on TESS |
 
 ## Where EEFN's evidence overlaps with these tools, and where it doesn't
 
@@ -48,7 +48,7 @@ centroid test; TRICERATOPS uses the TIC neighbours as blend scenarios; and TFOP 
 Gaia RUWE and neighbour checks. Two further caveats from measurement and the literature: TIC-8 stellar
 parameters are themselves computed from Gaia DR2, so TOI-minus-Gaia differences are largely method noise
 rather than independent evidence; and in EEFN's own evaluation the cross-catalog features add only about
-+0.008 AUC over the TOI table's columns under star-grouped CV and nothing under time-forward splits
++0.007 AUC over the TOI table's columns under star-grouped CV and nothing under time-forward splits
 (`backend/app/ml/honest_evaluation_report.json`). What is genuinely useful is the transparent flags
 (RUWE, an implausible derived radius, a duration/density inconsistency) with their provenance, as a
 pre-screen for TOI reviewers.

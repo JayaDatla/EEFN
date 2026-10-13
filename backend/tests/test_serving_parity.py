@@ -88,7 +88,7 @@ def test_missing_gaia_values_give_missing_disagreement_not_zero():
     row = PredictionEngine.__new__(PredictionEngine).build_feature_row(PredictionEngine.inputs_from_records(_cand(), host))
     assert row["teff_diff"] is None and row["rad_diff"] is None and row["dist_diff"] is None
     assert row["derived_rp_gaia"] is None and row["is_unphysical_rp_gaia"] == 0
-    assert row["completeness"] == 3          # only the three TOI-side values are present
+    assert "completeness" not in row         # no label-informative count of populated fields
 
 
 def test_not_yet_backfilled_host_is_all_missing_rather_than_fabricated():

@@ -4,6 +4,30 @@ from datetime import datetime
 from app.db.session import SessionLocal, Base, engine
 from app.db.models import HostStar, ExoplanetCandidate, CatalogSource, MeasurementHistory, AgreementMetrics, MLPrediction
 
+SEED_WARNING = """
+THIS SCRIPT ERASES THE ENTIRE DATABASE and fills it with RANDOMLY GENERATED, FABRICATED candidates
+(random periods, temperatures, scores, grades). None of it is real data. It exists only to make
+a throwaway demo database. Refusing to run unless you pass --erase-and-fabricate, and refusing
+even then if the target database already holds real ingested data (pass --force to override).
+"""
+
+
+def _refuse_if_real_data_present() -> None:
+    """Real ingestion writes MeasurementHistory provenance rows and TOI-side host values; seed data
+    writes neither. Their presence means this is not a throwaway database."""
+    from app.db.models import HostStar, MeasurementHistory
+    db = SessionLocal()
+    try:
+        real_rows = db.query(MeasurementHistory).count() + db.query(HostStar).filter(HostStar.toi_teff.isnot(None)).count()
+    except Exception:
+        real_rows = 0          # tables don't exist yet: nothing to protect
+    finally:
+        db.close()
+    if real_rows:
+        raise SystemExit(f"Refusing to erase: this database holds {real_rows} real ingested rows "
+                         "(provenance history / TOI host values). Use a different DATABASE_URL, or --force.")
+
+
 def seed_database():
     print("Dropping old database tables and creating ExoFusion-Net v2 schema...")
     Base.metadata.drop_all(bind=engine)
@@ -353,4 +377,11 @@ def seed_database():
 
 
 if __name__ == "__main__":
+    import sys
+
+    print(SEED_WARNING)
+    if "--erase-and-fabricate" not in sys.argv:
+        raise SystemExit("Not running. Pass --erase-and-fabricate to proceed.")
+    if "--force" not in sys.argv:
+        _refuse_if_real_data_present()
     seed_database()

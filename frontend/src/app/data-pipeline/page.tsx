@@ -58,7 +58,6 @@ const RF_FEATURES = [
   "derived_rp_gaia, derived_rp_diff, derived_rp_diff_rel — the Gaia-corrected planet radius and how far it sits from TESS's reported radius",
   "is_unphysical_rp_gaia — 1 if the Gaia-corrected radius exceeds the 22 R⊕ physical limit for a transiting planet",
   "RUWE, high_ruwe — Gaia's astrometric-binarity signal, raw and thresholded (>1.4)",
-  "completeness — how many of the 7 core stellar values above were actually measured for this star",
   "j_k, h_k, abs_K, ps_g_r — 2MASS and Pan-STARRS colours, plus absolute K magnitude from the Gaia parallax (a giant-vs-dwarf check on the catalog radius)",
 ];
 
@@ -240,7 +239,7 @@ export default function DataPipelinePage() {
           <div className="surface-card p-5">
             <h3 className="mb-2 text-sm font-semibold text-ink">Gradient-boosted trees (evidence-consistency score)</h3>
             <p className="mb-3 text-xs text-muted">
-              27 engineered features, built once for training and reproduced feature-for-feature at inference
+              26 engineered features, built once for training and reproduced feature-for-feature at inference
               so the model always sees the columns it was fit on. A missing input becomes a real, tracked
               missing value (imputed by the trained median imputer) — never a substituted default.
             </p>

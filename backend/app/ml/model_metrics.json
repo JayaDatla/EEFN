@@ -31,17 +31,16 @@
     "is_unphysical_rp_gaia",
     "RUWE",
     "high_ruwe",
-    "completeness",
     "j_k",
     "h_k",
     "abs_K",
     "ps_g_r"
   ],
   "metrics": {
-    "accuracy": 0.8539,
-    "roc_auc": 0.9267,
-    "f1_score": 0.8561
+    "accuracy": 0.8614,
+    "roc_auc": 0.9272,
+    "f1_score": 0.865
   },
-  "evaluated_at": "2026-10-11T13:56:13.910789+00:00",
+  "evaluated_at": "2026-10-13T06:05:00.471164+00:00",
   "note": "metrics computed on a stratified 80/20 held-out split never seen during training; the serialized model_artifacts.pkl is refit on the full dataset afterward, which is why these metrics are a lower bound on the production model's actual accuracy, not an exact measurement of it."
 }

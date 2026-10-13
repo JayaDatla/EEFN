@@ -49,8 +49,8 @@ export default function AboutPage() {
             </Callout>
             <Callout tone="warning" title="The score mostly reproduces the TOI table, and it gets worse on new candidates">
               Held-out AUC is 0.93 under star-grouped cross-validation, but the TOI table&apos;s own columns alone
-              reach 0.92: the cross-catalog (Gaia, 2MASS, Pan-STARRS) features add about +0.008 AUC
-              (95% CI +0.002 to +0.014). Scored the way it would really be used &mdash; train on older TOIs, score
+              reach 0.92: the cross-catalog (Gaia, 2MASS, Pan-STARRS) features add about +0.007 AUC
+              (95% CI +0.001 to +0.013). Scored the way it would really be used &mdash; train on older TOIs, score
               later ones &mdash; AUC falls to 0.84&ndash;0.88 and the cross-catalog features add nothing. Treat the score as a
               prior learned from catalog values, not as evidence that a planet is real. Details:{" "}
               <code>LIMITATIONS.md</code> §1.3.

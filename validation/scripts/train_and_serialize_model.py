@@ -65,7 +65,9 @@ def build_features(df: pd.DataFrame):
     df['is_unphysical_rp_gaia'] = (df['derived_rp_gaia'] > 22.0).astype(int)
 
     df['high_ruwe'] = (df['RUWE'] > 1.4).astype(int)
-    df['completeness'] = df[['st_teff', 'st_rad', 'st_dist', 'Teff', 'Rad', 'Dist', 'RUWE']].notna().sum(axis=1)
+    # (No 'completeness' count of populated catalog fields: it carried only the Gaia-missing pattern, which
+    #  is label-informative in this dataset (35% positive when Gaia astro-params are missing vs 53% when
+    #  present) and removing it cost 0.0008 AUC / 0.0002 time-forward -- see LIMITATIONS.md.)
 
     baseline_cols = [
         'pl_orbper', 'pl_trandurh', 'pl_trandep', 'pl_rade', 'pl_insol', 'pl_eqt',
@@ -74,7 +76,7 @@ def build_features(df: pd.DataFrame):
     disagreement_cols = [
         'teff_diff', 'teff_diff_rel', 'rad_diff', 'rad_diff_rel', 'dist_diff', 'dist_diff_rel',
         'derived_rp_gaia', 'derived_rp_diff', 'derived_rp_diff_rel',
-        'is_unphysical_rp_gaia', 'RUWE', 'high_ruwe', 'completeness',
+        'is_unphysical_rp_gaia', 'RUWE', 'high_ruwe',
         'j_k', 'h_k', 'abs_K', 'ps_g_r',
     ]
     feature_cols = baseline_cols + disagreement_cols
