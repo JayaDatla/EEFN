@@ -68,7 +68,7 @@ export default function AboutPage() {
               (ROC-AUC 0.81; it finds 88% of planets but also calls 36% of false positives planets, so a "Planet"
               verdict is weaker evidence than "Not Transit-Like") -- a real drop from the Kepler number, and those labels were assigned by people who
               inspected the same light curves, so this measures reproduction of human vetting. It replaced a CNN
-              that scored 64% under the same protocol. Outputs are not calibrated. See{" "}
+              that scored 64% under the same protocol. Probability calibration is checked on Kepler only, not on TESS. See{" "}
               <code>LIMITATIONS.md</code> §1.7 and the Light-Curve Vetting page.
             </Callout>
             <Callout tone="info" title="Only 5 of 7 planned catalogs feed every candidate">

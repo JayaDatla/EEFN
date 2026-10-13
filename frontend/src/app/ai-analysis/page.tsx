@@ -281,9 +281,21 @@ export default function AIAnalysisPage() {
                   </div>
                 )}
 
-                <Callout tone="warning" title="Outputs are not calibrated">
-                  The class probabilities are raw boosted-tree outputs. Use them to rank candidates, not as
-                  stated frequencies.
+                {report.ablation && (
+                  <Callout tone="info" title="Does it rely on catalog inputs?">
+                    No. With every stellar and catalog-derived input removed, cross-validated accuracy is{" "}
+                    {pct(report.ablation.ablation?.["light-curve features only (no stellar/catalog inputs)"]?.accuracy)}{" "}
+                    against {pct(report.ablation.ablation?.["all features (shipped)"]?.accuracy)} with them
+                    (95% CI {pct(report.ablation.ablation?.["all features (shipped)"]?.ci95_by_star?.[0], 0)}&ndash;
+                    {pct(report.ablation.ablation?.["all features (shipped)"]?.ci95_by_star?.[1], 0)}). Recall on
+                    binaries Kepler labelled by a centroid offset alone, which the model cannot see, is only{" "}
+                    {pct(report.ablation.eclipsing_binary_recall_by_kepler_flag?.["centroid-offset flag only (invisible to this model)"]?.recall, 0)}.
+                  </Callout>
+                )}
+                <Callout tone="warning" title="Calibration is measured on Kepler only">
+                  Out-of-fold calibration error on Kepler is {report.ablation?.calibration?.ece_before?.toFixed(3) ?? "--"}
+                  (and rescaling does not improve it). On TESS the probabilities are unchecked: 50 labelled
+                  targets are too few. Use them to rank candidates, not as stated frequencies.
                 </Callout>
               </>
             )}
@@ -420,7 +432,7 @@ export default function AIAnalysisPage() {
                         </span>
                       </div>
                       <span className="text-muted text-[8px]">
-                        Sectors {vetting.sectors?.join(', ')} &middot; {vetting.model_version} &middot; uncalibrated score
+                        Sectors {vetting.sectors?.join(', ')} &middot; {vetting.model_version} &middot; calibration unchecked on TESS
                       </span>
                     </div>
                     <div className="flex flex-col gap-3 font-mono text-[9px]">

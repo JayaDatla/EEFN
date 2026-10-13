@@ -363,3 +363,12 @@ def test_candidate_profile_exposes_real_observations_honestly():
         assert obs["centroid"]["photocentre_shift_arcsec"] is None and obs["centroid"]["is_dip"] is None
     if obs["lightcurve_vetting"]["status"] != "vetted":
         assert obs["lightcurve_vetting"]["classification"] is None
+
+
+def test_vetter_report_includes_the_catalog_input_ablation():
+    data = client.get("/api/v1/predictions/lightcurve_vetter").json()
+    abl = data["ablation"]["ablation"]
+    full = abl["all features (shipped)"]["accuracy"]
+    lc_only = abl["light-curve features only (no stellar/catalog inputs)"]["accuracy"]
+    assert abs(full - lc_only) < 0.05       # the vetter must not be mostly a catalog prior
+    assert data["ablation"]["calibration"]["ece_before"] < 0.10

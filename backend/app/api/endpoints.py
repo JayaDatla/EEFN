@@ -677,6 +677,10 @@ def get_lightcurve_vetter_report():
     if os.path.exists(study_path):
         with open(study_path, "r") as f:
             report["architecture_study"] = json.load(f)
+    abl_path = os.path.normpath(os.path.join(_ML_DIR, "lightcurve_vetter_ablation.json"))
+    if os.path.exists(abl_path):
+        with open(abl_path, "r") as f:
+            report["ablation"] = json.load(f)
     tess_path = os.path.normpath(os.path.join(_ML_DIR, "tess_transfer_report.json"))
     if os.path.exists(tess_path):
         with open(tess_path, "r") as f:

@@ -30,7 +30,7 @@
 ## Findings and Recommendations
 *   **This is NOT a clean pass.** The earlier version of this report certified the feature space as "clean" and concluded PASS. That conclusion was not supported:
 *   **Label circularity is untested here.** `tfopwg_disp` dispositions were assigned by human reviewers who used the same kinds of signals the features encode (Gaia RUWE/parallax/radius, the SPOC transit depth and radius). The two ablations in LIMITATIONS.md section 1.1 are weak proxies (pre/post-EDR3 re-splits; an RV-confirmed holdout of positives only). A negative-side clean-label test does not exist.
-*   **The TOI-table stellar values are derived from Gaia** (TIC-8 uses Gaia DR2), so TOI-minus-Gaia differences are not independent evidence. See `backend/app/ml/honest_evaluation_report.json`: the cross-catalog features add only ~+0.008 AUC over the TOI-table columns alone under star-grouped CV, and nothing under time-forward splits.
+*   **The TOI-table stellar values are derived from Gaia** (TIC-8 uses Gaia DR2), so TOI-minus-Gaia differences are not independent evidence. See `backend/app/ml/honest_evaluation_report.json`: the cross-catalog features add only ~+0.007 AUC over the TOI-table columns alone under star-grouped CV, and nothing under time-forward splits.
 *   **No target columns are used as features** (`tfopwg_disp` and `pl_controv_flag` are excluded), which rules out direct label leakage only.
 *   **Temporal offset:** Gaia DR3 (June 2022) postdates most TOI dispositions; it is a feature at serving time, not at the time most labels were assigned.
 
