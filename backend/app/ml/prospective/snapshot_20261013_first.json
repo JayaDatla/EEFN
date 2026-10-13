@@ -1,0 +1,2081 @@
+{
+ "core_flags": [
+  "ruwe_likely_binary",
+  "unphysical_radius",
+  "density_inconsistent",
+  "teff_outlier",
+  "radius_outlier"
+ ],
+ "created_at": "2026-10-13T06:17:39.572676+00:00",
+ "excluded_already_resolved": 389,
+ "excluded_not_in_archive": 0,
+ "git_commit": "39734e03cfca012a194666f22110de3d689927e5",
+ "hypothesis": "Among TOIs unresolved (PC) at this snapshot, those with >= 1 core catalog flag are more likely to be later dispositioned FP/FA than those with none.",
+ "label": "first",
+ "model_version": "lgbm-evidence-consistency-2.0.0",
+ "n_candidates": 108,
+ "rows": [
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9446068537974228,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 278683844,
+   "toi": "119.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9555133056472376,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 278683844,
+   "toi": "119.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9252381163542318,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 52368076,
+   "toi": "125.04"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.7455525186216025,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 425934411,
+   "toi": "142.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.7458457561658342,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 265612438,
+   "toi": "145.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.010331167459609415,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 88863718,
+   "toi": "1001.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.12829725842291934,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 65212867,
+   "toi": "1007.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.0053422338690506214,
+   "flags": {
+    "density_inconsistent": true,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": null,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 107782586,
+   "toi": "1009.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9025743788217873,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 114018671,
+   "toi": "1011.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.12571873124026353,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": true
+   },
+   "lightcurve_best_class": null,
+   "tic": 341420329,
+   "toi": "1019.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.8977709216937637,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 20318757,
+   "toi": "1027.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.901220121393914,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 20318757,
+   "toi": "1027.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9546061050984115,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 20318757,
+   "toi": "1027.03"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.0379977354377735,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 146589986,
+   "toi": "1032.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.015426202293288395,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 361413119,
+   "toi": "1035.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.29794051322318116,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 146172354,
+   "toi": "1036.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.015329646014718321,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 463402815,
+   "toi": "1044.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6352796574875574,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 421894914,
+   "toi": "1056.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9156230856036629,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 323132914,
+   "toi": "1057.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.22136551409322425,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 380783252,
+   "toi": "1059.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9591345624902977,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 406976746,
+   "toi": "1063.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9137740021159785,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 327301957,
+   "toi": "1074.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9573403697323326,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 369960846,
+   "toi": "1077.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.5186027832286686,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 379240073,
+   "toi": "1079.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.03879933294676443,
+   "flags": {
+    "density_inconsistent": true,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": true,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": false,
+    "unphysical_radius": true
+   },
+   "lightcurve_best_class": null,
+   "tic": 253728991,
+   "toi": "1081.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6170801649942057,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 261108236,
+   "toi": "1082.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.763619396954125,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 322270620,
+   "toi": "1083.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.7647698127105678,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 468148930,
+   "toi": "1086.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.02561344995607425,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 193413306,
+   "toi": "1091.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.010888157059770802,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 375223080,
+   "toi": "1095.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.0101816155612256,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": true
+   },
+   "lightcurve_best_class": null,
+   "tic": 351603103,
+   "toi": "1103.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9273189271374165,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 274151135,
+   "toi": "1105.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.013697666000320956,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 384513078,
+   "toi": "1106.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.882947796247412,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 304100538,
+   "toi": "1116.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6927559479685244,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 295541511,
+   "toi": "1117.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.004711703150640281,
+   "flags": {
+    "density_inconsistent": true,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 80166433,
+   "toi": "1125.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.007156649489215412,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 198213332,
+   "toi": "1131.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.01690261285897039,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 89389197,
+   "toi": "1137.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.022681387723355772,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 202563254,
+   "toi": "1139.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.021588289563196833,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 13419950,
+   "toi": "1162.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.029419536624870613,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 375542276,
+   "toi": "1163.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.1364435508297075,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 302518439,
+   "toi": "1169.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.745124132115063,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 230088370,
+   "toi": "1176.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.016775748454636336,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 372757221,
+   "toi": "1187.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.0260883311231954,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 112026224,
+   "toi": "1189.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.031246972962853593,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 69068526,
+   "toi": "1196.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.4119626562975874,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 92677094,
+   "toi": "1197.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.05597529436360431,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 467666275,
+   "toi": "1204.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.0667251081486666,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 287776397,
+   "toi": "1205.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6239063101136468,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 364393429,
+   "toi": "1207.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.7783723371074959,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 273985865,
+   "toi": "1208.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6994947714397484,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 273985865,
+   "toi": "1208.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.7564677063326353,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 273985865,
+   "toi": "1208.03"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.8194492460687597,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 30037565,
+   "toi": "1209.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.8513856713520576,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 50312495,
+   "toi": "1211.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.880530605448784,
+   "flags": {
+    "density_inconsistent": true,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 389924075,
+   "toi": "1212.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.8994372290133176,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 451606970,
+   "toi": "1214.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.8840738965001327,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": true,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 453260209,
+   "toi": "1215.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.5553699041827971,
+   "flags": {
+    "density_inconsistent": true,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 141527965,
+   "toi": "1216.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.27723774540288143,
+   "flags": {
+    "density_inconsistent": true,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 248092710,
+   "toi": "1217.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9059796015207453,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 294781547,
+   "toi": "1218.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.012872775514938687,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 294981566,
+   "toi": "1219.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.5962575267123832,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 374997123,
+   "toi": "1222.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6423285928347774,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 150428703,
+   "toi": "1225.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6989235950033872,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 150428703,
+   "toi": "1225.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9035970183506479,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 177115354,
+   "toi": "1226.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9200509152464438,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 154716798,
+   "toi": "1239.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.019152092755480854,
+   "flags": {
+    "density_inconsistent": true,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 159107668,
+   "toi": "1241.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.623951812288729,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": true,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 198212955,
+   "toi": "1242.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.11606213096578188,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 233211762,
+   "toi": "1252.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.5619631343050431,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 288132261,
+   "toi": "1258.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.7485343206209766,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 356311210,
+   "toi": "1261.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6904557422601093,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 406672232,
+   "toi": "1263.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.8470024862593376,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 416195870,
+   "toi": "1264.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9122691936259175,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 198241702,
+   "toi": "1269.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.7268476899507595,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 459969957,
+   "toi": "1274.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.79833158100645,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 153949511,
+   "toi": "1277.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9501147068688118,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 230017324,
+   "toi": "1280.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.8800782324350916,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 352764091,
+   "toi": "1287.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.8304657691702578,
+   "flags": {
+    "density_inconsistent": true,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 198186769,
+   "toi": "1291.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.14632193457017467,
+   "flags": {
+    "density_inconsistent": true,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": true,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 202504234,
+   "toi": "1293.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.7186204145651351,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 356867115,
+   "toi": "1301.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6772791242718075,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 441797803,
+   "toi": "1302.01"
+  },
+  {
+   "any_core_flag": null,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.0779037924888172,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": null,
+    "ruwe_possible_binary": null,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 167092385,
+   "toi": "1318.01"
+  },
+  {
+   "any_core_flag": null,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.15136855585903322,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": null,
+    "ruwe_possible_binary": null,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 167403519,
+   "toi": "1320.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.09976643529751725,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": true,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 160487753,
+   "toi": "1345.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.36575308163922926,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 233953967,
+   "toi": "1350.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.033652333009443515,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": null,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": true,
+    "unphysical_radius": true
+   },
+   "lightcurve_best_class": null,
+   "tic": 277566483,
+   "toi": "1356.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.11507038036260846,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 277447970,
+   "toi": "1361.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.015580075061534752,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 395142888,
+   "toi": "1362.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.003640614274320426,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 26880783,
+   "toi": "1364.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.02109131211041938,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 275722992,
+   "toi": "1381.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.011896750549255382,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 353038705,
+   "toi": "1389.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.5654618840149757,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 352239069,
+   "toi": "1404.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6243350667479531,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 352239069,
+   "toi": "1404.02"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.45780628013050806,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": true,
+    "ruwe_possible_binary": true,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 119700084,
+   "toi": "1413.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9519709679475915,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 148782377,
+   "toi": "1415.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9434014726981068,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 138588540,
+   "toi": "1434.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.7309997191195537,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 154383539,
+   "toi": "1436.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.23973535803776175,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 233617847,
+   "toi": "1440.01"
+  },
+  {
+   "any_core_flag": true,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.1275204000310497,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": true,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": true,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 233617847,
+   "toi": "1440.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6414121203932871,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 259172391,
+   "toi": "1445.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.6164555161466654,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 259172391,
+   "toi": "1445.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9308770041489673,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 294471966,
+   "toi": "1446.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9621241965043432,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 294471966,
+   "toi": "1446.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.445754649336857,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 356158613,
+   "toi": "1449.01"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.737357429694547,
+   "flags": {
+    "density_inconsistent": null,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": true,
+    "radius_outlier": null,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": null,
+    "unphysical_radius": null
+   },
+   "lightcurve_best_class": null,
+   "tic": 356158613,
+   "toi": "1449.02"
+  },
+  {
+   "any_core_flag": false,
+   "centroid_is_dip": null,
+   "disposition_at_snapshot": "PC",
+   "evidence_consistency_score": 0.9566976429848952,
+   "flags": {
+    "density_inconsistent": false,
+    "evidence_score_low": false,
+    "gaia_parameters_missing": false,
+    "radius_outlier": false,
+    "ruwe_likely_binary": false,
+    "ruwe_possible_binary": false,
+    "teff_outlier": false,
+    "unphysical_radius": false
+   },
+   "lightcurve_best_class": null,
+   "tic": 294179385,
+   "toi": "1454.01"
+  }
+ ],
+ "thresholds": {
+  "density_log_ratio_high": 2.72,
+  "density_log_ratio_low": -0.45,
+  "evidence_score_low": 0.3,
+  "radius_difference_fraction": 0.3,
+  "ruwe_likely_binary": 1.4,
+  "ruwe_possible_binary": 1.25,
+  "teff_difference_kelvin": 400.0,
+  "unphysical_planet_radius_earth": 22.0
+ }
+}

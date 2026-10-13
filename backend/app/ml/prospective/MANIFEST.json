@@ -1,0 +1,9 @@
+[
+ {
+  "file": "snapshot_20261013_first.json",
+  "sha256": "928b52d1327691182fe82b113c2308d4050da79254639acaf44627e8a2b10c67",
+  "created_at": "2026-10-13T06:17:39.572676+00:00",
+  "n_candidates": 108,
+  "git_commit": "39734e03cfca012a194666f22110de3d689927e5"
+ }
+]
