@@ -22,7 +22,9 @@ For each candidate, EEFN:
   catalog value).
 - Runs a trained LightGBM evidence-consistency classifier over the real catalog feature
   vector (incl. 2MASS/Pan-STARRS photometry) — see `backend/app/ml/predict.py` and
-  `backend/app/ml/model_metrics.json` for the actual held-out evaluation metrics.
+  `backend/app/ml/model_metrics.json` for the held-out metrics. The honest numbers are in
+  `backend/app/ml/honest_evaluation_report.json`: star-grouped AUC 0.93, but only ~0.85 when scoring
+  later TOIs from earlier ones, and the cross-catalog features add just +0.008 AUC over the TOI table.
 - Vets each candidate's **real** SPOC TESS light curve with a gradient-boosted model over
   physics features (odd/even depth, secondary eclipse, transit shape, implied radius, …),
   run nightly by the Arq worker. Star-grouped CV on Kepler: ~83%; measured transfer to 50

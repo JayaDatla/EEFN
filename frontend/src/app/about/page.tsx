@@ -47,6 +47,14 @@ export default function AboutPage() {
               evidence the model&apos;s accuracy is primarily circular reasoning -- but neither is a complete
               resolution. See <code>LIMITATIONS.md</code> §1.1 for the full methodology and caveats.
             </Callout>
+            <Callout tone="warning" title="The score mostly reproduces the TOI table, and it gets worse on new candidates">
+              Held-out AUC is 0.93 under star-grouped cross-validation, but the TOI table&apos;s own columns alone
+              reach 0.92: the cross-catalog (Gaia, 2MASS, Pan-STARRS) features add about +0.008 AUC
+              (95% CI +0.002 to +0.014). Scored the way it would really be used &mdash; train on older TOIs, score
+              later ones &mdash; AUC falls to 0.84&ndash;0.88 and the cross-catalog features add nothing. Treat the score as a
+              prior learned from catalog values, not as evidence that a planet is real. Details:{" "}
+              <code>LIMITATIONS.md</code> §1.3.
+            </Callout>
             <Callout tone="warning" title="Calibration is measured, and imperfect">
               Brier score 0.100 on held-out data (the previous Random Forest scored 0.113). The score is well
               calibrated at the extremes but mildly <em>under</em>-confident in the 0.2-0.5 range (predicted ~0.26,

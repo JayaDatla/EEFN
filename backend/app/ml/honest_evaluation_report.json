@@ -1,0 +1,253 @@
+{
+  "generated_at": "2026-10-13T05:47:26.612000+00:00",
+  "n_labelled_tois": 2667,
+  "baseline_definition": "TOI-table columns only: pl_orbper, pl_trandurh, pl_trandep, pl_rade, pl_insol, pl_eqt, st_teff, st_rad, st_logg, st_dist",
+  "full_model_features": [
+    "pl_orbper",
+    "pl_trandurh",
+    "pl_trandep",
+    "pl_rade",
+    "pl_insol",
+    "pl_eqt",
+    "st_teff",
+    "st_rad",
+    "st_logg",
+    "st_dist",
+    "teff_diff",
+    "teff_diff_rel",
+    "rad_diff",
+    "rad_diff_rel",
+    "dist_diff",
+    "dist_diff_rel",
+    "derived_rp_gaia",
+    "derived_rp_diff",
+    "derived_rp_diff_rel",
+    "is_unphysical_rp_gaia",
+    "RUWE",
+    "high_ruwe",
+    "completeness",
+    "j_k",
+    "h_k",
+    "abs_K",
+    "ps_g_r"
+  ],
+  "protocols": {
+    "random_stratified_5fold": {
+      "n": 2667,
+      "n_stars": 2524,
+      "positive_rate": 0.49606299212598426,
+      "full_model": {
+        "accuracy": 0.8560179977502812,
+        "roc_auc": 0.9269247381492279,
+        "brier": 0.10488833552590443
+      },
+      "toi_only_baseline": {
+        "accuracy": 0.8492688413948256,
+        "roc_auc": 0.9197086572724328,
+        "brier": 0.11050214390403826
+      },
+      "auc_gain_from_cross_catalog_features": 0.00721608087679515,
+      "ci95_by_star": {
+        "acc_full": [
+          0.8431519699812383,
+          0.8700410372570498
+        ],
+        "auc_full": [
+          0.9165943367358902,
+          0.9358875793613621
+        ],
+        "brier_full": [
+          0.0977626974930755,
+          0.11293781464224037
+        ],
+        "acc_base": [
+          0.8359899130361126,
+          0.8623929022014941
+        ],
+        "auc_base": [
+          0.9100186068037214,
+          0.9290391335495928
+        ],
+        "auc_diff": [
+          0.0013961946124766871,
+          0.013519826676389233
+        ]
+      }
+    },
+    "star_grouped_5fold": {
+      "n": 2667,
+      "n_stars": 2524,
+      "positive_rate": 0.49606299212598426,
+      "full_model": {
+        "accuracy": 0.8470191226096738,
+        "roc_auc": 0.926659288053846,
+        "brier": 0.10553874634411703
+      },
+      "toi_only_baseline": {
+        "accuracy": 0.850018747656543,
+        "roc_auc": 0.919130515962999,
+        "brier": 0.1109718475597484
+      },
+      "auc_gain_from_cross_catalog_features": 0.0075287720908470135,
+      "ci95_by_star": {
+        "acc_full": [
+          0.8330209978653519,
+          0.8605263157894737
+        ],
+        "auc_full": [
+          0.9173512913110672,
+          0.9356323460266007
+        ],
+        "brier_full": [
+          0.09794070961430217,
+          0.11287784242815184
+        ],
+        "acc_base": [
+          0.836220141670426,
+          0.8635937464693255
+        ],
+        "auc_base": [
+          0.9087711113322675,
+          0.9282457082297265
+        ],
+        "auc_diff": [
+          0.0017793189713525587,
+          0.01410513734890257
+        ]
+      }
+    },
+    "time_forward_train_to_2020-12-31": {
+      "n": 1097,
+      "n_stars": 1065,
+      "positive_rate": 0.49316317228805834,
+      "full_model": {
+        "accuracy": 0.7611668185961714,
+        "roc_auc": 0.8440670753600445,
+        "brier": 0.1713940288371064
+      },
+      "toi_only_baseline": {
+        "accuracy": 0.7575205104831358,
+        "roc_auc": 0.8445524541549755,
+        "brier": 0.16930829342932624
+      },
+      "auc_gain_from_cross_catalog_features": -0.00048537879493093516,
+      "ci95_by_star": {
+        "acc_full": [
+          0.734453539447749,
+          0.7851919561243145
+        ],
+        "auc_full": [
+          0.8210372986312727,
+          0.8673958575286593
+        ],
+        "brier_full": [
+          0.15459190335153725,
+          0.18840644296186382
+        ],
+        "acc_base": [
+          0.7312808908039996,
+          0.7824282015452901
+        ],
+        "auc_base": [
+          0.8206335637617774,
+          0.8654100207927459
+        ],
+        "auc_diff": [
+          -0.01418978557297936,
+          0.01302959276809245
+        ]
+      },
+      "train_n": 1530,
+      "train_positive_rate": 0.48562091503267973
+    },
+    "time_forward_train_to_2021-12-31": {
+      "n": 485,
+      "n_stars": 470,
+      "positive_rate": 0.6206185567010309,
+      "full_model": {
+        "accuracy": 0.7546391752577319,
+        "roc_auc": 0.8719124656940633,
+        "brier": 0.15460438166206714
+      },
+      "toi_only_baseline": {
+        "accuracy": 0.777319587628866,
+        "roc_auc": 0.8733208146757185,
+        "brier": 0.15014046197541805
+      },
+      "auc_gain_from_cross_catalog_features": -0.0014083489816552053,
+      "ci95_by_star": {
+        "acc_full": [
+          0.7152797067901234,
+          0.7920175107079869
+        ],
+        "auc_full": [
+          0.8401984944717159,
+          0.9038620224646131
+        ],
+        "brier_full": [
+          0.1335834785869206,
+          0.1769093545161377
+        ],
+        "acc_base": [
+          0.7391728417105615,
+          0.8132132541515076
+        ],
+        "auc_base": [
+          0.8456332544374882,
+          0.9012427370513248
+        ],
+        "auc_diff": [
+          -0.023127966865161012,
+          0.018361527845207476
+        ]
+      },
+      "train_n": 2152,
+      "train_positive_rate": 0.46143122676579923
+    },
+    "time_forward_train_to_2022-12-31": {
+      "n": 224,
+      "n_stars": 218,
+      "positive_rate": 0.59375,
+      "full_model": {
+        "accuracy": 0.7633928571428571,
+        "roc_auc": 0.8761464099809964,
+        "brier": 0.14844530517288
+      },
+      "toi_only_baseline": {
+        "accuracy": 0.8303571428571429,
+        "roc_auc": 0.8886226555399488,
+        "brier": 0.1326630249144456
+      },
+      "auc_gain_from_cross_catalog_features": -0.012476245558952437,
+      "ci95_by_star": {
+        "acc_full": [
+          0.7091670004004805,
+          0.821845238095238
+        ],
+        "auc_full": [
+          0.8325245921961251,
+          0.9212174443703433
+        ],
+        "brier_full": [
+          0.11766596876126018,
+          0.17922304104695316
+        ],
+        "acc_base": [
+          0.7802690582959642,
+          0.8755555555555555
+        ],
+        "auc_base": [
+          0.8415048665462572,
+          0.9298593727453768
+        ],
+        "auc_diff": [
+          -0.036889587613600665,
+          0.014924399594479066
+        ]
+      },
+      "train_n": 2425,
+      "train_positive_rate": 0.48329896907216496
+    }
+  },
+  "headline": "Star-grouped CV: AUC 0.927 (95% CI 0.917-0.936); TOI-table-only baseline 0.919; the cross-catalog features add +0.008 AUC (95% CI +0.002 to +0.014). Time-forward (train to 2020-12-31): AUC 0.844, Brier 0.171."
+}

@@ -684,6 +684,26 @@ def get_lightcurve_vetter_report():
     return report
 
 
+@router.get("/predictions/honest_evaluation")
+def get_honest_evaluation():
+    """
+    Star-grouped and time-forward evaluation of the tabular model, against a TOI-table-only
+    baseline, with 95% bootstrap CIs resampled by star (validation/scripts/honest_evaluation.py).
+    The random-split numbers in /predictions/metrics answer "how well does it recover labels for
+    TOIs like the training ones"; this answers "how well does it score new candidates, and what do
+    the cross-catalog features actually add". 503 if the artifact is missing -- never a fallback.
+    """
+    path = os.path.normpath(os.path.join(_ML_DIR, "honest_evaluation_report.json"))
+    if not os.path.exists(path):
+        raise HTTPException(
+            status_code=503,
+            detail="No honest_evaluation_report.json artifact found. Run "
+                   "backend/validation/scripts/honest_evaluation.py to generate one.",
+        )
+    with open(path, "r") as f:
+        return json.load(f)
+
+
 @router.get("/predictions/calibration")
 def get_model_calibration():
     """
