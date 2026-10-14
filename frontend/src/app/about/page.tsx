@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="max-w-3xl animate-fadeIn">
+    <div className="max-w-5xl animate-fadeIn">
       <SectionHeading
         eyebrow="SCOPE AND LIMITS"
         title="What EEFN does and does not do"

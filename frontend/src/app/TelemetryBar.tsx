@@ -7,7 +7,7 @@ interface TelemetryData {
   networkStatus: "ONLINE" | "OFFLINE" | "CHECKING";
   gaiaSync: string | null;
   nasaSync: string | null;
-  resolvedConflicts: string | null;
+  totalTargets: string | null;
   activeAlerts: string | null;
 }
 
@@ -15,7 +15,7 @@ const UNKNOWN: TelemetryData = {
   networkStatus: "CHECKING",
   gaiaSync: null,
   nasaSync: null,
-  resolvedConflicts: null,
+  totalTargets: null,
   activeAlerts: null,
 };
 
@@ -47,7 +47,7 @@ export default function TelemetryBar() {
         networkStatus: "ONLINE",
         gaiaSync: formatTime(health.last_sync?.gaia),
         nasaSync: formatTime(health.last_sync?.nasa),
-        resolvedConflicts: health.resolved_conflict_count != null ? Number(health.resolved_conflict_count).toLocaleString() : null,
+        totalTargets: health.total_candidates != null ? Number(health.total_candidates).toLocaleString() : null,
         activeAlerts: health.unresolved_alert_count != null ? Number(health.unresolved_alert_count).toLocaleString() : null,
       });
     } catch {
@@ -88,7 +88,7 @@ export default function TelemetryBar() {
       <div className="flex items-center gap-7">
         <div className="hidden lg:flex items-center gap-7">
           <span>
-            Targets <span className="font-medium text-ink">{data.resolvedConflicts ?? "—"}</span>
+            Targets <span className="font-medium text-ink">{data.totalTargets ?? "—"}</span>
           </span>
           <span>
             Alerts <span className="font-medium text-severity-high">{data.activeAlerts ?? "—"}</span>
