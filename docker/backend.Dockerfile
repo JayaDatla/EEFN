@@ -1,4 +1,4 @@
-FROM python:3.11-slim as base
+FROM python:3.13-slim AS base
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -14,9 +14,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY backend/requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
 
 COPY backend/ /app/
 
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# The schema is Alembic-managed (main.py does not create tables), so migrate before serving.
+CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"]

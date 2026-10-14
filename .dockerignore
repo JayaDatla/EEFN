@@ -1,0 +1,11 @@
+**/node_modules
+**/.next
+**/__pycache__
+**/.pytest_cache
+.git
+.claude
+backend/eefn.db
+backend/validation/data/kepler_lc_cache
+backend/validation/data/*.npz
+frontend/screenshots
+frontend/test-results
