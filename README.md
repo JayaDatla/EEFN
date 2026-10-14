@@ -1,185 +1,123 @@
 # EEFN — Exoplanet Evidence Fusion Network
 
-EEFN is an automated cross-catalog evidence auditor for transiting planet candidates. It
-ingests a TESS Object of Interest (TOI) from the NASA Exoplanet Archive, cross-matches it
-against Gaia DR3, and tells an observer — with a full audit trail — whether that
-candidate's catalog record is internally consistent enough to be worth scarce follow-up
-telescope time.
+A cross-catalog audit tool for TESS planet candidates. For each TESS Object of Interest (TOI) it
+pulls the NASA Exoplanet Archive record, matches the host star to Gaia DR3 (plus 2MASS and
+Pan-STARRS), and checks whether the catalogs agree with each other and with the transit itself.
+Every number on screen traces back to a catalog, a rule, or a measured model score.
 
-It is **not** an "AI confirms exoplanets" tool. Every disposition label in the training
-data was already assigned by human astronomers, in part using the same Gaia signals
-(RUWE, distance) EEFN's models are trained on — so a model trained on them partly learns
-to reproduce human categorization, not to independently discover planets. See
-[`LIMITATIONS.md`](LIMITATIONS.md) §1.1 for the full discussion of this, and every other
-disclosed limitation.
+It does not confirm planets. Disposition labels in the training data were set by astronomers,
+partly from the same Gaia signals used here, so the models partly reproduce human vetting.
+Read [`LIMITATIONS.md`](LIMITATIONS.md) before relying on any output.
 
-## What it actually does
+## What it gives you per candidate
 
-For each candidate, EEFN:
-- Cross-matches NASA/TOI, Gaia DR3 Source, and Gaia DR3 Astrophysical Parameters catalogs.
-- Computes catalog-disagreement metrics (temperature, radius, distance mismatches; RUWE
-  astrometric-binary signal; a transit-depth-derived planet radius checked against the
-  catalog value).
-- Runs a trained LightGBM evidence-consistency classifier over the real catalog feature
-  vector (incl. 2MASS/Pan-STARRS photometry) — see `backend/app/ml/predict.py` and
-  `backend/app/ml/model_metrics.json` for the held-out metrics. The honest numbers are in
-  `backend/app/ml/honest_evaluation_report.json`: star-grouped AUC 0.93, but only ~0.85 when scoring
-  later TOIs from earlier ones, and the cross-catalog features add just +0.007 AUC over the TOI table.
-- Vets each candidate's **real** SPOC TESS light curve with a gradient-boosted model over
-  physics features (odd/even depth, secondary eclipse, transit shape, implied radius, …),
-  run nightly by the Arq worker. Star-grouped CV on Kepler: ~83%; measured transfer to 50
-  real TESS TOIs: 76% agreement with the TFOP label (ROC-AUC 0.81; it catches 88% of planets but also calls 36% of false positives planets). It replaced a 3.9M-parameter
-  CNN that scored 64% under the same protocol — see [`LIMITATIONS.md`](LIMITATIONS.md) §1.7.
-- Measures real TESS target-pixel-file centroid offsets (in-transit vs out-of-transit
-  photocentre, with an empirical red-noise-aware significance) and real APOGEE-2
-  spectroscopy, also on a nightly schedule — [`LIMITATIONS.md`](LIMITATIONS.md) §1.8.
-- Grades each candidate A-F from the tabular model's planet probability (bands fixed in
-  `backend/app/science/health.py`); held-out false-positive share per grade is in
-  [`LIMITATIONS.md`](LIMITATIONS.md) and `GET /api/v1/health/validation`.
-- Surfaces everything through a FastAPI backend and a Next.js frontend, with alerts that
-  explain *why* a candidate was flagged, not just that it was.
+**Rule-based catalog checks (no model).** Fixed thresholds, each shown with its value:
 
-## Status
+| Check | Flags when |
+|---|---|
+| RUWE (Gaia astrometric noise) | > 1.4 |
+| Planet radius recomputed from depth and Gaia stellar radius | > 22 R⊕ |
+| Transit-derived stellar density vs Gaia density | outside the central 95% of confirmed planets |
+| Effective temperature, TOI vs Gaia | differs by > 400 K |
+| Stellar radius, TOI vs Gaia | differs by > 30% |
 
-This project is under active development against
-[`UPGRADE_PLAN.md`](UPGRADE_PLAN.md), a phased plan to take EEFN from a working
-prototype to a tool a real observer would trust on a Tuesday night. Read that file for
-the full list of known issues, what's already fixed, and what's still in progress. Read
-[`LIMITATIONS.md`](LIMITATIONS.md) before treating any output as more than it is.
+A check that cannot run (missing data) is shown as unknown, never as passed. A clean result means
+"no catalog red flags", not "planet".
 
-## The highest-leverage thing left isn't code
+**Model scores.**
+- A LightGBM planet probability from the catalog features, shown as an A–F grade.
+- A light-curve vetter on the real TESS SPOC light curve (odd/even depth, secondary eclipse, shape).
+- Real TESS centroid offsets and APOGEE-2 spectroscopy, run nightly on a few candidates at a time.
 
-Per `UPGRADE_PLAN.md` E.5: one TFOP-affiliated astronomer using EEFN for a real
-observing season is worth more to this project's credibility than any remaining
-engineering task. This is a relationship/outreach step for a human to pursue, not
-something to automate — flagged here prominently rather than silently skipped. If
-you're an astronomer (or know one) working TESS follow-up who'd try this against a
-real target list, that's the single most valuable next contribution.
+## Measured performance
 
-## Architecture
+| Claim | Result | How it was measured |
+|---|---|---|
+| Planet probability | AUC 0.926 (95% CI 0.916–0.935) | star-grouped 5-fold CV, 2,667 labelled TOIs |
+| Same, scoring later TOIs from earlier ones | AUC 0.84–0.88 | time-forward splits |
+| Value of the cross-catalog features | +0.007 AUC over TOI-table columns alone | paired, star-bootstrap |
+| Grade A is a false positive | 6.6% of the time (B 15%, C 39%, D 61%, F 94%) | star-grouped CV |
+| Flagged TOIs vs unflagged | 39–43 points more often false positives | train on older TOIs, test on later TOIs of new stars |
+| Light-curve vetter | 83% (±6) on Kepler; 76% agreement, AUC 0.81 on 50 TESS TOIs | star-grouped CV; TESS transfer check |
+| Centroid offsets | 5 candidates measured, none flagged | one earlier "5.4σ" claim was retracted (re-measured 1.97σ) |
 
-See [`DATA_FLOW.md`](DATA_FLOW.md) for the full ingestion/fusion/inference pipeline,
-database schema, and feature-engineering formulas, with diagrams.
+The flag result is retrospective and can be inflated because dispositions use the same evidence.
+The unbiased test is frozen in
+[`backend/app/ml/prospective/`](backend/app/ml/prospective) (108 unresolved TOIs, hash-registered
+2026-10-13). It needs about six months of outcomes; see
+[`docs/prospective_evaluation.md`](docs/prospective_evaluation.md).
 
-Short version: FastAPI + SQLAlchemy backend (SQLite or Postgres, Alembic-migrated) in
-`backend/`, Arq/Redis job queue for ingestion runs, Next.js 14 + React 18 + TypeScript
-frontend in `frontend/`, LightGBM models (catalog evidence + light-curve vetting) in
-`backend/app/ml/` (PyTorch retained for the CNN baseline). See [`docs/TOOL_COMPARISON.md`](docs/TOOL_COMPARISON.md) for how
-EEFN's catalog-disagreement approach relates to published vetting tools
-(TRICERATOPS, AstroNet, ExoMiner, Robovetter).
+Reports: `backend/app/ml/honest_evaluation_report.json`, `split_validation_report.json`,
+`lightcurve_vetter_report.json`, `tess_transfer_report.json`.
 
-## Interoperability
+## Run it
 
-Per `UPGRADE_PLAN.md` Part G ("meet observers where they already work" — a standalone
-dashboard is an adoption blocker):
-- **VOTable export**: `GET /api/v1/candidates/export` or `eefn export --format votable`
-  — a real, standards-compliant VOTable (verified by round-tripping through astropy's
-  own parser) that opens directly in TOPCAT/Aladin or loads via `astroquery`.
-- **Identifier resolution**: `GET /api/v1/resolve?id=...` accepts a TOI ID, TIC ID, or
-  Gaia DR3 `source_id` in any common format and returns the other two — never hand-
-  translate between them.
-- **Webhooks**: set `WEBHOOK_URLS` (comma-separated) to get a push notification when a
-  pipeline run finishes, so a TFOP triage channel doesn't need to poll. The payload
-  includes a top-level `text` field, so pointing it directly at a Slack incoming-
-  webhook URL renders sensibly with no Slack-specific integration needed.
-- **Python client**: `pip install -e backend` installs the `eefn` package/CLI (see
-  Quickstart below) — this *is* the "astroquery-style package" the plan asks for.
+Requires Python 3.13, Node 18+, and Redis for background jobs. See [`STARTUP.md`](STARTUP.md) for the
+full local setup.
 
-**Not implemented, and deliberately not attempted as unilateral code**: ExoFOP-TESS
-structured comments (the plan itself says this "needs coordination with ExoFOP
-maintainers" — there's no public write API to integrate against without that,
-and building one without their buy-in wouldn't be usable). A Zenodo DOI per release is
-a release-process step for whoever cuts a release, not something to code.
-
-## Quickstart
-
-### Backend
 ```bash
+# backend
 cd backend
 pip install -r requirements.txt
-alembic upgrade head   # schema is Alembic-managed, not auto-created (see D.1)
-uvicorn main:app --reload
-```
-The API comes up at `http://127.0.0.1:8000`; interactive docs at `/docs`. Defaults to a
-local SQLite file; set `DATABASE_URL` to a Postgres DSN for multi-writer use (a
-`postgres` service is already defined in `docker-compose.yml`).
+alembic upgrade head
+python -m uvicorn main:app --host 127.0.0.1 --port 8000   # docs at /docs
 
-`POST /pipeline/run` and the resolution-override endpoint need a running Redis + Arq
-worker (see D.2):
-```bash
-docker compose up -d redis          # or run your own Redis on REDIS_URL
-cd backend
-arq app.worker.WorkerSettings       # in a separate terminal
-```
-Set `API_KEY` in the environment before exposing the API anywhere reachable by anyone
-else — without it, `/pipeline/run` and the resolution-override endpoint are
-unauthenticated (a loud warning prints at startup if it's unset; see D.3).
-
-EEFN also installs as a Python package/CLI:
-```bash
-pip install -e backend
-eefn audit --toi 1017.01
-eefn sync --limit 100
-eefn export --format csv        # also: json, votable
+# frontend (another terminal)
+cd frontend
+npm install
+npm run dev                                                # http://localhost:3000
 ```
 
-Run the test suite:
+The frontend reads `NEXT_PUBLIC_API_URL`, defaulting to `http://127.0.0.1:8000`.
+
+Nightly enrichment (spectroscopy 02:00, centroids 03:00, light-curve vetting 05:00) runs in the worker:
+
 ```bash
 cd backend
+arq app.worker.WorkerSettings
+```
+
+Fill the database from NASA/Gaia/2MASS/Pan-STARRS with `eefn sync --limit 100` after
+`pip install -e backend`. The CLI also has `eefn audit --toi 1017.01` and
+`eefn export --format csv|json|votable`.
+
+Set `API_KEY` before exposing the API to anyone else; without it the write endpoints are open.
+
+## Reproduce the numbers
+
+```bash
+python reproduce_results.py                              # recomputes the tabular metrics, exits non-zero on mismatch
+cd backend
+python validation/scripts/honest_evaluation.py           # star-grouped and time-forward evaluation
+python validation/scripts/split_validation.py            # grade and flag results on held-out splits
+python validation/scripts/prospective_evaluate.py snapshot_20261013_first.json   # after ~6 months
 pytest tests/
 ```
 
-To (re)train the catalog evidence-consistency model and write real evaluation-metrics/calibration
-artifacts (accuracy/ROC-AUC/F1, reliability diagram, Brier score). The photometry columns come
-from `augment_dataset_photometry.py` (a one-off CDS cross-match, already applied to the CSV):
-```bash
-python validation/scripts/train_and_serialize_model.py
+Retraining the models: `python validation/scripts/train_and_serialize_model.py` (tabular) and
+`backend/validation/scripts/train_lightcurve_vetter.py` (needs MAST network access).
+
+## Layout
+
+```
+backend/    FastAPI, SQLAlchemy/Alembic, Arq jobs, models and science code (app/science, app/ml, app/pipeline)
+frontend/   Next.js 14 app
+validation/ training data and the tabular-model scripts
+docs/       design notes, evaluation protocol, tool comparison
 ```
 
-To run the label-leakage ablation studies (see LIMITATIONS.md §1.1):
-```bash
-python validation/scripts/leakage_ablation.py
-python validation/scripts/leakage_rv_confirmed_holdout.py
-```
+Other interfaces: `GET /api/v1/resolve?id=` maps TOI, TIC and Gaia IDs; `GET /api/v1/candidates/export`
+writes a VOTable that opens in TOPCAT; `WEBHOOK_URLS` posts when a pipeline run finishes.
+[`DATA_FLOW.md`](DATA_FLOW.md) describes the pipeline and schema;
+[`docs/TOOL_COMPARISON.md`](docs/TOOL_COMPARISON.md) compares it with TRICERATOPS, ExoMiner and others.
 
-To (re)train the light-curve vetter and write its cross-validated report, then re-run the
-architecture comparison and the TESS transfer check (all need MAST network access):
-```bash
-cd backend
-python validation/scripts/train_lightcurve_vetter.py
-python validation/scripts/dl_architecture_study.py
-python validation/scripts/tess_transfer_check.py --n-per-class 25
-```
+## Status
 
-The nightly enrichment jobs (centroids 03:00, spectroscopy 02:00, light-curve vetting 05:00)
-run inside the Arq worker (`arq app.worker.WorkerSettings`); to run a batch by hand:
-```bash
-python validation/scripts/run_real_centroid_subset.py --limit 5
-python validation/scripts/run_real_spectroscopy_subset.py --limit 20
-```
+Research prototype. No astronomer has used it on a real target list yet; that would be worth more than
+any remaining code change. Open items: ingest SPOC DV centroid offsets, key the cross-match on Gaia ID,
+add a Gaia DR4 adapter, and compare against published TRICERATOPS/ExoMiner values.
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Comes up at `http://localhost:3000`. Requires the backend running at
-`http://127.0.0.1:8000` — the frontend does not yet read a configurable API URL
-(hardcoded in ~19 places; see `UPGRADE_PLAN.md` A.14/H.5, not yet fixed), so it currently
-only works against a backend on localhost.
+## Contributing and license
 
-### Docker
-```bash
-docker-compose up
-```
-
-## Contributing
-
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the development setup, what will and
-won't be merged, and code style. This project follows the
-[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
-
-## License
-
-BSD-3-Clause — see [`LICENSE`](LICENSE).
+[`CONTRIBUTING.md`](CONTRIBUTING.md), [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). BSD-3-Clause, see
+[`LICENSE`](LICENSE).
