@@ -386,3 +386,11 @@ def test_centroid_block_reports_how_small_an_offset_could_have_been_seen():
     c.centroid_is_real = False
     assert _real_observations(c)["centroid"]["min_detectable_offset_arcsec"] is None   # unmeasured -> unknown, not zero
 
+
+
+def test_catalog_coverage_is_counted_live_and_internally_consistent():
+    d = client.get("/api/v1/catalog/coverage").json()
+    assert d["candidates_with_gaia_params"] <= d["candidates"] and d["hosts_with_gaia_params"] <= d["hosts"]
+    assert d["candidates_with_2mass"] <= d["candidates"] and d["candidates_with_panstarrs"] <= d["candidates"]
+    assert d["hosts_with_real_spectroscopy"] <= d["hosts"]
+    assert d["candidates_with_real_centroid"] <= d["candidates"] and d["candidates_with_lightcurve_vetting"] <= d["candidates"]

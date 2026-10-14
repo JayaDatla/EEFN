@@ -710,6 +710,33 @@ def get_honest_evaluation():
         return json.load(f)
 
 
+@router.get("/catalog/coverage")
+def get_catalog_coverage(db: Session = Depends(get_db)):
+    """Live counts of how many candidates / hosts each catalog and real-data enrichment actually covers,
+    so no page has to hardcode (and then silently outlive) these numbers."""
+    from sqlalchemy import func
+    n_cand = db.query(func.count(ExoplanetCandidate.id)).scalar() or 0
+    n_host = db.query(func.count(HostStar.id)).scalar() or 0
+
+    def cand_where(*conds):
+        return (db.query(func.count(ExoplanetCandidate.id)).join(HostStar, ExoplanetCandidate.host_id == HostStar.id)
+                .filter(*conds).scalar() or 0)
+
+    def host_where(*conds):
+        return db.query(func.count(HostStar.id)).filter(*conds).scalar() or 0
+
+    return {
+        "candidates": n_cand, "hosts": n_host,
+        "candidates_with_gaia_params": cand_where(HostStar.teff.isnot(None)),
+        "hosts_with_gaia_params": host_where(HostStar.teff.isnot(None)),
+        "candidates_with_2mass": cand_where(HostStar.j_mag.isnot(None)),
+        "candidates_with_panstarrs": cand_where(HostStar.g_mag.isnot(None)),
+        "hosts_with_real_spectroscopy": host_where(HostStar.spectroscopy_is_real.is_(True)),
+        "candidates_with_real_centroid": db.query(func.count(ExoplanetCandidate.id)).filter(ExoplanetCandidate.centroid_is_real.is_(True)).scalar() or 0,
+        "candidates_with_lightcurve_vetting": db.query(func.count(ExoplanetCandidate.id)).filter(ExoplanetCandidate.lc_vetting_status == "vetted").scalar() or 0,
+    }
+
+
 @router.get("/health/validation")
 def get_health_validation(db: Session = Depends(get_db)):
     """How well the A-F health grade separates confirmed planets from false positives, computed live

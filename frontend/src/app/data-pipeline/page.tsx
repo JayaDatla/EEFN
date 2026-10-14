@@ -1,53 +1,75 @@
 import { SectionHeading } from "../components/ScientificUI";
+import { apiUrl } from "@/lib/api";
 import { Callout } from "../components/ui/Callout";
 import { Table, TableHead, TableBody, Th, Td, Tr } from "../components/ui/Table";
+
+// Coverage is read from the live database on every request, never typed in.
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Catalogs and Data Flow | EEFN",
 };
+
+type Coverage = {
+  candidates: number; hosts: number; hosts_with_gaia_params: number; candidates_with_2mass: number;
+  candidates_with_panstarrs: number; hosts_with_real_spectroscopy: number; candidates_with_real_centroid: number;
+  candidates_with_lightcurve_vetting: number;
+};
+
+const frac = (k: number, n: number, what: string) =>
+  `${k.toLocaleString()} / ${n.toLocaleString()} ${what} (${n ? ((100 * k) / n).toFixed(1) : "0.0"}%)`;
+
+async function loadCoverage(): Promise<Coverage | null> {
+  try {
+    const res = await fetch(apiUrl("/api/v1/catalog/coverage"), { cache: "no-store" });
+    return res.ok ? await res.json() : null;
+  } catch {
+    return null;
+  }
+}
 
 const CATALOG_ROWS = [
   {
     name: "NASA Exoplanet Archive (TOI table)",
     gives: "The candidate itself: orbital period, transit depth/duration, TESS-reported planet radius, and the TESS pipeline's own stellar temperature/radius/distance estimate.",
     example: "TOI-1111.01: period 11.48 d, transit depth 8,341 ppm, reported planet radius 14.11 R⊕, host teff 7,262 K",
-    coverage: "546 / 546 candidates (100%)",
-    usedBy: "Both models",
+    coverage: (c: Coverage) => frac(c.candidates, c.candidates, "candidates"),
+    usedBy: "Both models, and the light-curve vetter",
   },
   {
     name: "Gaia DR3 Source + AstroParams",
     gives: "An independent, higher-precision stellar temperature, radius, distance, and RUWE (a single number that flags an unresolved binary star from its astrometric wobble).",
     example: "Same star, from Gaia: teff 7,464 K, radius 2.221 R☉, RUWE 0.992",
-    coverage: "409 / 509 host stars (80.4%)",
+    coverage: (c: Coverage) => frac(c.hosts_with_gaia_params, c.hosts, "host stars"),
     usedBy: "Both models — this is the other half of every disagreement calculation",
   },
   {
     name: "2MASS Photometry",
     gives: "Near-infrared brightness (J/H/K bands) — a temperature-sensitive measurement largely unaffected by interstellar dust, useful for cross-checking a star's temperature independent of Gaia's optical measurement.",
     example: "TOI-1111.01's host: J 9.055, H 8.953, K 8.892",
-    coverage: "492 / 546 candidates (90.1%)",
-    usedBy: "DL model only (3 of its 28 metadata inputs)",
+    coverage: (c: Coverage) => frac(c.candidates_with_2mass, c.candidates, "candidates"),
+    usedBy: "Tabular model (J−K, H−K, absolute K) and the light-curve vetter (colours)",
   },
   {
     name: "Pan-STARRS",
     gives: "Optical brightness across g/r/i/z/y bands — a second independent photometric fingerprint of the star, used the same way as 2MASS.",
     example: "TOI-1000.01's host: i 10.644, z 9.969, y 9.892",
-    coverage: "320 / 546 candidates (58.6%)",
-    usedBy: "DL model only (2 of its 28 metadata inputs — g and r)",
+    coverage: (c: Coverage) => frac(c.candidates_with_panstarrs, c.candidates, "candidates"),
+    usedBy: "Tabular model (g−r) and the light-curve vetter (colours)",
   },
   {
     name: "APOGEE-2 Spectroscopy",
     gives: "A direct spectroscopic metallicity (Fe/H) and, where matched, a spectroscopic temperature/radius — measured from the star's actual spectrum rather than inferred from photometry.",
-    example: "Real for 2 of 509 host stars today",
-    coverage: "2 / 509 host stars (0.4%)",
-    usedBy: "Both models, when present — real but rarely populated (see callout below)",
+    example: "Real APOGEE-2 matches exist only for the small share of stars that APOGEE observed",
+    coverage: (c: Coverage) => frac(c.hosts_with_real_spectroscopy, c.hosts, "host stars"),
+    usedBy: "Reported as evidence, not a model input (the models are trained on TIC/Gaia values) — real but rarely populated",
   },
   {
     name: "MAST TESS Target Pixel Files (centroid)",
     gives: "Whether the photocenter of the star shifts during the transit — a direct pixel-level check for whether the signal is actually happening on the target star or on a nearby contaminating source.",
-    example: "Real for 5 of 546 candidates today",
-    coverage: "5 / 546 candidates (0.9%)",
-    usedBy: "DL model only — the model's third input channel, when present",
+    example: "Real measurements exist only for candidates the nightly job has reached so far",
+    coverage: (c: Coverage) => frac(c.candidates_with_real_centroid, c.candidates, "candidates"),
+    usedBy: "Reported as separate evidence (offset, detection limit), not a model input",
   },
 ];
 
@@ -61,7 +83,8 @@ const RF_FEATURES = [
   "j_k, h_k, abs_K, ps_g_r — 2MASS and Pan-STARRS colours, plus absolute K magnitude from the Gaia parallax (a giant-vs-dwarf check on the catalog radius)",
 ];
 
-export default function DataPipelinePage() {
+export default async function DataPipelinePage() {
+  const coverage = await loadCoverage();
   return (
     <div className="max-w-4xl animate-fadeIn">
       <SectionHeading
@@ -85,8 +108,9 @@ export default function DataPipelinePage() {
       <section className="mt-8">
         <h2 className="mb-3 font-display text-lg font-medium text-ink">1. What each catalog gives</h2>
         <p className="mb-4 text-sm text-muted">
-          Coverage numbers are counted directly from the live database (546 candidates / 509 distinct host
-          stars) as of the current sync — not aspirational targets.
+          {coverage
+            ? `Coverage numbers are counted from the live database on every page load (${coverage.candidates.toLocaleString()} candidates / ${coverage.hosts.toLocaleString()} distinct host stars) — not aspirational targets.`
+            : "The live coverage service is unreachable, so no coverage numbers are shown (they are never filled in from memory)."}
         </p>
         <div className="surface-card overflow-hidden p-0">
           <Table>
@@ -105,7 +129,7 @@ export default function DataPipelinePage() {
                   <Td><span className="font-medium text-ink">{row.name}</span></Td>
                   <Td>{row.gives}</Td>
                   <Td><span className="font-mono text-2xs">{row.example}</span></Td>
-                  <Td>{row.coverage}</Td>
+                  <Td>{coverage ? row.coverage(coverage) : "unavailable"}</Td>
                   <Td>{row.usedBy}</Td>
                 </Tr>
               ))}
@@ -138,7 +162,7 @@ export default function DataPipelinePage() {
           </p>
           <p>
             Each star&apos;s TESS-catalog position is also proper-motion-corrected forward to the Gaia DR3
-            reference epoch (2016.0) before the match runs, using the star&apos;s Gaia-measured proper motion —
+            reference epoch (2016.0) before the match runs, using the star&apos;s TIC proper motion from the TOI table (<code className="text-accent">st_pmra</code>/<code className="text-accent">st_pmdec</code>) —
             without that step, a fast-moving nearby star can drift far enough between catalog epochs to miss
             a naive fixed-radius match entirely.
           </p>
