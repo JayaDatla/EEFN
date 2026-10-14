@@ -14,6 +14,7 @@ from app.science.crossmatch import crossmatch_quality
 from app.db.models import ExoplanetCandidate, HostStar, AgreementMetrics, MLPrediction, MeasurementHistory
 from app.science.tiers import compute_model_tier
 from app.science.health import compute_health_score
+from app.science.flags import CORE_FLAGS, THRESHOLDS, any_core_flag, compute_flags, flag_values
 
 
 def build_candidate_profile(db: Session, toi_id: float) -> Optional[Dict[str, Any]]:
@@ -121,6 +122,18 @@ def build_candidate_profile(db: Session, toi_id: float) -> Optional[Dict[str, An
         # data is reported as such (status + None), never as a clean/zero result.
         "real_observations": _real_observations(cand),
         "data_quality": {"crossmatch": crossmatch_quality(star)} if star is not None else {},
+        # Rule-based catalog checks: no model involved (prediction is deliberately not passed, so the
+        # model-derived `evidence_score_low` flag is None here). Retrospective held-out result for these:
+        # GET /api/v1/predictions/flag_validation.
+        "catalog_checks": {
+            "flags": compute_flags(cand, star, None) if star is not None else {},
+            "values": flag_values(cand, star) if star is not None else {},
+            "any_core_flag": any_core_flag(compute_flags(cand, star, None)) if star is not None else None,
+            "n_core_checkable": (sum(1 for k in CORE_FLAGS if compute_flags(cand, star, None).get(k) is not None)
+                                 if star is not None else 0),
+            "core_flags": CORE_FLAGS,
+            "thresholds": THRESHOLDS,
+        },
         "health": {
             "score": cand.health_score if cand.health_score is not None else health_result.score,
             "grade": cand.health_grade if cand.health_grade else health_result.grade,

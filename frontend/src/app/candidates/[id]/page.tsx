@@ -21,7 +21,7 @@ interface Planet {
   toi_id: number;
   disposition: string;
   orbper: number;
-  rade: number;
+  rade: number | null;
   trandep: number;
   trandurh: number;
   insol: number;
@@ -74,6 +74,15 @@ interface HealthBreakdown {
   factors: Record<string, number>;
 }
 
+interface CatalogChecks {
+  flags: Record<string, boolean | null>;
+  values: Record<string, number | null>;
+  any_core_flag: boolean | null;
+  n_core_checkable: number;
+  core_flags: string[];
+  thresholds: Record<string, number>;
+}
+
 interface CandidateProfile {
   planet: Planet;
   star: Star;
@@ -89,6 +98,7 @@ interface CandidateProfile {
   prediction: Prediction;
   model_tier: ModelTier;
   health: HealthBreakdown;
+  catalog_checks?: CatalogChecks;
 }
 
 function generateSvgPath(time: number[], flux: number[], width: number, height: number, padding: number) {
@@ -795,6 +805,7 @@ export default function CandidateDetailPage() {
 
   // Recalculations and states sync
   const derivedRp = star && star.rad && planet.trandep ? star.rad * Math.sqrt(planet.trandep * 1e-6) * 109.2 : planet.rade;
+  const fmtRp = (v: number | null | undefined) => (v === null || v === undefined || Number.isNaN(v) ? "N/A" : v.toFixed(2));
   // UPGRADE_PLAN.md: trust the backend's real is_unphysical_rp verdict (computed
   // once, canonically, at the 22.0 R_Earth threshold used everywhere else in the
   // system -- predict.py, ingest.py, alert_engine.py) rather than recomputing a
@@ -895,7 +906,7 @@ export default function CandidateDetailPage() {
     {
       title: "Initial Transit Detection",
       badge: "TESS",
-      desc: `TIC ${planet.tic_id} was observed by TESS, detecting a periodic transit of ${planet.orbper.toFixed(4)} days with a transit depth of ${planet.trandep.toFixed(1)} ppm. Initial host star parameters derived from pre-TESS stellar catalogs yielded a planet radius of ${planet.rade.toFixed(2)} R_Earth, placing it in the physical exoplanet regime.`
+      desc: `TIC ${planet.tic_id} was observed by TESS, detecting a periodic transit of ${planet.orbper.toFixed(4)} days with a transit depth of ${planet.trandep.toFixed(1)} ppm. Initial host star parameters derived from pre-TESS stellar catalogs yielded ${planet.rade != null ? `a planet radius of ${planet.rade.toFixed(2)} R_Earth, placing it in the physical exoplanet regime` : 'no reported planet radius (the TOI catalog has none for this target)'}.`
     },
     {
       title: "Gaia DR3 High-Precision Astrometry",
@@ -905,7 +916,7 @@ export default function CandidateDetailPage() {
     {
       title: "Parameter Mismatch & Conflict Generation",
       badge: "EEFN ALIGNMENT",
-      desc: `Applying Gaia DR3 parameters, the derived planet radius is recalculated. If the host star is larger, the transiting object must also be larger to produce the same transit depth. The revised radius is ${derivedRp.toFixed(2)} R_Earth (Gaia-corrected), triggering a size discrepancy conflict.`
+      desc: `Applying Gaia DR3 parameters, the derived planet radius is recalculated. If the host star is larger, the transiting object must also be larger to produce the same transit depth. The revised radius is ${fmtRp(derivedRp)} R_Earth (Gaia-corrected), triggering a size discrepancy conflict.`
     },
     {
       title: "Astrometric Noise & Companion Search",
@@ -1060,7 +1071,7 @@ export default function CandidateDetailPage() {
                       <div>Transit Depth (d): <span className="text-ink font-bold">{planet.trandep.toFixed(1)} ppm</span></div>
                       <div>Gaia Stellar Radius (R_star_Gaia): <span className="text-ink font-bold">{star.rad ? `${star.rad.toFixed(4)} R_sun` : "N/A"}</span></div>
                       <div>Original Stellar Radius (R_star_TOI): <span className="text-ink font-bold">{measurement_history.stellar_radius["TOI Catalog"] ? `${Number(measurement_history.stellar_radius["TOI Catalog"]).toFixed(4)} R_sun` : "N/A"}</span></div>
-                      <div>Original Planet Radius (R_p_original): <span className="text-ink font-bold">{planet.rade.toFixed(2)} R_Earth</span></div>
+                      <div>Original Planet Radius (R_p_original): <span className="text-ink font-bold">{planet.rade != null ? `${planet.rade.toFixed(2)} R_Earth` : "N/A"}</span></div>
                     </div>
                   </div>
 
@@ -1076,20 +1087,22 @@ export default function CandidateDetailPage() {
                       <div>
                         <span className="text-muted block font-semibold">Step B: Recalculate Gaia-Corrected Planet Radius (R_p_corrected)</span>
                         <span className="text-muted block">
-                          R_p_corrected = {star.rad ? star.rad.toFixed(4) : "1.0000"} * {Math.sqrt(planet.trandep * 1e-6).toFixed(6)} * 109.2 = <span className={`${isUnphysical ? 'text-severity-critical' : 'text-status-pass'} font-bold`}>{derivedRp.toFixed(2)} R_Earth</span>
+                          R_p_corrected = {star.rad ? star.rad.toFixed(4) : "1.0000"} * {Math.sqrt(planet.trandep * 1e-6).toFixed(6)} * 109.2 = <span className={`${isUnphysical ? 'text-severity-critical' : 'text-status-pass'} font-bold`}>{fmtRp(derivedRp)} R_Earth</span>
                         </span>
                       </div>
                       <div>
                         <span className="text-muted block font-semibold">Step C: Recalculate Original (TESS) Planet Radius (R_p_original)</span>
                         <span className="text-muted block">
-                          R_p_original = {measurement_history.stellar_radius["TOI Catalog"] ? Number(measurement_history.stellar_radius["TOI Catalog"]).toFixed(4) : "1.0000"} * {Math.sqrt(planet.trandep * 1e-6).toFixed(6)} * 109.2 = <span className="text-ink/80 font-semibold">{(measurement_history.stellar_radius["TOI Catalog"] ? (Number(measurement_history.stellar_radius["TOI Catalog"]) * Math.sqrt(planet.trandep * 1e-6) * 109.2) : planet.rade).toFixed(2)} R_Earth</span>
+                          R_p_original = {measurement_history.stellar_radius["TOI Catalog"] ? Number(measurement_history.stellar_radius["TOI Catalog"]).toFixed(4) : "1.0000"} * {Math.sqrt(planet.trandep * 1e-6).toFixed(6)} * 109.2 = <span className="text-ink/80 font-semibold">{fmtRp(measurement_history.stellar_radius["TOI Catalog"] ? (Number(measurement_history.stellar_radius["TOI Catalog"]) * Math.sqrt(planet.trandep * 1e-6) * 109.2) : planet.rade)} R_Earth</span>
                         </span>
                       </div>
                     </div>
                   </div>
 
                   <div className="bg-surface-2 p-2.5 border border-border rounded text-muted text-[10px] leading-normal mt-1 font-sans">
-                    <strong>Audit Assessment:</strong> Recalculation yields a revised planetary size of <span className="text-ink font-bold">{derivedRp.toFixed(2)} R_Earth</span> compared to catalog-reported <span className="text-ink/80 font-bold">{planet.rade.toFixed(2)} R_Earth</span>. {isUnphysical 
+                    <strong>Audit Assessment:</strong> Recalculation yields a revised planetary size of <span className="text-ink font-bold">{fmtRp(derivedRp)} R_Earth</span> compared to {planet.rade != null ? <>catalog-reported <span className="text-ink/80 font-bold">{planet.rade.toFixed(2)} R_Earth</span></> : "a catalog that reports no radius for this target"}. {planet.rade == null
+                      ? (isUnphysical ? "The recalculated size exceeds the physical limit." : "There is no catalog radius to compare against.")
+                      : isUnphysical 
                       ? `This represents a ${(((derivedRp - planet.rade) / planet.rade) * 100).toFixed(0)}% radius enlargement, breaching physical boundaries for stable planetary envelopes.` 
                       : `The revised size is physical and matches within catalog uncertainty boundaries.`}
                   </div>
@@ -1395,7 +1408,7 @@ export default function CandidateDetailPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted">Equilibrium Temp:</span>
-                    <span className="text-ink font-bold">{planet.eqt.toFixed(0)} K</span>
+                    <span className="text-ink font-bold">{planet.eqt != null ? `${planet.eqt.toFixed(0)} K` : "N/A"}</span>
                   </div>
                 </div>
 
@@ -1406,6 +1419,58 @@ export default function CandidateDetailPage() {
 
           <div className="flex flex-col gap-6">
             
+            {/* Rule-based catalog checks: fixed thresholds, no model. Shown before the model-derived grade so a
+                reader can vet a candidate on the evidence itself. */}
+            {profile.catalog_checks && (() => {
+              const cc = profile.catalog_checks;
+              const th = cc.thresholds;
+              const fmt = (v: number | null | undefined, d = 2, unit = "") => (v === null || v === undefined ? "—" : `${v.toFixed(d)}${unit}`);
+              const rows: { label: string; flag: string; value: string; rule: string }[] = [
+                { label: "Single star (RUWE)", flag: "ruwe_likely_binary", value: fmt(cc.values.ruwe), rule: `flag if > ${th.ruwe_likely_binary}` },
+                { label: "Planet radius physical", flag: "unphysical_radius", value: fmt(cc.values.derived_planet_radius_earth, 1, " R⊕"), rule: `flag if > ${th.unphysical_planet_radius_earth} R⊕` },
+                { label: "Transit vs Gaia stellar density", flag: "density_inconsistent", value: `ln ratio ${fmt(cc.values.density_log_ratio)}`, rule: `flag outside ${th.density_log_ratio_low} … ${th.density_log_ratio_high}` },
+                { label: "Teff: TOI vs Gaia", flag: "teff_outlier", value: fmt(cc.values.teff_difference_kelvin, 0, " K"), rule: `flag if > ${th.teff_difference_kelvin} K` },
+                { label: "Stellar radius: TOI vs Gaia", flag: "radius_outlier", value: fmt(cc.values.radius_difference_fraction === null || cc.values.radius_difference_fraction === undefined ? null : cc.values.radius_difference_fraction * 100, 0, " %"), rule: `flag if > ${th.radius_difference_fraction * 100}%` },
+              ];
+              const flagged = rows.filter(r => cc.flags[r.flag] === true).length;
+              return (
+                <div className="surface-card p-5 flex flex-col gap-3">
+                  <h3 className="panel-title">
+                    <CheckCircle2 className="h-4.5 w-4.5 text-accent" /> Catalog checks (rule-based, no ML)
+                  </h3>
+                  <p className="text-xs text-muted leading-relaxed">
+                    {cc.n_core_checkable} of {cc.core_flags.length} checks could run on this candidate;{" "}
+                    <strong className={flagged > 0 ? "text-severity-critical" : "text-ink"}>{flagged} flagged</strong>.
+                    {cc.n_core_checkable < cc.core_flags.length && " A check that cannot run is unknown, not passed."}
+                  </p>
+                  <div className="flex flex-col gap-2 font-mono text-xs">
+                    {rows.map(r => {
+                      const f = cc.flags[r.flag];
+                      return (
+                        <div key={r.flag} className="flex items-baseline justify-between gap-3 border-b border-border pb-2">
+                          <div className="flex flex-col">
+                            <span className="text-ink">{r.label}</span>
+                            <span className="text-muted text-[10px]">{r.rule}</span>
+                          </div>
+                          <div className="flex items-baseline gap-2 text-right">
+                            <span className="text-muted">{r.value}</span>
+                            <span className={`font-bold ${f === true ? "text-severity-critical" : f === false ? "text-status-pass" : "text-muted"}`}>
+                              {f === true ? "FLAG" : f === false ? "OK" : "n/a"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] text-muted leading-relaxed">
+                    Clean means no catalog red flags, not a confirmed planet. RUWE can miss close companions. In a
+                    retrospective test on later TOIs, ones with a flag were false positives about 40 points more often;
+                    the prospective test is still running (see About).
+                  </p>
+                </div>
+              );
+            })()}
+
             {/* Curation Telemetry Card (B3 & B8) */}
             <div className="surface-card p-5 flex flex-col gap-4">
               <h3 className="panel-title">
@@ -1441,7 +1506,7 @@ export default function CandidateDetailPage() {
                     recomputed server-side, never reimplemented here. */}
                 <details className="mt-1 border-t border-border pt-2 cursor-pointer group">
                   <summary className="text-[10px] text-accent font-bold hover:underline select-none">
-                    WHY GRADE {profile.health.grade}? VIEW SCORE BREAKDOWN (v{profile.health.version})
+                    HAND-WEIGHTED CATALOG FACTORS (reference only)
                   </summary>
                   <div className="mt-2.5 bg-surface-2 p-3 border border-border rounded-lg text-muted text-[10px] font-mono cursor-default space-y-2">
                     {Object.entries(profile.health.factors).map(([name, value]) => (
@@ -1452,9 +1517,9 @@ export default function CandidateDetailPage() {
                         </span>
                       </div>
                     ))}
-                    <div className="flex justify-between border-t border-border pt-1.5 font-bold text-ink">
-                      <span>Overall score:</span>
-                      <span>{profile.health.score.toFixed(1)} (Grade {profile.health.grade})</span>
+                    <div className="border-t border-border pt-1.5 text-ink">
+                      Grade {profile.health.grade} ({profile.health.score.toFixed(1)} = 100 × model planet probability,
+                      v{profile.health.version}) comes from the model, not from these factors.
                     </div>
                   </div>
                 </details>
@@ -2023,7 +2088,7 @@ export default function CandidateDetailPage() {
                     <div className="bg-severity-critical/5 border border-severity-critical/25 p-3 rounded-lg flex flex-col gap-1">
                       <span className="text-severity-critical font-bold">CRITICAL: Size Discrepancy Flagged</span>
                       <p className="text-muted text-[10px] font-sans">
-                        Recalculated planet size ({derivedRp.toFixed(2)} R_Earth) exceeds physical transit bounds (22 R_Earth). Blended stellar companion highly likely.
+                        Recalculated planet size ({fmtRp(derivedRp)} R_Earth) exceeds physical transit bounds (22 R_Earth). Blended stellar companion highly likely.
                       </p>
                     </div>
                   </div>

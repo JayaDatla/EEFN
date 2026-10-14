@@ -57,3 +57,17 @@ def test_flags_are_more_often_false_positives_on_held_out_data():
     for name, s in d["protocols"].items():
         a = s["per_flag"]["any_core_flag"]
         assert a["risk_difference"] > 0.2 and a["risk_difference_ci95"][0] > 0, name
+
+
+def test_profile_exposes_rule_based_checks_without_the_model():
+    prof = TestClient(app).get("/api/v1/candidates?limit=1").json()
+    rows = prof["items"] if isinstance(prof, dict) else prof
+    if not rows:
+        import pytest
+        pytest.skip("empty database")
+    cc = TestClient(app).get(f"/api/v1/candidates/{rows[0]['toi_id']}").json()["catalog_checks"]
+    assert set(cc["core_flags"]) <= set(cc["flags"])
+    assert cc["flags"]["evidence_score_low"] is None          # the model-derived flag is excluded here
+    assert 0 <= cc["n_core_checkable"] <= len(cc["core_flags"])
+    if cc["n_core_checkable"] == 0:
+        assert cc["any_core_flag"] is None                      # nothing checkable is never reported clean

@@ -49,11 +49,8 @@ def _gt(value: Optional[float], threshold: float) -> Optional[bool]:
     return None if value is None else bool(value > threshold)
 
 
-def compute_flags(cand: Any, host: Any, prediction: Any = None) -> Dict[str, Optional[bool]]:
-    """Flags from a candidate row, its host row, and (optionally) its stored prediction. Pure: reads
-    attributes only, so it works on ORM rows or any object with the same fields."""
-    ruwe = getattr(host, "ruwe", None)
-
+def flag_values(cand: Any, host: Any) -> Dict[str, Optional[float]]:
+    """The numbers the flags test, so a reader can see the value next to the verdict. Pure."""
     derived_rp = compute_derived_planet_radius_earth(getattr(host, "rad", None), getattr(cand, "trandep", None))
 
     density_transit = compute_transit_density_cgs(
@@ -64,18 +61,31 @@ def compute_flags(cand: Any, host: Any, prediction: Any = None) -> Dict[str, Opt
 
     toi_teff, gaia_teff = getattr(host, "toi_teff", None), getattr(host, "teff", None)
     toi_rad, gaia_rad = getattr(host, "toi_rad", None), getattr(host, "rad", None)
-    teff_diff = abs(toi_teff - gaia_teff) if toi_teff is not None and gaia_teff is not None else None
-    rad_diff_frac = (abs(toi_rad - gaia_rad) / gaia_rad) if toi_rad is not None and gaia_rad else None
+    return {
+        "ruwe": getattr(host, "ruwe", None),
+        "derived_planet_radius_earth": derived_rp,
+        "density_log_ratio": log_ratio,
+        "teff_difference_kelvin": abs(toi_teff - gaia_teff) if toi_teff is not None and gaia_teff is not None else None,
+        "radius_difference_fraction": (abs(toi_rad - gaia_rad) / gaia_rad) if toi_rad is not None and gaia_rad else None,
+    }
+
+
+def compute_flags(cand: Any, host: Any, prediction: Any = None) -> Dict[str, Optional[bool]]:
+    """Flags from a candidate row, its host row, and (optionally) its stored prediction. Pure: reads
+    attributes only, so it works on ORM rows or any object with the same fields."""
+    v = flag_values(cand, host)
+    log_ratio = v["density_log_ratio"]
+    gaia_teff, gaia_rad = getattr(host, "teff", None), getattr(host, "rad", None)
 
     score = getattr(prediction, "evidence_consistency_score", None) if prediction is not None else None
     return {
-        "ruwe_possible_binary": _gt(ruwe, THRESHOLDS["ruwe_possible_binary"]),
-        "ruwe_likely_binary": _gt(ruwe, THRESHOLDS["ruwe_likely_binary"]),
-        "unphysical_radius": _gt(derived_rp, THRESHOLDS["unphysical_planet_radius_earth"]),
+        "ruwe_possible_binary": _gt(v["ruwe"], THRESHOLDS["ruwe_possible_binary"]),
+        "ruwe_likely_binary": _gt(v["ruwe"], THRESHOLDS["ruwe_likely_binary"]),
+        "unphysical_radius": _gt(v["derived_planet_radius_earth"], THRESHOLDS["unphysical_planet_radius_earth"]),
         "density_inconsistent": (None if log_ratio is None else bool(
             log_ratio < THRESHOLDS["density_log_ratio_low"] or log_ratio > THRESHOLDS["density_log_ratio_high"])),
-        "teff_outlier": _gt(teff_diff, THRESHOLDS["teff_difference_kelvin"]),
-        "radius_outlier": _gt(rad_diff_frac, THRESHOLDS["radius_difference_fraction"]),
+        "teff_outlier": _gt(v["teff_difference_kelvin"], THRESHOLDS["teff_difference_kelvin"]),
+        "radius_outlier": _gt(v["radius_difference_fraction"], THRESHOLDS["radius_difference_fraction"]),
         "crossmatch_suspect": crossmatch_quality(host)["suspect"] if host is not None else None,
         "gaia_parameters_missing": None if host is None else bool(gaia_teff is None and gaia_rad is None),
         "evidence_score_low": None if score is None else bool(score < THRESHOLDS["evidence_score_low"]),

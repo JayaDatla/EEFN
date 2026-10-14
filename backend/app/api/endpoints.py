@@ -118,6 +118,7 @@ class CandidateProfileResponse(BaseModel):
     health: HealthBreakdownResponse
     real_observations: Dict[str, Any] = {}
     data_quality: Dict[str, Any] = {}
+    catalog_checks: Dict[str, Any] = {}
 
 _CANDIDATE_SORT_FIELDS = {
     "toi_id": ExoplanetCandidate.toi_id,
@@ -487,6 +488,7 @@ def get_candidate_detail(toi_id: float, db: Session = Depends(get_db)):
         health=HealthBreakdownResponse(**profile["health"]),
         real_observations=profile.get("real_observations", {}),
         data_quality=profile.get("data_quality", {}),
+        catalog_checks=profile.get("catalog_checks", {}),
     )
 
 class PipelineRunResponse(BaseModel):
