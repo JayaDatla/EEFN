@@ -5,12 +5,14 @@ import pickle
 
 import sklearn
 import uuid
+from datetime import datetime
 import numpy as np
 import pandas as pd
 from typing import Dict, Any, Optional, Tuple, Union
 
 from sqlalchemy.orm import Session
-from app.db.models import ExoplanetCandidate, HostStar, AgreementMetrics, MLPrediction
+from app.db.models import ExoplanetCandidate, HostStar, AgreementMetrics, MLPrediction, DispositionChangeEvent
+from app.science.health import MODEL_HEALTH_VERSION, grade_from_probability
 from app.science.radius import compute_derived_planet_radius_earth
 
 logger = logging.getLogger(__name__)
@@ -312,6 +314,20 @@ class PredictionEngine:
                 pred_rec.prob_planet = evidence_score
                 pred_rec.feature_importance = top_contrib
                 pred_rec.model_version = self.model_version
+
+            # Served grade = the model's planet probability, banded a priori (see app/science/health.py and
+            # validation/scripts/split_validation.py for its held-out false-positive share per grade).
+            prev_grade, prev_version = candidate_obj.health_grade, candidate_obj.health_score_version
+            new_grade = grade_from_probability(evidence_score)
+            candidate_obj.health_score = round(100.0 * evidence_score, 1)
+            candidate_obj.health_grade = new_grade
+            candidate_obj.health_score_version = MODEL_HEALTH_VERSION
+            if prev_grade is not None and prev_grade != new_grade and prev_version == MODEL_HEALTH_VERSION:
+                db.add(DispositionChangeEvent(
+                    candidate_id=candidate_obj.id, toi_id=candidate_obj.toi_id, pl_name=candidate_obj.pl_name,
+                    field_name="health_grade", old_value=prev_grade, new_value=new_grade,
+                    changed_at=datetime.utcnow(),
+                ))
 
             db.commit()
 

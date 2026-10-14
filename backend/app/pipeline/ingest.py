@@ -541,9 +541,13 @@ def ingest_and_fuse_data(db: Session, limit: int = 100, rate_limiter=None,
         cand.density_transit = density_transit
         cand.density_gaia = density_gaia
         cand.density_discrepancy_sigma = density_sigma
-        cand.health_score = h_score
-        cand.health_grade = h_grade
-        cand.health_score_version = health_result.version
+        # The served grade comes from the model's planet probability (set by predictor.predict_confirmation
+        # right after this row is committed). The hand-weighted catalog score is only the fallback for when
+        # no model is loaded, so the two never alternate and spuriously look like grade changes.
+        if not predictor.loaded:
+            cand.health_score = h_score
+            cand.health_grade = h_grade
+            cand.health_score_version = health_result.version
         cand.query_failed = query_failed
         db.commit()
         db.refresh(cand)
@@ -556,7 +560,7 @@ def ingest_and_fuse_data(db: Session, limit: int = 100, rate_limiter=None,
                     field_name="disposition", old_value=prev_disposition, new_value=cand.disposition,
                     changed_at=change_time,
                 ))
-            if prev_health_grade is not None and prev_health_grade != cand.health_grade:
+            if not predictor.loaded and prev_health_grade is not None and prev_health_grade != cand.health_grade:
                 db.add(DispositionChangeEvent(
                     candidate_id=cand.id, toi_id=cand.toi_id, pl_name=cand.pl_name,
                     field_name="health_grade", old_value=prev_health_grade, new_value=cand.health_grade,

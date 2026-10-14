@@ -158,6 +158,11 @@ class AlertEngine:
             return {"health_score": 0.0, "health_grade": "F", "factors": {}}
 
         result = compute_health_score(cand.agreement_metrics, cand)
+        if cand.health_score is not None and cand.health_grade:
+            # The served grade (model planet probability) is stored on the row; the hand-weighted factors
+            # stay as the catalog-consistency breakdown.
+            return {"health_score": cand.health_score, "health_grade": cand.health_grade,
+                    "factors": result.factors}
         return {
             "health_score": result.score,
             "health_grade": result.grade,

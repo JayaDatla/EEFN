@@ -15,6 +15,8 @@ from typing import Any, Dict, Optional
 # Bump whenever the term weights/caps below change, so a stored `health_score_version`
 # on ExoplanetCandidate tells you whether a historical score is comparable to a fresh one.
 HEALTH_SCORE_VERSION = "1.1.0"
+# Version stored when the grade comes from the tabular model's planet probability instead (score = 100*p).
+MODEL_HEALTH_VERSION = "2.0.0-model"
 
 
 @dataclass
@@ -34,6 +36,18 @@ def _grade_for(score: float) -> str:
         return "C"
     if score >= 60.0:
         return "D"
+    return "F"
+
+
+# Grade bands on the tabular model's planet probability. Fixed a priori (round numbers, not tuned on
+# outcomes) so the split-validation numbers in validation/scripts/split_validation.py are not fitted.
+MODEL_GRADE_BANDS = ((0.90, "A"), (0.75, "B"), (0.50, "C"), (0.25, "D"))
+
+
+def grade_from_probability(p: float) -> str:
+    for lower, letter in MODEL_GRADE_BANDS:
+        if p >= lower:
+            return letter
     return "F"
 
 

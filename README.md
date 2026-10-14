@@ -33,8 +33,9 @@ For each candidate, EEFN:
 - Measures real TESS target-pixel-file centroid offsets (in-transit vs out-of-transit
   photocentre, with an empirical red-noise-aware significance) and real APOGEE-2
   spectroscopy, also on a nightly schedule — [`LIMITATIONS.md`](LIMITATIONS.md) §1.8.
-- Computes one unified evidence health score (0-100, letter grade A-F) — see
-  `backend/app/science/health.py` for the single formula every code path uses.
+- Grades each candidate A-F from the tabular model's planet probability (bands fixed in
+  `backend/app/science/health.py`); held-out false-positive share per grade is in
+  [`LIMITATIONS.md`](LIMITATIONS.md) and `GET /api/v1/health/validation`.
 - Surfaces everything through a FastAPI backend and a Next.js frontend, with alerts that
   explain *why* a candidate was flagged, not just that it was.
 

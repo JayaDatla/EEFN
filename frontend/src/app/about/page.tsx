@@ -55,12 +55,25 @@ export default function AboutPage() {
               prior learned from catalog values, not as evidence that a planet is real. Details:{" "}
               <code>LIMITATIONS.md</code> §1.3.
             </Callout>
-            <Callout tone="warning" title="The A–F health grade is a catalog-consistency summary, not a planet probability">
-              Measured on every labelled candidate in the database (<code>GET /api/v1/health/validation</code>,
-              computed live): the 0–100 score ranks confirmed planets above false positives with AUC about 0.75,
-              and a grade-A candidate is still labelled a false positive about 37% of the time (52% overall),
-              rising to 84&ndash;95% for grades C&ndash;F. Read &ldquo;A&rdquo; as &ldquo;no catalog red flags&rdquo;,
-              not &ldquo;likely a planet&rdquo;.
+            <Callout tone="warning" title="The A–F grade is the model's planet probability, checked on stars it never saw">
+              The grade bands the tabular model&apos;s planet probability (A &ge; 0.90, B &ge; 0.75, C &ge; 0.50,
+              D &ge; 0.25, F below; cut points fixed in advance, not tuned). It replaced a hand-weighted
+              catalog-consistency score whose grade A was a false positive 39% of the time. On held-out stars
+              (star-grouped cross-validation) the new grade A is a false positive <strong>6.6%</strong> of the time
+              (grade B 15%, C 39%, D 61%, F 94%); scored forward in time (train on older TOIs, grade newer ones)
+              grade A is 4&ndash;15% false positives. That is a measured rate, not a promise: it inherits every
+              limit of the score above, including that human labels are partly set from the same catalog evidence.
+              Live numbers: <code>GET /api/v1/health/validation</code> (<code>out_of_sample</code> is the one to
+              trust; the top-level figures are on rows the model trained on). Details:{" "}
+              <code>validation/scripts/split_validation.py</code>.
+            </Callout>
+            <Callout tone="info" title="Catalog-hygiene flags: retrospective split result, prospective test pending">
+              Fitting the one data-calibrated threshold (the transit-vs-Gaia density band) on older TOIs only and
+              applying it to newer stars, TOIs with at least one core flag resolved as false positives
+              39&ndash;42 percentage points more often than unflagged ones (95% CI lower bound +0.24 or higher in
+              every split). Dispositions are partly decided from the same Gaia evidence, so this can overstate the
+              effect; the frozen prospective snapshot is the unbiased test and has not resolved yet.
+              (<code>GET /api/v1/predictions/flag_validation</code>)
             </Callout>
             <Callout tone="warning" title="Calibration is measured, and imperfect">
               Brier score 0.100 on held-out data (the previous Random Forest scored 0.113). The score is well

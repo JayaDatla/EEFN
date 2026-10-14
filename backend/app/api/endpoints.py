@@ -739,12 +739,43 @@ def get_catalog_coverage(db: Session = Depends(get_db)):
 
 @router.get("/health/validation")
 def get_health_validation(db: Session = Depends(get_db)):
-    """How well the A-F health grade separates confirmed planets from false positives, computed live
-    from the labelled candidates in the database (see app/science/health_validation.py)."""
+    """How well the A-F grade separates confirmed planets from false positives.
+
+    `out_of_sample` is the number to trust: false-positive share per grade on stars/TOIs the model never
+    trained on (star-grouped CV and time-forward splits; validation/scripts/split_validation.py).
+    The top-level keys are the same measurement on the labelled rows in the database, which the model
+    WAS trained on, so they flatter the grade and are kept only as a consistency check.
+    """
     from app.science.health_validation import validate_health
     rows = [{"disposition": c.disposition, "health_score": c.health_score, "health_grade": c.health_grade}
             for c in db.query(ExoplanetCandidate).all()]
-    return validate_health(rows)
+    out = validate_health(rows)
+    out["in_sample_warning"] = ("Computed on labelled candidates the model was fitted on; optimistic. "
+                                "See out_of_sample for held-out numbers.")
+    report_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ml", "split_validation_report.json")
+    try:
+        with open(report_path, encoding="utf-8") as f:
+            rep = json.load(f)
+        out["out_of_sample"] = {"grade_bands_model": rep.get("grade_bands_model"), "protocols": rep.get("grade"),
+                                "generated_at": rep.get("generated_at")}
+    except (OSError, ValueError):
+        out["out_of_sample"] = None
+    return out
+
+
+@router.get("/predictions/flag_validation")
+def get_flag_validation():
+    """Held-out (star-grouped and time-forward) false-positive rates of flagged vs unflagged TOIs, with the
+    density band re-fitted on the training part only. Retrospective: dispositions can depend on the same
+    Gaia evidence the flags use, so the frozen prospective snapshot remains the unbiased test."""
+    report_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ml", "split_validation_report.json")
+    try:
+        with open(report_path, encoding="utf-8") as f:
+            rep = json.load(f)
+    except (OSError, ValueError):
+        raise HTTPException(status_code=404, detail="split_validation_report.json missing; run validation/scripts/split_validation.py")
+    return {"generated_at": rep.get("generated_at"), "protocols": rep.get("flags"),
+            "caveat": "Retrospective: label circularity can inflate these. The frozen prospective snapshot is the unbiased test."}
 
 
 @router.get("/predictions/calibration")

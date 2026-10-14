@@ -1409,7 +1409,7 @@ export default function CandidateDetailPage() {
             {/* Curation Telemetry Card (B3 & B8) */}
             <div className="surface-card p-5 flex flex-col gap-4">
               <h3 className="panel-title">
-                <CheckCircle2 className="h-4.5 w-4.5 text-accent" /> Evidence health breakdown
+                <CheckCircle2 className="h-4.5 w-4.5 text-accent" /> Catalog-consistency breakdown
               </h3>
 
               <div className="flex flex-col gap-3 font-mono text-xs text-muted">

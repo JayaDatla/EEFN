@@ -250,7 +250,7 @@ export default async function DataPipelinePage() {
             independent evidence this isn&apos;t a real planet transit.
           </p>
           <p className="text-muted text-xs">
-            Result: health grade D (61.6/100), evidence-consistency score 0.29, follow-up priority 0.03 — this
+            Illustrative result (older catalog-consistency grade): health grade D (61.6/100), evidence-consistency score 0.29, follow-up priority 0.03 — this
             candidate is correctly pushed to the bottom of the queue rather than competing for scarce telescope
             time against candidates whose catalogs actually agree.
           </p>
@@ -295,7 +295,7 @@ export default async function DataPipelinePage() {
         <h2 className="mb-3 font-display text-lg font-medium text-ink">5. What an astronomer actually sees</h2>
         <div className="surface-card p-6 text-sm leading-relaxed text-ink/90">
           <p>
-            Every candidate resolves to a health grade (A–F), an evidence-consistency score, and a follow-up
+            Every candidate resolves to a grade (A–F, banded from the model's planet probability), an evidence-consistency score, and a follow-up
             priority score — each with the full measurement trail (which catalog, which value, when it was
             fetched) one click away. The point isn&apos;t to replace an astronomer&apos;s judgment; it&apos;s
             to do the cross-catalog arithmetic that&apos;s tedious to do by hand for hundreds of candidates, so
