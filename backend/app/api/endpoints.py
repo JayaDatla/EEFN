@@ -710,6 +710,16 @@ def get_honest_evaluation():
         return json.load(f)
 
 
+@router.get("/health/validation")
+def get_health_validation(db: Session = Depends(get_db)):
+    """How well the A-F health grade separates confirmed planets from false positives, computed live
+    from the labelled candidates in the database (see app/science/health_validation.py)."""
+    from app.science.health_validation import validate_health
+    rows = [{"disposition": c.disposition, "health_score": c.health_score, "health_grade": c.health_grade}
+            for c in db.query(ExoplanetCandidate).all()]
+    return validate_health(rows)
+
+
 @router.get("/predictions/calibration")
 def get_model_calibration():
     """

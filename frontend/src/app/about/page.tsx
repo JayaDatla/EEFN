@@ -55,6 +55,13 @@ export default function AboutPage() {
               prior learned from catalog values, not as evidence that a planet is real. Details:{" "}
               <code>LIMITATIONS.md</code> §1.3.
             </Callout>
+            <Callout tone="warning" title="The A–F health grade is a catalog-consistency summary, not a planet probability">
+              Measured on every labelled candidate in the database (<code>GET /api/v1/health/validation</code>,
+              computed live): the 0–100 score ranks confirmed planets above false positives with AUC about 0.75,
+              and a grade-A candidate is still labelled a false positive about 37% of the time (52% overall),
+              rising to 84&ndash;95% for grades C&ndash;F. Read &ldquo;A&rdquo; as &ldquo;no catalog red flags&rdquo;,
+              not &ldquo;likely a planet&rdquo;.
+            </Callout>
             <Callout tone="warning" title="Calibration is measured, and imperfect">
               Brier score 0.100 on held-out data (the previous Random Forest scored 0.113). The score is well
               calibrated at the extremes but mildly <em>under</em>-confident in the 0.2-0.5 range (predicted ~0.26,

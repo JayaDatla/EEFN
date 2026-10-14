@@ -2367,13 +2367,13 @@ export default function CandidateDetailPage() {
                     </div>
                   </div>
 
-                  {/* Chart 4: Deep Learning (PyTorch) CNN Inputs */}
+                  {/* Chart 4: light-curve vetter input views (real TESS data when vetted, otherwise the simulation, unclassified) */}
                   {pipelineData.dl_global_view && pipelineData.dl_local_view && (
                     <div className="bg-surface-2/80 border border-border p-4 rounded-xl flex flex-col gap-3 relative">
                       <div className="flex justify-between items-center border-b border-border pb-2">
-                        <span className="text-ink font-bold uppercase text-[10px]">4. Deep ExoFusion Net (CNN Input Channels)</span>
+                        <span className="text-ink font-bold uppercase text-[10px]">4. Light-curve vetter input views (folded global + local)</span>
                         <span className="text-accent font-bold text-[10px] uppercase tracking-wider flex items-center gap-1">
-                          <span className="h-1.5 w-1.5 rounded-full bg-accent"></span> PYTORCH MULTI-MODAL PIPELINE
+                          <span className="h-1.5 w-1.5 rounded-full bg-accent"></span> {pipelineData.dl_input_source === "real_tess_spoc_2min" ? "REAL TESS LIGHT CURVE" : "SIMULATED CURVE, NOT CLASSIFIED"}
                         </span>
                       </div>
                       

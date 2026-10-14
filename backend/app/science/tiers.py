@@ -8,16 +8,14 @@ incomplete one."
 | Tier | Requires | Component |
 |---|---|---|
 | 0 | any data at all | Rule engine (alert_engine.py) |
-| 1 | NASA/TOI + Gaia (source + astroparams) | RF tabular model |
-| 2 | Tier 1 + real TESS light curve | Global+Local CNN branches |
-| 3 | Tier 2 + TPF centroid + 2MASS/Pan-STARRS/spectroscopy | Full 4-branch net |
+| 1 | NASA/TOI + Gaia (source + astroparams) | Catalog evidence-consistency model |
+| 2 | Tier 1 + real TESS light curve | + light-curve vetting (gradient-boosted physics features) |
+| 3 | Tier 2 + TPF centroid + 2MASS/Pan-STARRS/spectroscopy | + real centroid check and extended catalogs |
 
-Tier 2 and Tier 3 are architecturally defined here but cannot be reached by any
-candidate in this codebase today: no real MAST light curve or TPF centroid ingestion
-exists yet (UPGRADE_PLAN.md F.6) -- `transit_pipeline.py` only ever simulates a light
-curve. This module reports that honestly (every candidate currently tops out at Tier
-1, or Tier 0 if even Gaia is unmatched) rather than pretending coverage that isn't
-real.
+Tiers 2 and 3 are reachable only for candidates the nightly syncs (app/pipeline/real_sync.py) have
+actually processed: a real SPOC light curve was vetted (`lc_vetting_status == "vetted"`) and, for Tier 3,
+a real TPF centroid was measured. Most candidates will sit at Tier 1 until the syncs reach them. The
+flags are passed in by callers from real DB provenance, never inferred from field presence.
 
 IMPORTANT, learned the hard way while building this: `ExoplanetCandidate.centroid_shift_max`
 and `HostStar.teff_spec`/`fe_h` can be non-null in this database for a reason that has
@@ -102,11 +100,11 @@ def compute_model_tier(candidate: ExoplanetCandidate, host: Optional[HostStar],
                         ("2MASS Photometry", "Pan-STARRS Photometry", "Spectroscopy (APOGEE/GALAH/LAMOST)"))
 
     if has_real_light_curve and has_centroid and has_extended and has_gaia_source and has_gaia_astroparams:
-        tier, name = 3, "Full 4-branch net (light curve + centroid + extended catalogs)"
+        tier, name = 3, "Catalog model + light-curve vetting + centroid + extended catalogs"
     elif has_real_light_curve and has_gaia_source and has_gaia_astroparams:
-        tier, name = 2, "Global+Local CNN (real light curve)"
+        tier, name = 2, "Catalog model + light-curve vetting (real light curve)"
     elif has_gaia_source and has_gaia_astroparams:
-        tier, name = 1, "RF tabular model (NASA/TOI + Gaia)"
+        tier, name = 1, "Catalog model (NASA/TOI + Gaia)"
     else:
         tier, name = 0, "Rule engine only"
 

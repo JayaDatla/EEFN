@@ -2,9 +2,9 @@ name: EEFN CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   test-backend:
@@ -20,6 +20,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install httpx
         pip install -r backend/requirements.txt
+    - name: Create the database schema
+      run: |
+        cd backend
+        alembic upgrade head
     - name: Run Backend Tests
       run: |
         cd backend

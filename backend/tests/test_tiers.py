@@ -57,7 +57,7 @@ def test_tier_stays_1_without_a_real_light_curve_even_with_full_catalog_coverage
     )
     result = compute_model_tier(_candidate(), host=host, has_real_light_curve=False)
     assert result.tier == 1
-    assert result.tier_name == "RF tabular model (NASA/TOI + Gaia)"
+    assert result.tier_name == "Catalog model (NASA/TOI + Gaia)"
 
 
 def test_tier_3_reachable_only_when_all_real_data_flags_and_coverage_are_true():
