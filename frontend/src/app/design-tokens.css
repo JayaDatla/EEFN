@@ -2,17 +2,14 @@
   Design tokens (UPGRADE_PLAN.md H.2). Single source of truth for color, type,
   spacing, radius, and elevation -- every component should reference these custom
   properties (directly, or via the Tailwind theme.extend mapping in
-  tailwind.config.js) rather than hardcoding hex/px values. Three themes switch by
-  setting `data-theme` on `<html>`: "light" (daytime control-room use), "dark"
-  (default), and "red-night" (telescope-side night-vision -- near-black background,
-  red-only text/accents, no blue light at all, a real functional requirement for
-  this user base).
+  tailwind.config.js) rather than hardcoding hex/px values. Two themes switch by
+  setting `data-theme` on `<html>`: "light" (daytime control-room use) and "dark"
+  (default); with no attribute set, the OS preference decides.
 
   Visual direction (2026-10, explicit user request -- "Observatory editorial"): a deep
   ink-navy canvas (warm "paper" in light), one starlight-gold accent, a large light
   serif for headlines and figures, hairline borders instead of heavy shadows, and a
-  faint ambient glow plus film grain for depth. Red-night is exempt from all
-  decoration (no glow, no grain, no shadows) -- preserving night vision is the goal.
+  faint ambient glow plus film grain for depth.
 */
 
 :root {
@@ -110,7 +107,7 @@
 /* ---- Dark theme (default when the OS/browser prefers dark and no explicit
    choice has been made, and whenever data-theme="dark" is set explicitly) ---- */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):not([data-theme="red-night"]) {
+  :root:not([data-theme="light"]) {
     --gray-50:  #f3efe6;
     --gray-100: #e4dfd3;
     --gray-200: #c9c6c2;
@@ -201,47 +198,4 @@
   --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 10px 24px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 24px 48px rgba(0, 0, 0, 0.5);
-}
-
-/* ---- Red/night-vision theme -- near-black background, red-only text/accents, no
-   blue light at all. A real, specific need for telescope-side use (H.2): every
-   other theme's colors are deliberately NOT referenced here, this palette stands
-   alone so no accidental blue-ish gray creeps in. Deliberately exempted from the
-   "soft shadow" modern-SaaS treatment -- flat and utilitarian is correct here. ---- */
-:root[data-theme="red-night"] {
-  --color-background: #0a0000;
-  --color-surface:    #150202;
-  --color-surface-2:  #200404;
-  --color-border:     #3a0808;
-  --color-text:       #ff3b30;
-  --color-text-muted: #e7352d;
-  --color-accent:     #ff5c4d;
-  --color-accent-text: #0a0000;
-
-  /* No hue variation available without reintroducing non-red light -- grade/severity
-     distinctions fall back to weight/opacity + the mandatory icon/label pairing
-     (H.1: color is never the only signal) rather than a color ramp in this theme. */
-  --grade-a: #ff5c4d;
-  --grade-b: #ff5c4d;
-  --grade-c: #d94436;
-  --grade-d: #b5342a;
-  --grade-f: #ff3b30;
-
-  --severity-critical: #ff3b30;
-  --severity-high:     #d94436;
-  --severity-medium:   #bd2c25;
-  --severity-low:      #7a1e1a;
-
-  --status-pass: #d94436;
-  --status-watch: #b5342a;
-  --status-risk: #ff3b30;
-
-  --color-hairline:   rgba(255, 59, 48, 0.18);
-  --color-accent-soft: rgba(255, 92, 77, 0.10);
-  --color-glow:       transparent;
-  --grain-opacity:    0;
-
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
 }

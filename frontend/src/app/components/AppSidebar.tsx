@@ -77,7 +77,6 @@ const galleryNavigation = [
 const THEME_OPTIONS: { value: Theme; label: string }[] = [
   { value: "light", label: "Light" },
   { value: "dark", label: "Dark" },
-  { value: "red-night", label: "Night" },
 ];
 
 function ThemeToggle() {

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-export type Theme = "system" | "light" | "dark" | "red-night";
+export type Theme = "system" | "light" | "dark";
 
 const STORAGE_KEY = "eefn-theme";
 
@@ -26,8 +26,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("system");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY) as Theme | null;
-    const initial = stored ?? "system";
+    // A value saved by an older version (e.g. the removed night theme) falls back to "system".
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    const initial: Theme = stored === "light" || stored === "dark" ? stored : "system";
     setThemeState(initial);
     applyTheme(initial);
   }, []);

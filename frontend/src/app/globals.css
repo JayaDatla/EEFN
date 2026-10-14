@@ -13,10 +13,10 @@
   * Depth: hairline borders + a faint top highlight + soft ambient glow and film grain,
     instead of drop-shadow cards. Radii are tight on controls, softer on panels.
   * Motion: transform/opacity only, staggered on entry, always disabled under
-    prefers-reduced-motion. Red-night stays flat: no glow, no grain, no shadows.
+    prefers-reduced-motion.
 
-  Everything below reads tokens from design-tokens.css, so all three themes
-  (light/dark/red-night) apply everywhere with no per-page overrides.
+  Everything below reads tokens from design-tokens.css, so both themes
+  (light/dark) apply everywhere with no per-page overrides.
 */
 
 * {
@@ -1066,8 +1066,7 @@ html {
   color-scheme: light;
 }
 
-:root[data-theme="dark"],
-:root[data-theme="red-night"] {
+:root[data-theme="dark"] {
   color-scheme: dark;
 }
 
