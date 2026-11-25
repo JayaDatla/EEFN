@@ -81,6 +81,8 @@ interface CatalogChecks {
   n_core_checkable: number;
   core_flags: string[];
   thresholds: Record<string, number>;
+  informational_flags?: Record<string, boolean | null>;
+  informational_thresholds?: Record<string, number>;
 }
 
 interface CandidateProfile {
@@ -1462,10 +1464,34 @@ export default function CandidateDetailPage() {
                       );
                     })}
                   </div>
+                  {cc.informational_flags && "giant_planet_ambiguity" in cc.informational_flags && (() => {
+                    const g = cc.informational_flags!.giant_planet_ambiguity;
+                    const gr = cc.informational_thresholds?.giant_planet_ambiguity_radius_earth ?? 8;
+                    return (
+                      <div className="flex flex-col gap-1 border-t border-border pt-2 font-mono text-xs">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <div className="flex flex-col">
+                            <span className="text-ink">Giant planet or brown dwarf?</span>
+                            <span className="text-muted text-[10px]">informational · radius above ~{gr} R⊕, no mass measured</span>
+                          </div>
+                          <span className={`font-bold ${g === true ? "text-severity-high" : "text-muted"}`}>
+                            {g === true ? "AMBIGUOUS" : g === false ? "n/a (smaller)" : "n/a"}
+                          </span>
+                        </div>
+                        {g === true && (
+                          <p className="text-[10px] text-muted leading-relaxed">
+                            At this radius a planet and a brown dwarf look alike. This does not make a brown dwarf more
+                            likely; a radial-velocity mass would settle it. Not counted in the checks above.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
                   <p className="text-[10px] text-muted leading-relaxed">
-                    Clean means no catalog red flags, not a confirmed planet. RUWE can miss close companions. In a
-                    retrospective test on later TOIs, ones with a flag were false positives about 40 points more often;
-                    the prospective test is still running (see About).
+                    Clean means no catalog red flags, not a confirmed planet. RUWE can miss close companions. These
+                    checks collect cross-catalog evidence in one place; they do not replace follow-up. Later TOIs with
+                    a flag were more often false positives, but those dispositions partly used the same indicators,
+                    so this is an association, not independent validation (see About).
                   </p>
                 </div>
               );

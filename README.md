@@ -1,13 +1,16 @@
 # EEFN — Exoplanet Evidence Fusion Network
 
-A cross-catalog audit tool for TESS planet candidates. For each TESS Object of Interest (TOI) it
+A time-saving evidence view for TESS planet candidates. For each TESS Object of Interest (TOI) it
 pulls the NASA Exoplanet Archive record, matches the host star to Gaia DR3 (plus 2MASS and
-Pan-STARRS), and checks whether the catalogs agree with each other and with the transit itself.
-Every number on screen traces back to a catalog, a rule, or a measured model score.
+Pan-STARRS), and puts the cross-catalog checks in one place, so nobody has to compile them by hand:
+do the catalogs agree with each other and with the transit itself? Every number on screen traces
+back to a catalog, a rule, or a measured model score.
 
-It does not confirm planets. Disposition labels in the training data were set by astronomers,
-partly from the same Gaia signals used here, so the models partly reproduce human vetting.
-Read [`LIMITATIONS.md`](LIMITATIONS.md) before relying on any output.
+It is not a planet predictor and does not confirm planets. Many of these checks are already part of
+standard vetting; the aim is to apply them quickly and consistently, especially to older unresolved
+TOIs and candidates with limited follow-up. The model grade is an optional second opinion: its
+training labels were set by astronomers, partly from the same Gaia signals used here, so it partly
+reproduces human vetting. Read [`LIMITATIONS.md`](LIMITATIONS.md) before relying on any output.
 
 ## What it gives you per candidate
 
@@ -22,7 +25,12 @@ Read [`LIMITATIONS.md`](LIMITATIONS.md) before relying on any output.
 | Stellar radius, TOI vs Gaia | differs by > 30% |
 
 A check that cannot run (missing data) is shown as unknown, never as passed. A clean result means
-"no catalog red flags", not "planet".
+"no catalog red flags", not "planet". The density band is calibrated on confirmed planets, which are
+shaped by detection and follow-up biases, so read a flag as "unusual", not "wrong".
+
+**Informational note (not a check, never affects a grade).** A candidate whose radius is above about
+8 R⊕ shows "Giant planet or brown dwarf?": at that size the radius alone cannot tell them apart and a
+radial-velocity mass would. It does not imply a brown dwarf is more likely.
 
 **Model scores.**
 - A LightGBM planet probability from the catalog features, shown as an A–F grade.
@@ -37,11 +45,12 @@ A check that cannot run (missing data) is shown as unknown, never as passed. A c
 | Same, scoring later TOIs from earlier ones | AUC 0.84–0.88 | time-forward splits |
 | Value of the cross-catalog features | +0.007 AUC over TOI-table columns alone | paired, star-bootstrap |
 | Grade A is a false positive | 6.6% of the time (B 15%, C 39%, D 61%, F 94%) | star-grouped CV |
-| Flagged TOIs vs unflagged | 39–43 points more often false positives | train on older TOIs, test on later TOIs of new stars |
+| Flagged TOIs vs unflagged | 39–43 points more often later marked false positive (an association, see below) | train on older TOIs, test on later TOIs of new stars |
 | Light-curve vetter | 83% (±6) on Kepler; 76% agreement, AUC 0.81 on 50 TESS TOIs | star-grouped CV; TESS transfer check |
 | Centroid offsets | 5 candidates measured, none flagged | one earlier "5.4σ" claim was retracted (re-measured 1.97σ) |
 
-The flag result is retrospective and can be inflated because dispositions use the same evidence.
+The flag result is retrospective and is an association, not independent validation: dispositions
+partly use the same evidence, so it can overstate the effect.
 The unbiased test is frozen in
 [`backend/app/ml/prospective/`](backend/app/ml/prospective) (108 unresolved TOIs, hash-registered
 2026-10-13). It needs about six months of outcomes; see
@@ -116,6 +125,12 @@ writes a VOTable that opens in TOPCAT; `WEBHOOK_URLS` posts when a pipeline run 
 Research prototype. No astronomer has used it on a real target list yet; that would be worth more than
 any remaining code change. Open items: ingest SPOC DV centroid offsets, key the cross-match on Gaia ID,
 add a Gaia DR4 adapter, and compare against published TRICERATOPS/ExoMiner values.
+
+## Acknowledgements
+
+Biel Escolà-Rodrigo reviewed the project and suggested the giant planet / brown dwarf ambiguity note,
+a separate scientific-interest measure, a check of transit-duration effects, and the caution about
+calibrating flags on confirmed planets. Errors remain ours.
 
 ## Contributing and license
 

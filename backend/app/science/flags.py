@@ -45,6 +45,33 @@ THRESHOLDS = {
 CORE_FLAGS = ["ruwe_likely_binary", "unphysical_radius", "density_inconsistent", "teff_outlier", "radius_outlier"]
 
 
+# Informational checks. They are NOT part of CORE_FLAGS, THRESHOLDS or compute_flags(), so the frozen
+# prospective snapshot (which records THRESHOLDS and CORE_FLAGS) is untouched. They never feed the grade,
+# the priority score or any validation number: they only tell a reader something about the candidate.
+INFORMATIONAL_THRESHOLDS = {
+    # Above ~8 R_Earth a transiting companion could be a giant planet or a brown dwarf: the radius alone
+    # cannot tell them apart (suggested by B. Escola-Rodrigo, personal communication; empirical radius
+    # range ~0.7-1.4 R_Jup, Carmichael 2023, MNRAS, doi:10.1093/mnras/stac3720). Deliberately a soft
+    # reference value, not a boundary: young brown dwarfs can be larger.
+    "giant_planet_ambiguity_radius_earth": 8.0,
+}
+
+INFORMATIONAL_FLAGS = ["giant_planet_ambiguity"]
+
+
+def compute_informational_flags(cand: Any, host: Any) -> Dict[str, Optional[bool]]:
+    """Checks that describe a physical ambiguity rather than a catalog inconsistency.
+
+    giant_planet_ambiguity: True when the derived radius is above the reference value AND no independent
+    mass measurement is available. This database holds no companion masses at all, so the second
+    condition is always met today; it is stated so the check stays honest if masses are ever added.
+    A True value does NOT say the object is more likely a brown dwarf; it says radius alone cannot decide
+    and a radial-velocity mass would. None when the radius cannot be derived.
+    """
+    rp = flag_values(cand, host)["derived_planet_radius_earth"]
+    return {"giant_planet_ambiguity": _gt(rp, INFORMATIONAL_THRESHOLDS["giant_planet_ambiguity_radius_earth"])}
+
+
 def _gt(value: Optional[float], threshold: float) -> Optional[bool]:
     return None if value is None else bool(value > threshold)
 

@@ -14,7 +14,8 @@ from app.science.crossmatch import crossmatch_quality
 from app.db.models import ExoplanetCandidate, HostStar, AgreementMetrics, MLPrediction, MeasurementHistory
 from app.science.tiers import compute_model_tier
 from app.science.health import compute_health_score
-from app.science.flags import CORE_FLAGS, THRESHOLDS, any_core_flag, compute_flags, flag_values
+from app.science.flags import (CORE_FLAGS, INFORMATIONAL_THRESHOLDS, THRESHOLDS, any_core_flag, compute_flags,
+                               compute_informational_flags, flag_values)
 
 
 def build_candidate_profile(db: Session, toi_id: float) -> Optional[Dict[str, Any]]:
@@ -133,6 +134,9 @@ def build_candidate_profile(db: Session, toi_id: float) -> Optional[Dict[str, An
                                  if star is not None else 0),
             "core_flags": CORE_FLAGS,
             "thresholds": THRESHOLDS,
+            # Informational only: never counted in any_core_flag, the grade or the priority.
+            "informational_flags": compute_informational_flags(cand, star) if star is not None else {},
+            "informational_thresholds": INFORMATIONAL_THRESHOLDS,
         },
         "health": {
             "score": cand.health_score if cand.health_score is not None else health_result.score,

@@ -18,12 +18,13 @@ export default function AboutPage() {
         <section>
           <h2 className="mb-2 text-sm font-semibold text-ink">What EEFN is</h2>
           <p>
-            EEFN is an automated cross-catalog evidence auditor for transiting planet candidates. Given a TOI,
-            it cross-matches NASA/TESS, Gaia DR3, 2MASS, and Pan-STARRS records, flags where those catalogs
-            disagree with each other, and produces a health score, an evidence-consistency probability, and a
-            follow-up priority ranking with a full audit trail (source, catalog version, query timestamp) behind
-            every number. It exists to help an observer decide whether a candidate&apos;s catalog record is
-            internally consistent enough to be worth scarce follow-up telescope time.
+            EEFN is a time-saving evidence view for transiting planet candidates. Given a TOI, it cross-matches
+            NASA/TESS, Gaia DR3, 2MASS, and Pan-STARRS records and shows, in one place, where those catalogs
+            disagree with each other, with a full audit trail (source, catalog version, query timestamp) behind
+            every number. A model grade is included as an optional second opinion. Many of these checks are
+            already part of standard vetting; the aim is to apply them quickly and consistently, for example to
+            older unresolved candidates, so an observer can decide faster whether a candidate&apos;s record is
+            consistent enough to be worth scarce follow-up telescope time. It is not a planet predictor.
           </p>
         </section>
 
@@ -67,13 +68,25 @@ export default function AboutPage() {
               trust; the top-level figures are on rows the model trained on). Details:{" "}
               <code>validation/scripts/split_validation.py</code>.
             </Callout>
-            <Callout tone="info" title="Catalog-hygiene flags: retrospective split result, prospective test pending">
+            <Callout tone="info" title="Catalog-hygiene flags: an association, not independent validation">
               Fitting the one data-calibrated threshold (the transit-vs-Gaia density band) on older TOIs only and
-              applying it to newer stars, TOIs with at least one core flag resolved as false positives
-              39&ndash;42 percentage points more often than unflagged ones (95% CI lower bound +0.24 or higher in
-              every split). Dispositions are partly decided from the same Gaia evidence, so this can overstate the
-              effect; the frozen prospective snapshot is the unbiased test and has not resolved yet.
+              applying it to newer stars, TOIs with at least one core flag were later marked false positive
+              39&ndash;42 percentage points more often than unflagged ones. Dispositions are partly decided from
+              the same Gaia evidence, so this can overstate the effect and does not show the flags add information
+              beyond existing vetting. The density band is calibrated on confirmed planets, which are shaped by
+              detection and follow-up biases: an unusual candidate may be real, so read a flag as &quot;unusual&quot;,
+              not &quot;wrong&quot;. The frozen prospective snapshot has not resolved yet.
               (<code>GET /api/v1/predictions/flag_validation</code>)
+            </Callout>
+            <Callout tone="info" title="Giant planet or brown dwarf: radius alone cannot tell">
+              Candidates with a radius above about 8 R&oplus; and no measured mass show an informational note. At
+              that size planets and brown dwarfs overlap (empirical range ~0.7&ndash;1.4 Jupiter radii, Carmichael
+              2023); a radial-velocity mass would settle it. The note does not make a brown dwarf more likely and
+              does not affect any grade or check.
+            </Callout>
+            <Callout tone="warning" title="Short transits may be smeared by the 29.4-minute binning">
+              The light-curve vetter works on 29.4-minute bins; 143 of 560 candidates have transits shorter than
+              2 hours. Accuracy for short transits has not been measured separately.
             </Callout>
             <Callout tone="warning" title="Calibration is measured, and imperfect">
               Brier score 0.100 on held-out data (the previous Random Forest scored 0.113). The score is well
