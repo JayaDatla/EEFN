@@ -435,6 +435,13 @@ export default function AIAnalysisPage() {
                         Sectors {vetting.sectors?.join(', ')} &middot; {vetting.model_version} &middot; calibration unchecked on TESS
                       </span>
                     </div>
+                    {selectedCand.trandurh != null && selectedCand.trandurh < 2 && (
+                      <Callout tone="warning" title={`Short transit (${selectedCand.trandurh.toFixed(2)} h)`}>
+                        The vetter works on 29.4-minute bins, and only 18 of its 205 Kepler training examples are
+                        shorter than 2 hours, so its accuracy on short transits is not well measured. Read this
+                        verdict as weaker evidence.
+                      </Callout>
+                    )}
                     <div className="flex flex-col gap-3 font-mono text-[9px]">
                       {Object.entries(classification).map(([cls, prob]) => (
                         <div key={cls} className="flex flex-col gap-1">

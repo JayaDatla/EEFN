@@ -11,7 +11,9 @@ import astropy.units as u
 from astropy.table import Table
 from sqlalchemy.orm import Session
 
-from app.db.models import ExoplanetCandidate, MLPrediction
+from app.db.models import ExoplanetCandidate, HostStar, MLPrediction
+from app.science.interest import candidate_novelty
+from app.science.flags import CORE_FLAGS, compute_flags, compute_informational_flags, flag_values
 
 # (column, unit, description) -- VOTable FIELD metadata a real client (TOPCAT, Aladin)
 # will actually display, not just bare numbers. Units are real astropy.units objects,
@@ -32,8 +34,34 @@ _COLUMNS = [
     ("trandurh", u.hour, "Transit duration"),
     ("health_score", None, "EEFN evidence health score (0-100)"),
     ("health_grade", None, "EEFN evidence health letter grade (A-F)"),
-    ("evidence_consistency_score", None, "EEFN Random Forest evidence-consistency score (0-1)"),
+    ("evidence_consistency_score", None, "EEFN model planet probability (0-1); an optional second opinion"),
+    # Rule-based catalog checks (no model). The values let a user apply their own cuts; the flags use
+    # EEFN's fixed thresholds. Flag columns are 1 = flagged, 0 = checked and clean, -1 = could not check.
+    ("ruwe", None, "Gaia DR3 RUWE"),
+    ("derived_planet_radius_earth", u.earthRad, "Planet radius recomputed from transit depth and the Gaia stellar radius"),
+    ("density_log_ratio", None, "ln(transit-derived stellar density / Gaia stellar density)"),
+    ("teff_difference_kelvin", u.K, "|TOI Teff - Gaia Teff|"),
+    ("radius_difference_fraction", None, "|TOI stellar radius - Gaia radius| / Gaia radius"),
+    ("flag_ruwe_likely_binary", None, "RUWE above 1.4 (1/0/-1)"),
+    ("flag_unphysical_radius", None, "Derived planet radius above 22 Earth radii (1/0/-1)"),
+    ("flag_density_inconsistent", None, "Transit density outside the band calibrated on confirmed planets (1/0/-1)"),
+    ("flag_teff_outlier", None, "TOI and Gaia Teff differ by more than 400 K (1/0/-1)"),
+    ("flag_radius_outlier", None, "TOI and Gaia stellar radius differ by more than 30 percent (1/0/-1)"),
+    ("checks_flagged", None, "Number of the five core checks flagged (-1 if the host star is unknown)"),
+    ("checks_checkable", None, "Number of the five core checks that could run"),
+    ("interest_novelty", None, "Observational novelty vs confirmed transiting planets, 0-1 (NaN = cannot compute); not a planet probability"),
+    ("info_giant_planet_ambiguity", None, "Derived radius above ~8 Earth radii with no mass measured (1/0/-1); informational"),
 ]
+
+_FLAG_COLUMN = {"flag_ruwe_likely_binary": "ruwe_likely_binary", "flag_unphysical_radius": "unphysical_radius",
+                "flag_density_inconsistent": "density_inconsistent", "flag_teff_outlier": "teff_outlier",
+                "flag_radius_outlier": "radius_outlier"}
+_VALUE_COLUMNS = ["ruwe", "derived_planet_radius_earth", "density_log_ratio", "teff_difference_kelvin",
+                  "radius_difference_fraction"]
+
+
+def _tri(flag):
+    return -1 if flag is None else int(bool(flag))
 
 
 def build_candidates_table(
@@ -45,9 +73,9 @@ def build_candidates_table(
     those TOIs, in the order supplied by the caller -- not silently truncated to
     whichever `toi_ids` happen to also satisfy `limit`, since a batch upload's
     output should contain every real match, not a re-paginated subset of it."""
-    query = db.query(ExoplanetCandidate, MLPrediction).outerjoin(
+    query = db.query(ExoplanetCandidate, MLPrediction, HostStar).outerjoin(
         MLPrediction, MLPrediction.candidate_id == ExoplanetCandidate.id
-    )
+    ).outerjoin(HostStar, HostStar.id == ExoplanetCandidate.host_id)
     if disposition:
         query = query.filter(ExoplanetCandidate.disposition == disposition)
     if toi_ids:
@@ -57,7 +85,7 @@ def build_candidates_table(
         rows = query.order_by(ExoplanetCandidate.toi_id.asc()).limit(limit).all()
 
     data = {col: [] for col, _, _ in _COLUMNS}
-    for cand, pred in rows:
+    for cand, pred, host in rows:
         data["pl_name"].append(cand.pl_name)
         data["tic_id"].append(cand.tic_id if cand.tic_id is not None else -1)
         data["toi_id"].append(cand.toi_id if cand.toi_id is not None else float("nan"))
@@ -74,6 +102,20 @@ def build_candidates_table(
             pred.evidence_consistency_score if pred and pred.evidence_consistency_score is not None else float("nan")
         )
 
+        vals = flag_values(cand, host) if host is not None else {}
+        flags = compute_flags(cand, host, None) if host is not None else {}
+        for col in _VALUE_COLUMNS:
+            v = vals.get(col)
+            data[col].append(float("nan") if v is None else float(v))
+        for col, key in _FLAG_COLUMN.items():
+            data[col].append(_tri(flags.get(key)))
+        data["checks_flagged"].append(sum(1 for k in CORE_FLAGS if flags.get(k) is True) if host is not None else -1)
+        data["checks_checkable"].append(sum(1 for k in CORE_FLAGS if flags.get(k) is not None) if host is not None else 0)
+        _nov = candidate_novelty(cand, host)["novelty"] if host is not None else None
+        data["interest_novelty"].append(float("nan") if _nov is None else _nov)
+        data["info_giant_planet_ambiguity"].append(
+            _tri(compute_informational_flags(cand, host)["giant_planet_ambiguity"]) if host is not None else -1)
+
     table = Table(data)
     for col, unit, description in _COLUMNS:
         if unit:
@@ -89,3 +131,13 @@ def build_candidates_votable_bytes(
     buf = io.BytesIO()
     table.write(buf, format="votable")
     return buf.getvalue()
+
+
+def build_candidates_csv_bytes(
+    db: Session, disposition: Optional[str] = None, limit: int = 5000, toi_ids: Optional[List[float]] = None
+) -> bytes:
+    """Same table as the VOTable, as plain CSV for pandas/R users. Missing numbers are empty cells."""
+    table = build_candidates_table(db, disposition=disposition, limit=limit, toi_ids=toi_ids)
+    buf = io.StringIO()
+    table.write(buf, format="ascii.csv")
+    return buf.getvalue().encode("utf-8")

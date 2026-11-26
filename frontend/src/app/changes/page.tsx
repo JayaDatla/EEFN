@@ -16,9 +16,30 @@ interface ChangeEvent {
   changed_at: string;
 }
 
+interface CatalogChange {
+  toi_id: number | null;
+  pl_name: string;
+  source: string;
+  parameter: string;
+  old_value: number;
+  new_value: number;
+  relative_change: number | null;
+  kind: "catalog_update" | "crossmatch_change";
+  changed_at: string;
+}
+
+interface CatalogChangeResponse {
+  count: number;
+  counts_by_kind: Record<string, number>;
+  events: CatalogChange[];
+  caveat: string;
+}
+
 const LAST_VISIT_KEY = "eefn-changes-last-visit";
 
 export default function ChangesPage() {
+  const [catChanges, setCatChanges] = useState<CatalogChangeResponse | null>(null);
+  const [catKind, setCatKind] = useState<"catalog_update" | "crossmatch_change">("catalog_update");
   const [events, setEvents] = useState<ChangeEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +61,13 @@ export default function ChangesPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetch(apiUrl(`/api/v1/catalog_changes?limit=200&kind=${catKind}`))
+      .then(r => (r.ok ? r.json() : null))
+      .then(setCatChanges)
+      .catch(() => setCatChanges(null));
+  }, [catKind]);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(LAST_VISIT_KEY);
@@ -115,6 +143,70 @@ export default function ChangesPage() {
             </tbody>
           </table>
         )}
+      </div>
+
+      <div className="mt-8">
+        <h2 className="mb-1 text-sm font-semibold text-ink">Catalog value changes</h2>
+        <p className="mb-3 max-w-3xl text-xs leading-relaxed text-muted">
+          Values that differ between EEFN&apos;s ingestions. Gaia DR3, 2MASS and Pan-STARRS are frozen releases,
+          so a different value there means the cross-match picked another row or star, which is worth checking
+          but is not a catalog revision. Only live tables (the TOI table) are revised. A new Gaia release will
+          appear here as a catalog update. The time shown is when EEFN saw the value, not the release date.
+        </p>
+        <div className="mb-3 flex gap-2 text-xs">
+          {(["catalog_update", "crossmatch_change"] as const).map(k => (
+            <button
+              key={k}
+              onClick={() => setCatKind(k)}
+              className={`rounded-lg border px-3 py-1.5 cursor-pointer ${catKind === k ? "border-accent/40 bg-accent/10 text-accent" : "border-border bg-surface-2 text-ink"}`}
+            >
+              {k === "catalog_update" ? "Catalog updates" : "Cross-match changes"}
+              {catChanges?.counts_by_kind ? ` (${catChanges.counts_by_kind[k] ?? 0})` : ""}
+            </button>
+          ))}
+        </div>
+        <div className="surface-card overflow-hidden">
+          {catChanges && catChanges.events.length === 0 && (
+            <div className="px-5 py-8 text-center text-xs text-muted">
+              None recorded. {catKind === "catalog_update"
+                ? "This ledger started in August 2026; revisions of a live catalog will appear as they happen."
+                : ""}
+            </div>
+          )}
+          {catChanges && catChanges.events.length > 0 && (
+            <table className="w-full text-left text-xs">
+              <thead className="bg-surface-2 text-2xs uppercase tracking-wider text-muted border-b border-border">
+                <tr>
+                  <th className="px-5 py-3">Candidate</th>
+                  <th className="px-5 py-3">Source / parameter</th>
+                  <th className="px-5 py-3">Change</th>
+                  <th className="px-5 py-3">Seen</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {catChanges.events.map((e, idx) => (
+                  <tr key={idx} className="hover:bg-accent/5">
+                    <td className="px-5 py-3">
+                      {e.toi_id != null ? (
+                        <Link href={`/candidates/${e.toi_id}`} className="font-semibold text-ink hover:text-accent">{e.pl_name}</Link>
+                      ) : <span className="text-ink">{e.pl_name}</span>}
+                    </td>
+                    <td className="px-5 py-3 font-mono text-muted">{e.source} · {e.parameter}</td>
+                    <td className="px-5 py-3 font-mono">
+                      <span className="text-muted">{Number(e.old_value.toFixed(3))}</span>
+                      <span className="mx-2 text-muted">&rarr;</span>
+                      <span className="text-ink">{Number(e.new_value.toFixed(3))}</span>
+                      {e.relative_change != null && (
+                        <span className="ml-2 text-muted">({e.relative_change >= 0 ? "+" : ""}{(e.relative_change * 100).toFixed(1)}%)</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 text-muted">{new Date(e.changed_at).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );

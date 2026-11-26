@@ -1,0 +1,12 @@
+{
+  "source": "NASA Exoplanet Archive, table pscomppars, discoverymethod = Transit (TAP sync, CSV)",
+  "built_at": "2026-11-26T04:14:35.734093+00:00",
+  "n_downloaded": 4800,
+  "n_reference": 4798,
+  "columns": {
+    "pl_rade": "Earth radii",
+    "pl_orbper": "days",
+    "st_mass": "solar masses"
+  },
+  "note": "Observed, detection-biased population. Used for observational novelty, not intrinsic rarity."
+}

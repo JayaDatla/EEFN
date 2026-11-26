@@ -21,6 +21,9 @@ type Candidate = {
   followup_priority_score?: number;
   health_score?: number;
   health_grade?: string;
+  checks_flagged?: number | null;
+  checks_checkable?: number | null;
+  interest_novelty?: number | null;
 };
 
 type ObservabilityInfo = {
@@ -45,10 +48,11 @@ type ObservabilityRow = {
 
 const PAGE_SIZE = 500;
 const SORT_FIELDS: { value: string; label: string }[] = [
-  { value: "followup_priority_score", label: "Follow-up priority" },
-  { value: "health_score", label: "Health score" },
-  { value: "evidence_consistency_score", label: "Evidence confidence" },
   { value: "toi_id", label: "TOI ID" },
+  { value: "checks_flagged", label: "Catalog checks flagged" },
+  { value: "interest_novelty", label: "Observational novelty" },
+  { value: "evidence_consistency_score", label: "Model score" },
+  { value: "health_score", label: "Model grade" },
 ];
 
 function healthStatus(grade: string | undefined, rade: number, score: number | undefined) {
@@ -64,8 +68,8 @@ export default function TriageQueue() {
   const [data, setData] = useState<Candidate[]>([]);
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [offset, setOffset] = useState(0);
-  const [sortBy, setSortBy] = useState("followup_priority_score");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortBy, setSortBy] = useState("toi_id");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [dispositionFilter, setDispositionFilter] = useState("");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -133,7 +137,8 @@ export default function TriageQueue() {
         elevation_m: obsElevation || "0",
         date: obsDate,
         limit: String(PAGE_SIZE),
-        sort_by: sortBy,
+        // the observability endpoint sorts in SQL and does not know the computed checks sort
+        sort_by: sortBy === "checks_flagged" || sortBy === "interest_novelty" ? "toi_id" : sortBy,
         sort_dir: sortDir,
       });
       if (dispositionFilter) params.set("disposition", dispositionFilter);
@@ -212,14 +217,14 @@ export default function TriageQueue() {
 
   const columns = obsActive
     ? "2fr_0.8fr_1fr_1fr_1fr_1.2fr"
-    : "2fr_1fr_1fr_1fr_1.2fr_1fr";
+    : "2fr_0.9fr_0.9fr_0.9fr_1.1fr_0.9fr_1fr";
 
   return (
     <div className="animate-fadeIn">
       <SectionHeading
         eyebrow="TRIAGE QUEUE / CROSS-MATCHED REGISTRY"
         title="Should I point a telescope at this tonight?"
-        description="The full cross-matched TOI registry, server-paginated and virtualized -- sorted by follow-up priority by default. Set an observing site below to filter by real altitude, airmass, and moon separation for tonight."
+        description="The full cross-matched TOI registry, server-paginated and virtualized -- in TOI order by default; choose a sort below. Rule-based catalog checks and the model score are shown separately and never combined into one ranking. Set an observing site below to filter by real altitude, airmass, and moon separation for tonight."
         action={
           <button onClick={load} className="btn-ghost">
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Sync registry
@@ -390,8 +395,9 @@ export default function TriageQueue() {
             <>
               <span>Period</span>
               <span>Radius</span>
-              <span>Evidence confidence</span>
-              <span>Review status</span>
+              <span>Catalog checks</span>
+              <span>Model score</span>
+              <span>Model grade</span>
             </>
           )}
         </div>
@@ -412,7 +418,7 @@ export default function TriageQueue() {
                 >
                   <Link href={`/candidates/${c.toi_id}`} className="font-semibold text-ink hover:text-accent">
                     {c.pl_name}
-                    <span className="mt-1 block data-value text-2xs font-normal text-muted">TIC {c.tic_id}</span>
+                    <span className="mt-1 block data-value text-2xs font-normal text-muted">TIC {c.tic_id}{c.interest_novelty != null ? ` · novelty ${c.interest_novelty.toFixed(2)}` : ""}</span>
                   </Link>
                   <span className="data-value text-ink/80">{c.disposition}</span>
                   {obsActive ? (
@@ -431,7 +437,10 @@ export default function TriageQueue() {
                   ) : (
                     <>
                       <span className="data-value text-muted">{Number(c.orbper).toFixed(3)} d</span>
-                      <span className={`data-value ${Number(c.rade) > 20 ? "text-severity-critical" : "text-muted"}`}>{Number(c.rade).toFixed(2)} R⊕</span>
+                      <span className="data-value text-muted">{Number(c.rade).toFixed(2)} R⊕</span>
+                      <span className="data-value text-muted" title="Rule-based catalog checks flagged / checks that could run (no model)">
+                        {c.checks_flagged == null || !c.checks_checkable ? "n/a" : `${c.checks_flagged} / ${c.checks_checkable} flagged`}
+                      </span>
                       <span><ConfidenceBadge score={c.evidence_consistency_score ?? 0.5} /></span>
                       <span><StatusIndicator status={healthStatus(c.health_grade, c.rade, c.evidence_consistency_score)} /></span>
                     </>

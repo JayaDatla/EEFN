@@ -32,6 +32,14 @@ shaped by detection and follow-up biases, so read a flag as "unusual", not "wron
 8 R⊕ shows "Giant planet or brown dwarf?": at that size the radius alone cannot tell them apart and a
 radial-velocity mass would. It does not imply a brown dwarf is more likely.
 
+**Observational novelty (optional sort, separate from everything else).** How rare a candidate's radius,
+period and host-star mass are among confirmed transiting planets. It is not a planet probability and not a
+recommendation.
+
+**Export and change tracking.** `GET /api/v1/candidates/export?format=csv` (or VOTable) returns every
+candidate with the check values and flags, so you can apply your own cuts. The Changes page lists catalog
+value changes between ingestions and separates real catalog updates from cross-match changes.
+
 **Model scores.**
 - A LightGBM planet probability from the catalog features, shown as an A–F grade.
 - A light-curve vetter on the real TESS SPOC light curve (odd/even depth, secondary eclipse, shape).
@@ -123,7 +131,9 @@ writes a VOTable that opens in TOPCAT; `WEBHOOK_URLS` posts when a pipeline run 
 ## Status
 
 Research prototype. No astronomer has used it on a real target list yet; that would be worth more than
-any remaining code change. Open items: ingest SPOC DV centroid offsets, key the cross-match on Gaia ID,
+any remaining code change. Plans for getting that feedback and measuring time saved are in
+[`docs/feedback_pack.md`](docs/feedback_pack.md), [`docs/time_saved_study.md`](docs/time_saved_study.md) and
+[`docs/exofop_review_protocol.md`](docs/exofop_review_protocol.md) (protocols; none has been run). Open items: ingest SPOC DV centroid offsets, key the cross-match on Gaia ID,
 add a Gaia DR4 adapter, and compare against published TRICERATOPS/ExoMiner values.
 
 ## Acknowledgements

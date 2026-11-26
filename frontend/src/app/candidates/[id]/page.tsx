@@ -101,6 +101,7 @@ interface CandidateProfile {
   model_tier: ModelTier;
   health: HealthBreakdown;
   catalog_checks?: CatalogChecks;
+  scientific_interest?: { novelty: number | null; reason: string | null; n_reference?: number };
 }
 
 function generateSvgPath(time: number[], flux: number[], width: number, height: number, padding: number) {
@@ -820,8 +821,12 @@ export default function CandidateDetailPage() {
   const isUnphysical = agreement_metrics.is_unphysical_rp;
   
   const radiusStatus = isUnphysical ? 'INVALID size' : 'VALID size';
-  const priorityScore = isUnphysical ? 0.05 : (profile.prediction && profile.prediction.followup_priority_score !== undefined ? profile.prediction.followup_priority_score : 0.5);
-  const priorityFlag = priorityScore < 0.3 ? 'DO NOT OBSERVE' : (priorityScore > 0.7 ? 'HIGH PRIORITY' : 'STANDBY');
+  // The model's planet probability, a second opinion. No catalog flag changes it (an unusual or
+  // unphysical-radius candidate is shown as such by the checks, not pushed down by a verdict here).
+  const priorityScore = profile.prediction && profile.prediction.evidence_consistency_score !== undefined ? profile.prediction.evidence_consistency_score : 0.5;
+  const priorityFlag = priorityScore < 0.3 ? 'LOW MODEL SCORE' : (priorityScore > 0.7 ? 'HIGH MODEL SCORE' : 'MIXED MODEL SCORE');
+  const checksFlagged = profile.catalog_checks ? profile.catalog_checks.core_flags.filter(k => profile.catalog_checks!.flags[k] === true).length : null;
+  const checksRun = profile.catalog_checks ? profile.catalog_checks.n_core_checkable : 0;
   const agreementScore = isUnphysical ? Math.min(agreement_metrics.catalog_agreement_score, 0.45) : agreement_metrics.catalog_agreement_score;
   const consensusStatus = agreementScore > 0.85 ? 'CONSENSUS' : 'CONFLICT';
 
@@ -967,12 +972,9 @@ export default function CandidateDetailPage() {
               Archive status: {planet.disposition === 'CP' ? 'CONFIRMED' : planet.disposition === 'FP' ? 'FALSE POSITIVE' : 'CANDIDATE'}
             </span>
 
-            <span className={`cand-chip ${
-              isUnphysical || priorityScore < 0.3 ? 'bg-severity-critical/10 text-severity-critical border-severity-critical/30' :
-              priorityScore > 0.7 ? 'bg-status-pass/10 text-status-pass border-status-pass/30' :
-              'bg-severity-high/10 text-severity-high border-severity-high/30'
-            }`}>
-              Model curation: {isUnphysical || priorityScore < 0.3 ? 'HIGH FALSE POSITIVE RISK' : priorityScore > 0.7 ? 'LIKELY CONFIRMED' : 'REASSESS DETAILS'}
+            <span className="cand-chip bg-accent/10 text-accent border-accent/30"
+              title="The model grade is an optional second opinion trained on human dispositions; it does not decide whether to observe.">
+              Model second opinion: {priorityFlag.toLowerCase().replace('model score', 'score')}
             </span>
 
             {/* UPGRADE_PLAN.md H.3.2: which model tier produced this score, and
@@ -1140,11 +1142,11 @@ export default function CandidateDetailPage() {
                 </span>
               </div>
               <div className="min-w-[110px]">
-                <span className="text-muted block text-[10px] uppercase font-bold tracking-wider">Recommendation</span>
+                <span className="text-muted block text-[10px] uppercase font-bold tracking-wider">Catalog checks</span>
                 <span className={`text-sm font-extrabold block mt-0.5 ${
-                  isUnphysical || priorityScore < 0.3 ? 'text-severity-critical' : (priorityScore > 0.7 ? 'text-status-pass' : 'text-severity-high')
+                  checksFlagged === null || checksRun === 0 ? 'text-muted' : checksFlagged > 0 ? 'text-severity-high' : 'text-status-pass'
                 }`}>
-                  {isUnphysical || priorityScore < 0.3 ? 'DO NOT OBSERVE' : (priorityScore > 0.7 ? 'PROCEED FOLLOW-UP' : 'REASSESS DETAILS')}
+                  {checksFlagged === null || checksRun === 0 ? 'NOT CHECKABLE' : `${checksFlagged} OF ${checksRun} FLAGGED`}
                 </span>
               </div>
             </div>
@@ -1497,6 +1499,28 @@ export default function CandidateDetailPage() {
               );
             })()}
 
+            {/* Observational novelty: a separate axis, never blended with the checks or the model. */}
+            {profile.scientific_interest && (
+              <div className="surface-card p-5 flex flex-col gap-2">
+                <h3 className="panel-title">
+                  <CheckCircle2 className="h-4.5 w-4.5 text-accent" /> Observational novelty (separate from checks and model)
+                </h3>
+                <div className="flex items-baseline justify-between font-mono text-xs">
+                  <span className="text-muted">Rarity among confirmed transiting planets</span>
+                  <span className="text-ink font-bold">
+                    {profile.scientific_interest.novelty != null ? profile.scientific_interest.novelty.toFixed(2) : "n/a"}
+                  </span>
+                </div>
+                <p className="text-[10px] text-muted leading-relaxed">
+                  {profile.scientific_interest.novelty != null
+                    ? `Share of ${profile.scientific_interest.n_reference?.toLocaleString() ?? ""} confirmed planets that sit in a denser region of (radius, period, host-star mass). 1 means rarer than all of them. `
+                    : `Not computed: ${profile.scientific_interest.reason ?? "missing inputs"}. `}
+                  This is observational novelty, not intrinsic rarity (the confirmed sample reflects what is easy to
+                  detect), assumes the inputs are right, and says nothing about whether this is a planet.
+                </p>
+              </div>
+            )}
+
             {/* Curation Telemetry Card (B3 & B8) */}
             <div className="surface-card p-5 flex flex-col gap-4">
               <h3 className="panel-title">
@@ -1555,11 +1579,8 @@ export default function CandidateDetailPage() {
                 {profile.prediction && (
                   <>
                     <div className="flex justify-between text-muted">
-                      <span>Pipeline Audit Recommendation:</span>
-                      <span className={`font-bold ${
-                        priorityScore < 0.3 ? 'text-severity-critical' :
-                        priorityScore > 0.7 ? 'text-status-pass' : 'text-severity-high'
-                      }`}>
+                      <span>Model second opinion:</span>
+                      <span className="font-bold text-ink">
                         {priorityFlag}
                       </span>
                     </div>
@@ -2052,6 +2073,17 @@ export default function CandidateDetailPage() {
                     <span className="text-accent font-bold block border-b border-border pb-1">STEP 1: Target Candidate Summary</span>
                     <div className="flex justify-between"><span>Planet Name:</span><span className="text-ink font-bold">{planet.pl_name}</span></div>
                     <div className="flex justify-between"><span>TIC ID:</span><span className="text-ink">TIC {planet.tic_id}</span></div>
+                    <div className="flex justify-between">
+                      <span>Follow-up notes:</span>
+                      <a
+                        href={`https://exofop.ipac.caltech.edu/tess/target.php?id=${planet.tic_id}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="text-accent hover:underline"
+                        title="Observation notes and files belong to the people who uploaded them. EEFN links to them; it does not copy them."
+                      >
+                        ExoFOP-TESS ↗
+                      </a>
+                    </div>
                     <div className="flex justify-between"><span>Observed Transit Depth:</span><span className="text-ink font-bold">{planet.trandep.toFixed(1)} ppm</span></div>
                     <div className="flex justify-between"><span>Candidate Period:</span><span className="text-ink">{planet.orbper.toFixed(4)} days</span></div>
                   </div>

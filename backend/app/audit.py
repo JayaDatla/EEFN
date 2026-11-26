@@ -14,6 +14,7 @@ from app.science.crossmatch import crossmatch_quality
 from app.db.models import ExoplanetCandidate, HostStar, AgreementMetrics, MLPrediction, MeasurementHistory
 from app.science.tiers import compute_model_tier
 from app.science.health import compute_health_score
+from app.science.interest import candidate_novelty
 from app.science.flags import (CORE_FLAGS, INFORMATIONAL_THRESHOLDS, THRESHOLDS, any_core_flag, compute_flags,
                                compute_informational_flags, flag_values)
 
@@ -138,6 +139,9 @@ def build_candidate_profile(db: Session, toi_id: float) -> Optional[Dict[str, An
             "informational_flags": compute_informational_flags(cand, star) if star is not None else {},
             "informational_thresholds": INFORMATIONAL_THRESHOLDS,
         },
+        # Observational novelty vs confirmed transiting planets (app/science/interest.py): a separate axis,
+        # never combined with the model probability or the checks.
+        "scientific_interest": candidate_novelty(cand, star) if star is not None else {"novelty": None, "reason": "no host star"},
         "health": {
             "score": cand.health_score if cand.health_score is not None else health_result.score,
             "grade": cand.health_grade if cand.health_grade else health_result.grade,

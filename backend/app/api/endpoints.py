@@ -17,8 +17,10 @@ from app.config import settings
 from app.api.auth import require_api_key
 from app.audit import build_candidate_profile
 from app.science.tiers import compute_model_tier
+from app.science.flags import CORE_FLAGS, compute_flags
+from app.science.interest import candidate_novelty
 from app.science.observability import compute_observability, compute_observability_batch, TargetSpec
-from app.export import build_candidates_votable_bytes
+from app.export import build_candidates_csv_bytes, build_candidates_votable_bytes
 from app.resolve import resolve_identifier
 from app.ml.transit_pipeline import transit_pipeline
 from app.ml.deep_learning_pipeline import dl_vetting_engine
@@ -58,6 +60,11 @@ class PlanetResponse(BaseModel):
     model_tier: Optional[int] = None
     catalogs_available_count: Optional[int] = None
     catalogs_total: Optional[int] = None
+    # Rule-based checks (no model): how many of the core checks flagged / could run. None = host unknown.
+    checks_flagged: Optional[int] = None
+    checks_checkable: Optional[int] = None
+    # Observational novelty vs confirmed transiting planets (0-1, None = cannot compute). Separate axis; not a rank.
+    interest_novelty: Optional[float] = None
 
     class Config:
         from_attributes = True
@@ -119,6 +126,7 @@ class CandidateProfileResponse(BaseModel):
     real_observations: Dict[str, Any] = {}
     data_quality: Dict[str, Any] = {}
     catalog_checks: Dict[str, Any] = {}
+    scientific_interest: Dict[str, Any] = {}
 
 _CANDIDATE_SORT_FIELDS = {
     "toi_id": ExoplanetCandidate.toi_id,
@@ -128,6 +136,19 @@ _CANDIDATE_SORT_FIELDS = {
     "evidence_consistency_score": MLPrediction.evidence_consistency_score,
     "followup_priority_score": MLPrediction.followup_priority_score,
 }
+# Sorted in Python (the count is computed from the catalog flags, not stored); only on the candidate list.
+_CHECKS_SORT = "checks_flagged"
+_INTEREST_SORT = "interest_novelty"
+_PY_SORTS = (_CHECKS_SORT, _INTEREST_SORT)
+
+
+def _core_check_counts(cand, host):
+    """(flagged, checkable) over the rule-based core checks; (None, None) without a host star."""
+    if host is None:
+        return None, None
+    flags = compute_flags(cand, host, None)
+    return (sum(1 for k in CORE_FLAGS if flags.get(k) is True),
+            sum(1 for k in CORE_FLAGS if flags.get(k) is not None))
 
 
 @router.get("/candidates", response_model=List[PlanetResponse])
@@ -150,8 +171,8 @@ def get_candidates(
     client-side slice of a fixed-size pull). The total match count (pre-pagination) is
     returned via the X-Total-Count header so a client can build page controls.
     """
-    if sort_by not in _CANDIDATE_SORT_FIELDS:
-        raise HTTPException(status_code=400, detail=f"sort_by must be one of: {', '.join(_CANDIDATE_SORT_FIELDS)}")
+    if sort_by not in _CANDIDATE_SORT_FIELDS and sort_by not in _PY_SORTS:
+        raise HTTPException(status_code=400, detail=f"sort_by must be one of: {', '.join([*_CANDIDATE_SORT_FIELDS, *_PY_SORTS])}")
 
     query = db.query(ExoplanetCandidate, MLPrediction, HostStar).outerjoin(
         MLPrediction, MLPrediction.candidate_id == ExoplanetCandidate.id
@@ -170,12 +191,32 @@ def get_candidates(
 
     response.headers["X-Total-Count"] = str(query.count())
 
-    sort_col = _CANDIDATE_SORT_FIELDS[sort_by]
-    order_fn = desc if sort_dir == "desc" else asc
-    rows = query.order_by(order_fn(sort_col)).offset(offset).limit(limit).all()
+    if sort_by in _PY_SORTS:
+        # Whole matching set is read and sorted here: fine at this database's size (hundreds of rows);
+        # would need a stored column at the full ~7,000-row catalog scale. Unknown sorts last either way.
+        every = query.all()
+
+        def _py_key(r):
+            if sort_by == _CHECKS_SORT:
+                v = _core_check_counts(r[0], r[2])[0] if r[2] is not None else None
+            else:
+                nv = candidate_novelty(r[0], r[2]) if r[2] is not None else {"novelty": None}
+                v = nv["novelty"]
+                # tie-break among 1.0 scores by density (lower density = rarer)
+                tb = nv.get("log10_density") or 0.0
+                return (v is None, (-(v or 0), tb) if sort_dir == "desc" else ((v or 0), -tb))
+            return (v is None, -(v or 0) if sort_dir == "desc" else (v or 0))
+
+        every.sort(key=_py_key)
+        rows = every[offset:offset + limit]
+    else:
+        sort_col = _CANDIDATE_SORT_FIELDS[sort_by]
+        order_fn = desc if sort_dir == "desc" else asc
+        rows = query.order_by(order_fn(sort_col)).offset(offset).limit(limit).all()
 
     results = []
     for c, pred, host in rows:
+        flagged, checkable = _core_check_counts(c, host)
         tier_result = compute_model_tier(
             c, host, has_real_light_curve=False,
             has_real_centroid=c.centroid_is_real,
@@ -201,6 +242,9 @@ def get_candidates(
             model_tier=tier_result.tier,
             catalogs_available_count=len(tier_result.catalogs_available),
             catalogs_total=tier_result.catalogs_total,
+            checks_flagged=flagged,
+            checks_checkable=checkable,
+            interest_novelty=candidate_novelty(c, host)["novelty"] if host is not None else None,
         ))
     return results
 
@@ -320,6 +364,7 @@ def get_observability(
 
 @router.get("/candidates/export")
 def export_candidates_votable(disposition: Optional[str] = None, limit: int = Query(5000, ge=1, le=20000),
+                               format: str = Query("votable", pattern="^(votable|csv)$"),
                                db: Session = Depends(get_db)):
     """
     VOTable export (UPGRADE_PLAN.md G, Phase 4) -- how astronomers already consume
@@ -329,6 +374,12 @@ def export_candidates_votable(disposition: Optional[str] = None, limit: int = Qu
     route on a failed path-type conversion, so "export" would 422 against {toi_id} if
     this route were registered second.
     """
+    if format == "csv":
+        return Response(
+            content=build_candidates_csv_bytes(db, disposition=disposition, limit=limit),
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=eefn_candidates.csv"},
+        )
     votable_bytes = build_candidates_votable_bytes(db, disposition=disposition, limit=limit)
     return Response(
         content=votable_bytes,
@@ -471,6 +522,22 @@ def get_changes(
     ]
 
 
+@router.get("/catalog_changes")
+def get_catalog_changes(
+    since: Optional[datetime] = Query(None, description="Only changes strictly after this UTC timestamp"),
+    parameter: Optional[str] = Query(None, description="e.g. stellar_teff, stellar_radius, distance, j_mag"),
+    toi_id: Optional[float] = None,
+    kind: Optional[str] = Query(None, pattern="^(catalog_update|crossmatch_change)$"),
+    limit: int = Query(200, ge=1, le=2000),
+    db: Session = Depends(get_db),
+):
+    """Which catalog values changed between EEFN's ingestions (app/catalog_changes.py). Separate from
+    /changes, which lists disposition and grade transitions. `kind` separates real revisions of a live catalog
+    (catalog_update) from values that differ only because the cross-match chose another row (crossmatch_change). Includes a `caveat` field on timing."""
+    from app.catalog_changes import catalog_change_events
+    return catalog_change_events(db, since=since, parameter=parameter, toi_id=toi_id, limit=limit, kind=kind)
+
+
 @router.get("/candidates/{toi_id}", response_model=CandidateProfileResponse)
 def get_candidate_detail(toi_id: float, db: Session = Depends(get_db)):
     profile = build_candidate_profile(db, toi_id)
@@ -489,6 +556,7 @@ def get_candidate_detail(toi_id: float, db: Session = Depends(get_db)):
         real_observations=profile.get("real_observations", {}),
         data_quality=profile.get("data_quality", {}),
         catalog_checks=profile.get("catalog_checks", {}),
+        scientific_interest=profile.get("scientific_interest", {}),
     )
 
 class PipelineRunResponse(BaseModel):
@@ -708,6 +776,18 @@ def get_honest_evaluation():
             detail="No honest_evaluation_report.json artifact found. Run "
                    "backend/validation/scripts/honest_evaluation.py to generate one.",
         )
+    with open(path, "r") as f:
+        return json.load(f)
+
+
+@router.get("/predictions/duration_diagnostic")
+def get_duration_diagnostic():
+    """Light-curve vetter accuracy by transit duration on held-out Kepler stars
+    (validation/scripts/duration_diagnostic.py). 503 if the artifact is missing -- never a fallback."""
+    path = os.path.normpath(os.path.join(_ML_DIR, "duration_diagnostic_report.json"))
+    if not os.path.exists(path):
+        raise HTTPException(status_code=503, detail="No duration_diagnostic_report.json artifact found. Run "
+                                                    "backend/validation/scripts/duration_diagnostic.py.")
     with open(path, "r") as f:
         return json.load(f)
 

@@ -1,0 +1,76 @@
+{
+  "generated_at": "2026-11-26T02:48:58.890173+00:00",
+  "protocol": "StratifiedGroupKFold(5) x 5 repeats, grouped by KIC star; mean OOF probability",
+  "cadence_note": "Kepler long cadence is natively 29.4 min, the same binning the vetter uses on TESS. This shows short-transit performance at that cadence; it does not test rebinning TESS 2-min data.",
+  "n_kois": 205,
+  "overall_accuracy": 0.844,
+  "median_duration_h": 3.6,
+  "min_duration_h": 0.87,
+  "by_duration": [
+    {
+      "duration_bin": "< 2 h",
+      "n": 18,
+      "accuracy": 0.778,
+      "accuracy_ci95": [
+        0.548,
+        0.91
+      ],
+      "n_true_planets": 10,
+      "planet_recall": 0.9,
+      "planet_recall_ci95": [
+        0.596,
+        0.982
+      ],
+      "class_counts": {
+        "Planet Transit": 10,
+        "Eclipsing Binary": 7,
+        "Not Transit-Like": 1
+      }
+    },
+    {
+      "duration_bin": "2-4 h",
+      "n": 100,
+      "accuracy": 0.91,
+      "accuracy_ci95": [
+        0.838,
+        0.952
+      ],
+      "n_true_planets": 57,
+      "planet_recall": 0.965,
+      "planet_recall_ci95": [
+        0.881,
+        0.99
+      ],
+      "class_counts": {
+        "Planet Transit": 57,
+        "Eclipsing Binary": 34,
+        "Not Transit-Like": 9
+      }
+    },
+    {
+      "duration_bin": "> 4 h",
+      "n": 87,
+      "accuracy": 0.782,
+      "accuracy_ci95": [
+        0.684,
+        0.855
+      ],
+      "n_true_planets": 33,
+      "planet_recall": 0.788,
+      "planet_recall_ci95": [
+        0.622,
+        0.893
+      ],
+      "class_counts": {
+        "Planet Transit": 33,
+        "Eclipsing Binary": 25,
+        "Not Transit-Like": 29
+      }
+    }
+  ],
+  "limits": [
+    "Bins with few KOIs have wide intervals; read the CI, not the point value.",
+    "Duration correlates with period, star size and class, so a difference here is not proof that duration itself is the cause.",
+    "The 50-TOI TESS check set has too few short-transit targets to split by duration."
+  ]
+}

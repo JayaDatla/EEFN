@@ -283,11 +283,10 @@ class PredictionEngine:
         positive_idx = classes.index(1) if 1 in classes else int(np.argmax(proba))
         evidence_score = float(proba[positive_idx])
 
-        # Priority score: how urgently this candidate merits follow-up telescope time.
-        # Deliberately distinct from evidence_score -- an unphysical-radius candidate is
-        # unlikely to be a real planet AND not worth chasing, so both terms fall together
-        # here; C.5 will change this multiplier to a softer, density-aware weighting.
-        priority_score = evidence_score * (0.1 if is_unphysical else 1.0)
+        # Kept for API compatibility. It is now exactly the model probability: no catalog flag
+        # (including the unphysical-radius one) changes it, so an unusual candidate is never
+        # pushed down a queue by a rule. Flags are shown next to it; they do not rank (2026-11).
+        priority_score = evidence_score
 
         contributions, bias = self._contributions(X_imputed)
         contrib_by_feature = dict(zip(self.feature_names, contributions))
